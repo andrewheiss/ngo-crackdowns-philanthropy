@@ -1,0 +1,36 @@
+name: "ngo-crackdowns-philanthropy-pilot"
+exclude: ["Data", "Icon?", "Manuscript", "Output", "Sandbox", "Makefile"]
+navbar:
+  title: "NGO Crackdowns and Philanthropy Pilot"
+  right:
+    - text: "Preregistration"
+      icon: fa-pencil-square
+      href: preregistration.html
+    - text: "Design"
+      icon: fa-map
+      href: design.html
+    - text: "Experiment"
+      icon: fa-flask
+      href: experiment.html
+    - text: "Power analysis"
+      icon: fa-bar-chart
+      href: power.html
+    - text: "Results"
+      icon: fa-bar-chart
+      href: results.html
+output:
+  html_document:
+    theme: spacelab
+    css: html/fixes.css
+    include:
+      after_body: html/footer.html
+    highlight: pygments
+    code_folding: hide
+    code_download: true
+    toc: yes
+    toc_float:
+      collapsed: false
+      smooth_scroll: true
+    toc_depth: 4
+    fig_height: 4
+    fig_width: 6

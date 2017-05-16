@@ -1,0 +1,30 @@
+# Temporarily ignore data and output
+Output/*
+Data/*
+
+# Site output
+_site/*
+
+# Manuscript output
+Manuscript/**.docx
+Manuscript/**.html
+Manuscript/**.pdf
+Manuscript/**.tex
+Manuscript/tex_out/*
+Manuscript/vc*
+
+# Other folders
+Manuscript/Papers/*
+Sandbox/*
+
+# R stuff
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+# Miscellaneous
+*.~lock.*
+.DS_Store
+.dropbox
+Icon?
