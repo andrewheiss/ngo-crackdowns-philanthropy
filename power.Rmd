@@ -23,7 +23,7 @@ n_group <- n_total / (2 * 2 * 2)
 
 Cohen's rules of thumb for $f^2$ power are 0.02, 0.15, and 0.35 for small, medium, and large effect sizes.
 
-We are using a 2 × 2 × 2 design, manipulating the experimental condition, the issue area for the NGO, and the source of funding for the NGO. The formula for calculating the $f^2$-based sample size with [`pwr.f2.test`](https://www.rdocumentation.org/packages/pwr/versions/1.2-0/topics/pwr.f2.test) requires the following values:
+We are using a [2 × 2 × 2 design](design.html), manipulating the experimental condition, the issue area for the NGO, and the source of funding for the NGO. The formula for calculating the $f^2$-based sample size with [`pwr.f2.test`](https://www.rdocumentation.org/packages/pwr/versions/1.2-0/topics/pwr.f2.test) requires the following values:
 
 - `u`: degrees of freedom for the numerator. This is a 2 × 2 × 2 design, so the degrees of freedom = $(2 - 1) \times (2 - 1) \times (2 - 1) = 1$
 - `f2`: effect size. Here we use a small size, or `r f2_mine`.
