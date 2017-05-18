@@ -9,11 +9,11 @@ We have preregistered this study with the [Center for Open Science's](https://co
 
 We are also participating in COS's [Preregistration Challenge](https://cos.io/our-services/prereg-more-information/), and will submit our final article to one of the following eligible journals:
 
-- Voluntas
-- International Interactions
-- Journal of Experimental Political Science
-- Political Science Research Methods
-- Research and Politics
+- *Voluntas*
+- *International Interactions*
+- *Journal of Experimental Political Science*
+- *Political Science Research Methods*
+- *Research and Politics*
 
 ## Preregistration protocol
 
