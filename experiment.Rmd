@@ -134,15 +134,14 @@ A substantial proportion of IRC’s funding comes from {FUNDING SOURCE: governme
     - Yes
     - No
 
-*Q4.4*: How closely do you follow politics in the news?
+*Q4.4*: Some people seem to follow what's going on in government and public affairs most of the time, whether there's an election going on or not. Others aren't that interested. Would you say that you follow what's going on in government and public affairs…
 
 :   Single answer
 
-    - Extremely closely
-    - Very closely
-    - Closely
-    - Barely
-    - Not at all
+    - Most of the time
+    - Some of the time
+    - Only now and then
+    - Hardly at all
 
 *Q4.5*: How would you describe your political views?
 
