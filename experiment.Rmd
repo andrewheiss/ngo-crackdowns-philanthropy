@@ -21,7 +21,15 @@ payment
 
 ### Consent 
 
-***Q1.1***: Consent form here…
+***Q1.1***: You have been invited to participate in an academic research survey about international nongovernmental organizations. This study is being conducted by Suparna Chaudhry from Dartmouth College and Andrew Heiss from Duke University. The experiment should take about **5 minutes** to complete. You will be paid **$0.75** for your participation.
+ 
+Your participation in this study is entirely voluntary and you are free to skip any question or withdraw from the experiment at any time. The experiment contains no trick questions. You will not be asked to provide any personal information, and your answers will remain anonymous. There are no reasonably foreseeable risks or discomforts associated with participating in this study.
+ 
+You will receive no direct benefits from participating in this research study, but your responses may reveal important and useful insights about international NGOs and philanthropy.
+ 
+If you have any questions at any time about the study or the procedures, you can contact Suparna Chaudhry (Suparna.Chaudhry@dartmouth.edu; Dickey Center for International Understanding, Hanover, NH 03755) or Andrew Heiss (andrew.heiss@duke.edu; Sanford School of Public Policy, Durham, NC 27712) at andrew.heiss@duke.edu. This research has been reviewed by the Committee for the Protection of Human Subjects at Dartmouth College (603-646-6842; cphs.tasks@dartmouth.edu) and the Human Subjects Committee at Duke University (919-684-3030; campusirb@duke.edu).
+ 
+By clicking "I agree" below you are indicating that you are at least 18 years old, have read and understood this consent form and agree to participate in this research study. Please print a copy of this page for your records.
 
 *Q1.2*: I have read the above information, and I consent to take part in the study.
 
