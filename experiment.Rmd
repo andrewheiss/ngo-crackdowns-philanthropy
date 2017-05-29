@@ -40,6 +40,21 @@ By clicking "I agree" below you are indicating that you are at least 18 years ol
 
 ---
 
+*Q1.3*: Please read the paragraph below carefully. 
+
+What is your favorite color? While we are interested in learning about your preferences on a variety of topics, including colors, we also want to make sure that you are reading the questions we have written. To demonstrate that you’ve read this much, just go ahead and select both green and yellow from among the alternatives listed below, no matter what your favorite color is. Yes, ignore the first sentence and select both green and yellow.
+
+: Multiple answers allowed (*must be green and yellow*)
+
+    - Pink
+    - Red
+    - Green
+    - White
+    - Yellow
+    - Blue
+
+---
+
 ### Crackdown and private giving
 
 ![](img/irc_logo.png "IRC logo"){.img-responsive .center}
