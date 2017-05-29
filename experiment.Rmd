@@ -7,7 +7,15 @@ date: "Last run: `r format(Sys.time(), '%F')`"
 
 This survey was hosted on [Qualtrics](https://www.qualtrics.com) and participants were randomly sorted into one of eight variations (see [Design](design.html)).
 
-Participants were recruited through [Amazon Mechanical Turk](https://www.mturk.com/mturk/welcome) and were paid $X for their response.
+Participants were recruited through [Amazon Mechanical Turk](https://www.mturk.com/mturk/welcome) and were paid \$0.75 for their response, which is equivalent to a \$9/hour wage:
+
+```{r calculate-payment}
+hourly.wage <- 9
+survey.length.minutes <- 5
+
+payment <- survey.length.minutes * (hourly.wage / 60)
+payment
+```
 
 ## Survey experiment {.survey}
 
