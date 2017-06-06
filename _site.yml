@@ -3,7 +3,7 @@ exclude: ["Data", "Icon?", "Manuscript", "Output", "Sandbox", "Makefile"]
 navbar:
   title: "NGO Crackdowns and Philanthropy Pilot"
   right:
-    - text: "Preregistration"
+    - text: "Preregistration & IRB"
       icon: fa-pencil-square
       href: preregistration.html
     - text: "Design"
