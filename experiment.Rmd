@@ -3,31 +3,31 @@ title: "Experiment"
 date: "Last run: `r format(Sys.time(), '%F')`"
 ---
 
-## Description
+# Description
 
-This survey was hosted on [Qualtrics](https://www.qualtrics.com) and participants were randomly sorted into one of eight variations (see [Design](design.html)).
+This survey was hosted on [Qualtrics](https://www.qualtrics.com) and participants were randomly sorted into [one of eight conditions](preregistration.html#experimental_conditions).
 
 Participants were recruited through [Amazon Mechanical Turk](https://www.mturk.com/mturk/welcome) and were paid \$0.75 for their response, which is equivalent to a \$9/hour wage:
 
 ```{r calculate-payment}
-hourly.wage <- 9
-survey.length.minutes <- 5
+hourly_wage <- 9
+survey_length_minutes <- 5
 
-payment <- survey.length.minutes * (hourly.wage / 60)
+payment <- survey_length_minutes * (hourly_wage / 60)
 payment
 ```
 
-## Survey experiment {.survey}
+# Survey experiment {.survey}
 
-### Consent 
+## Consent 
 
-***Q1.1***: You have been invited to participate in an academic research survey about international nongovernmental organizations. This study is being conducted by Suparna Chaudhry from Dartmouth College and Andrew Heiss from Duke University. The experiment should take about **5 minutes** to complete. You will be paid **$0.75** for your participation.
+***Q1.1***: You have been invited to participate in an academic research survey about international nongovernmental organizations. This study is being conducted by Suparna Chaudhry from Christopher Newport University and Andrew Heiss from Brigham Young University. The experiment should take about **5 minutes** to complete. You will be paid **$0.75** for your participation.
  
 Your participation in this study is entirely voluntary and you are free to skip any question or withdraw from the experiment at any time. You will not be asked to provide any personal information, and your answers will remain anonymous. There are no reasonably foreseeable risks or discomforts associated with participating in this study. There will be questions designed to check that you’re paying attention to the details of the experiment. If you answer these incorrectly, the survey will end early and you may not receive compensation.
 
 Beyond your payment, you will receive no direct benefits from participating in this research study, but your responses may reveal important and useful insights about international NGOs and philanthropy.
  
-If you have any questions at any time about the study or the procedures, you can contact Suparna Chaudhry (Suparna.Chaudhry@dartmouth.edu; Dickey Center for International Understanding, Hanover, NH 03755) or Andrew Heiss (andrew.heiss@duke.edu; Sanford School of Public Policy, Durham, NC 27712) at andrew.heiss@duke.edu. This research has been reviewed by the Committee for the Protection of Human Subjects at Dartmouth College (603-646-6842; cphs.tasks@dartmouth.edu) and the Human Subjects Committee at Duke University (919-684-3030; campusirb@duke.edu).
+If you have any questions at any time about the study or the procedures, you can contact Suparna Chaudhry (suparna.chaudhry@cnu.edu; Reiff Center for Human Rights and Conflict Resolution, Christopher Newport University, Newport News, VA 23606) or Andrew Heiss (andrew_heiss@byu.edu; Romney Institute of Public Management, Brigham Young University, Provo, UT 84602) at andrew_heiss@byu.edu. This research has been reviewed by the Institutional Review Board at Christopher Newport University (757-594-7461; IRB@cnu.edu) and the IRB administrator at Brigham Young University (801-422-1461; irb@byu.edu).
  
 By clicking "I agree" below you are indicating that you are at least 18 years old, have read and understood this consent form and agree to participate in this research study. Please print a copy of this page for your records.
 
@@ -57,17 +57,29 @@ What is your favorite color? While we are interested in learning about your pref
 
 ---
 
-### Crackdown and private giving
+## Crackdown and private giving
+
+*Q2.1*: How do you feel about the following types of organizations?
+
+:   Matrix table
+
+    |                                                                          | Very unfavorable | Unfavorable | Neutral | Favorable | Very favorable |
+    |--------------------------------------------------------------------------|:----------------:|:-----------:|:-------:|:---------:|:--------------:|
+    | Nonprofit organizations that provide humanitarian relief                 |         ⊚        |      ⊚      |    ⊚    |     ⊚     |        ⊚       |
+    | Nonprofit organizations that advocate for human rights                   |         ⊚        |      ⊚      |    ⊚    |     ⊚     |        ⊚       |
+    | Nonprofit organizations that help with development and alleviate poverty |         ⊚        |      ⊚      |    ⊚    |     ⊚     |        ⊚       |
+
+---
 
 ![](img/irc_logo.png "IRC logo"){.img-responsive .center}
 
 \
 
-***Q2.1***: The **International Rescue Committee** (IRC) focuses on {ISSUE AREA: humanitarian assistance for refugees | human rights for refugees} {MAIN MANIPULATION: and works in countries that have recently passed laws that harshly restrict nonprofit organizations}.
+*Q2.2*: The **International Rescue Committee** (IRC) focuses on {ISSUE AREA: humanitarian assistance for refugees | human rights for refugees} {MAIN MANIPULATION: and works in countries that have recently passed laws that harshly restrict nonprofit organizations}.
  
 A substantial proportion of IRC’s funding comes from {FUNDING SOURCE: government | private donors}.
 
-*Q2.2*: How likely would you be to donate to IRC?
+*Q2.3*: How likely would you be to donate to IRC?
 
 :   Single answer
 
@@ -77,78 +89,24 @@ A substantial proportion of IRC’s funding comes from {FUNDING SOURCE: governme
     - Somewhat unlikely
     - Extremely unlikely
 
-*Q2.3*: If you had an extra $100, how much would you be willing to donate to IRC right now? (*Total must add to 100*)
+*Q2.4*: If you had an extra $100, how much would you be willing to donate to IRC right now? (*Total must add to 100*)
 
 :   Numeric slider, options must sum to 100
 
     - Donate to IRC (0–100)
     - Keep for yourself (0–100)
  	 	 	 		
-*Q2.4*: Why would you donate that amount?
+*Q2.5*: Why did you select that amount?
 
 :   Text field
 
 ---
 
-### Crackdown and corporate social responsibility (CSR)
+## Demographics
 
-![](img/google_irc_logo.png "Google and IRC logos"){.img-responsive .center}
+*Q3.1*: Almost done! This is the last page of the study.
 
-\
-
-***Q3.1***: In December 2016, Google held a Giving Weekend and raised $X and did YYY to support International Rescue Committee’s (IRC) efforts in {ISSUE AREA: providing humanitarian assistance for refugees | advocating human rights for refugees} {in countries where nonprofit organizations are harshly restricted}. 
- 
-A substantial proportion of IRC’s funding comes from {FUNDING SOURCE: government | private donors}.
-
-*Q3.2*: How favorable do you feel towards Google?
-
-:   Single answer
-
-    - Extremely positive
-    - Somewhat positive
-    - Neither positive nor negative
-    - Somewhat negative
-    - Extremely negative
-
-*Q3.3*: How generous do you feel Google is?
-
-:   Single answer
-
-    - Extremely generous
-    - Very generous
-    - Moderately generous
-    - Slightly generous
-    - Not generous at all
-
-*Q3.4*: Rate how strongly you feel Google is committed to philanthropy:
-
-:   Single answer
-
-    - Extremely committed
-    - Very committed
-    - Moderately committed
-    - Slightly committed
-    - Not committed at all
-
-*Q3.5*: Where would you most like to see Google donate its money?
-
-:   Single answer
-
-    - Nonprofit organizations or foundations working mostly in California
-    - Nonprofit organizations or foundations working throughout the United States
-    - Nonprofit organizations or foundations working mostly in foreign countries
-
-*Q3.6*: Why do you think Google should donate money to organizations working in X?
-
-:   Text field
-
----
-
-### Demographics
-
-***Q4.1***: Almost done! This is the last page of the study.
-
-*Q4.2*: How often do you donate to charity (either cash or in-kind)?
+*Q3.2*: How often do you donate to charity (either cash or in-kind)?
 
 :   Single answer
 
@@ -160,14 +118,14 @@ A substantial proportion of IRC’s funding comes from {FUNDING SOURCE: governme
     - Once every few years
     - Never
 
-*Q4.3*: Have you volunteered in the past 12 months?
+*Q3.3*: Have you volunteered in the past 12 months?
 
 :   Single answer
 
     - Yes
     - No
 
-*Q4.4*: Some people seem to follow what's going on in government and public affairs most of the time, whether there's an election going on or not. Others aren't that interested. Would you say that you follow what's going on in government and public affairs…
+*Q3.4*: Some people seem to follow what's going on in government and public affairs most of the time, whether there's an election going on or not. Others aren't that interested. Would you say that you follow what's going on in government and public affairs…
 
 :   Single answer
 
@@ -176,7 +134,7 @@ A substantial proportion of IRC’s funding comes from {FUNDING SOURCE: governme
     - Only now and then
     - Hardly at all
 
-*Q4.5*: How would you describe your political views?
+*Q3.5*: How would you describe your political views?
 
 :   Single answer
 
@@ -188,7 +146,7 @@ A substantial proportion of IRC’s funding comes from {FUNDING SOURCE: governme
     - Conservative
     - Very conservative
 
-*Q4.6*: What is the highest degree or level of school you have completed?
+*Q3.6*: What is the highest degree or level of school you have completed?
 
 :   Single answer
 
@@ -200,7 +158,7 @@ A substantial proportion of IRC’s funding comes from {FUNDING SOURCE: governme
     - Graduate or professional degree
     - Doctorate
 
-*Q4.7*: Aside from weddings and funerals, how often do you attend religious services?
+*Q3.7*: Aside from weddings and funerals, how often do you attend religious services?
 
 :   Single answer
 
@@ -212,7 +170,7 @@ A substantial proportion of IRC’s funding comes from {FUNDING SOURCE: governme
     - Never
     - Don't know
 
-*Q4.8*: Please select blue from the following list:
+*Q3.8*: Please select blue from the following list:
 
 :   Single answer
 
@@ -221,7 +179,7 @@ A substantial proportion of IRC’s funding comes from {FUNDING SOURCE: governme
     - Blue
     - Green
 
-*Q4.9*: What is your gender?
+*Q3.9*: What is your gender?
 
 :   Single answer
 
@@ -231,7 +189,7 @@ A substantial proportion of IRC’s funding comes from {FUNDING SOURCE: governme
     - Other:
     - Prefer not to say
 
-*Q4.10*: What is your total household income?
+*Q3.10*: What is your total household income?
 
 :   Single answer
 
@@ -248,7 +206,7 @@ A substantial proportion of IRC’s funding comes from {FUNDING SOURCE: governme
     - $100,000 - $149,999
     - More than $150,000
 
-*Q4.11*: How old are you?
+*Q3.11*: How old are you?
 
 :   Single answer
 

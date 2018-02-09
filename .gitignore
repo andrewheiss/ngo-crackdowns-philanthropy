@@ -1,21 +1,22 @@
 # Temporarily ignore data and output
-Output/*
-Data/*
+output/*
+data/*
 
 # Site output
 _site/*
 
 # Manuscript output
-Manuscript/**.docx
-Manuscript/**.html
-Manuscript/**.pdf
-Manuscript/**.tex
-Manuscript/tex_out/*
-Manuscript/vc*
+manuscript/**.docx
+manuscript/**.html
+manuscript/**.pdf
+manuscript/**.tex
+manuscript/tex_out/*
+manuscript/vc*
 
 # Other folders
-Manuscript/Papers/*
-Sandbox/*
+manuscript/Papers/*
+sandbox/*
+misc/*
 
 # R stuff
 .Rproj.user
