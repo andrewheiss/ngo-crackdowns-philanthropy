@@ -1,0 +1,11 @@
+---
+title: "Robustness checks"
+author: "Andrew Heiss and Suparna Chaudhry"
+date: "Last run: `r format(Sys.time(), '%B %e, %Y')`"
+output: 
+  html_document:
+    code_folding: show
+editor_options: 
+  chunk_output_type: console
+---
+

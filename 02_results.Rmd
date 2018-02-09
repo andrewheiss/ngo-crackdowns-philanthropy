@@ -1,0 +1,87 @@
+---
+title: "Results"
+author: "Andrew Heiss and Suparna Chaudhry"
+date: "Last run: `r format(Sys.time(), '%B %e, %Y')`"
+output: 
+  html_document:
+    code_folding: show
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r skeleton, eval=FALSE}
+
+# Check distribution of experimental conditions
+results %>% count(crackdown, issue, funding)
+
+# Average amount donated, by condition
+# Individual frames
+results %>% group_by(crackdown) %>% summarize(avg_donation = mean(amount_donate))
+results %>% group_by(issue) %>% summarize(avg_donation = mean(amount_donate))
+results %>% group_by(funding) %>% summarize(avg_donation = mean(amount_donate))
+results %>% group_by(crackdown, funding) %>% summarize(avg_donation = mean(amount_donate))
+results %>% group_by(crackdown, issue) %>% summarize(avg_donation = mean(amount_donate))
+results %>% group_by(crackdown, issue, funding) %>% summarize(avg_donation = mean(amount_donate))
+
+# Amount / propensity to donate based on predisposition towards nonprofits
+# Amount / propensity to donate based on charitableness
+# Amount / propensity to donate based on voluntarism
+# Amount / propensity to donate based on political knowledge
+# Amount / propensity to donate based on political ideology
+# Amount / propensity to donate based on education
+# Amount / propensity to donate based on religiosity
+# Amount / propensity to donate based on gender
+# Amount / propensity to donate based on income
+# Amount / propensity to donate based on age
+
+# Control for all those things
+
+```
+
+```{r stuff}
+#   mutate(likelihood_bin = fct_recode(likelihood,
+#                                      Unlikely = "Extremely unlikely",
+#                                      Unlikely = "Somewhat unlikely",
+#                                      Unlikely = "Neither likely nor unlikely",
+#                                      Likely = "Somewhat likely",
+#                                      Likely = "Extremely likely"))
+#   
+# plot(results$likelihood)
+# plot(results$likelihood_bin)
+```
+
+
+```{r var-summary}
+# results_summary <- results %>%
+#   select(favorability, donation, keep,
+#          crackdown, issue, funding)
+```
+
+```{r check-balance}
+# balance <- results %>%
+#   group_by(crackdown) %>%
+#   summarise_at(vars(volunteered), mean)  # THIS IS WRONG THOUGH
+```
+
+```{r}
+# wilcox.test(donation ~ crackdown, data = results) 
+# t.test(donation ~ crackdown, data = results)
+```
+
+
+
+- Demographic balance across main crackdown condition
+
+- Differences of these across conditions:
+
+    - Mean likelihood
+    - Mean likelihood collapsed to binary
+    - Mean donation to NGO
+    - Mean amount kept for person
+
+- Modeling:
+
+    - donation ~ frames (OLS)
+    - likelihood binary  ~ frames (multinomial)
+    - likelihood ~ frames (multinomial)
+    - those models with controls

@@ -1,0 +1,66 @@
+---
+title: "Clean data"
+author: "Andrew Heiss and Suparna Chaudhry"
+date: "Last run: `r format(Sys.time(), '%B %e, %Y')`"
+output: 
+  html_document:
+    code_folding: show
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r clean-data}
+library(tidyverse)
+library(here)
+
+results_file <- file.path(here(), "Data", "test_data.csv")
+
+# Possible answers
+favorability <- c("Very unfavorable", "Unfavorable", "Neutral", 
+                  "Favorable", "Very favorable")
+likelihood <- c("Extremely unlikely", "Somewhat unlikely", 
+                "Neither likely nor unlikely", 
+                "Somewhat likely", "Extremely likely")
+frequency_charity <- c("Once a week", "Once a month", "Once every three months", 
+                       "Once every six months", "Once a year", "Once every few years", 
+                       "Never")
+frequency_religion <- c("More than once a week", "Once a week", "Once or twice a month", 
+                        "A few times a year", "Seldom", "Never", "Don't know")
+income <- c("Less than $10,000", "$10,000 – $19,999", "$20,000 – $29,999", 
+            "$30,000 – $39,999", "$40,000 – $49,999", "$50,000 – $59,999", 
+            "$60,000 – $69,999", "$70,000 – $79,999", "$80,000 – $89,999", 
+            "$90,000 – $99,999", "$100,000 – $149,999", "More than $150,000", 
+            "Prefer not to say")
+age <- c("Under 18", "18 – 24", "25 – 34", "35 – 44", "45 – 54", 
+         "55 – 64", "65 – 74", "75 – 84", "85 or older")
+
+# Qualtrics stores question information in the first 3 rows. All we care about
+# are the column names in the first row.
+results_meta <- read_csv(results_file, n_max = 2)
+
+# The first 8 rows need to be skipped because the consent question has a bunch
+# of line breaks and it messes with CSV line counting. The actual responses
+# start on row 9. This doesn't entirely make sense, since read_csv can read the
+# line break-filled row in just fine. Skipping said lines makes it choke. <shrug>
+results_raw <- read_csv(results_file, skip = 8,
+                        col_names = colnames(results_meta))
+
+results <- results_raw %>%
+  # Only select necessary columns
+  select(id = ResponseId, duration = `Duration (in seconds)`,
+         start_date = StartDate, end_date = EndDate,
+         crackdown, issue, funding, starts_with("Q")) %>%
+  rename(favor_humanitarian = Q2.1_1, favor_human_rights = Q2.1_2, 
+         favor_development = Q2.1_3, donate_likely = Q2.3, 
+         amount_donate = Q2.4_1, amount_keep = Q2.4_2, amount_why = Q2.5,
+         give_charity = Q3.2, volunteer = Q3.3, political_knowledge = Q3.4,
+         ideology = Q3.5, education = Q3.6, religiosity = Q3.7,
+         gender = Q3.9, gender_other = Q3.9_4_TEXT, income = Q3.10, age = Q3.11) %>%
+  # Clean up experimental condition columns
+  mutate(issue = recode(issue, `human rights for refugees` = "Human rights",
+                        `humanitarian assistance for refugees` = "Humanitarian assistance"),
+         funding = recode(funding, `government donors` = "Government",
+                          `individual, private donors` = "Private")) %>%
+  mutate(crackdown = ifelse(str_detect(crackdown, "harshly restrict"), 
+                            "Crackdown", "No crackdown"))
+```
