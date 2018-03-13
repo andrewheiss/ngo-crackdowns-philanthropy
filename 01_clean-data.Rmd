@@ -9,7 +9,7 @@ editor_options:
   chunk_output_type: console
 ---
 
-```{r clean-data}
+```{r clean-data, warning=FALSE, message=FALSE}
 library(tidyverse)
 library(here)
 
@@ -18,21 +18,43 @@ results_file <- file.path(here(), "Data", "test_data.csv")
 # Possible answers
 favorability <- c("Very unfavorable", "Unfavorable", "Neutral", 
                   "Favorable", "Very favorable")
+
 likelihood <- c("Extremely unlikely", "Somewhat unlikely", 
                 "Neither likely nor unlikely", 
                 "Somewhat likely", "Extremely likely")
+
 frequency_charity <- c("Once a week", "Once a month", "Once every three months", 
                        "Once every six months", "Once a year", "Once every few years", 
                        "Never")
+
+frequency_public_affairs <- c("Most of the time", "Some of the time", 
+                              "Only now and then", "Hardly at all")
+
+levels_ideology <- c("Strong liberal", "Liberal", "Independent, leaning liberal", 
+                     "Independent", "Independent, leaning conservative", 
+                     "Conservative", "Very conservative")
+
+levels_education <- c("Less than high school", "High school graduate", 
+                      "Some college", "2 year degree", "4 year degree", 
+                      "Graduate or professional degree", "Doctorate")
+
 frequency_religion <- c("More than once a week", "Once a week", "Once or twice a month", 
                         "A few times a year", "Seldom", "Never", "Don't know")
-income <- c("Less than $10,000", "$10,000 – $19,999", "$20,000 – $29,999", 
-            "$30,000 – $39,999", "$40,000 – $49,999", "$50,000 – $59,999", 
-            "$60,000 – $69,999", "$70,000 – $79,999", "$80,000 – $89,999", 
-            "$90,000 – $99,999", "$100,000 – $149,999", "More than $150,000", 
-            "Prefer not to say")
-age <- c("Under 18", "18 – 24", "25 – 34", "35 – 44", "45 – 54", 
-         "55 – 64", "65 – 74", "75 – 84", "85 or older")
+
+levels_gender <- c("Female", "Male", "Transgender", "Other", "Prefer not to say")
+
+levels_income <- c("Less than $10,000", "$10,000 – $19,999", "$20,000 – $29,999", 
+                   "$30,000 – $39,999", "$40,000 – $49,999", "$50,000 – $59,999", 
+                   "$60,000 – $69,999", "$70,000 – $79,999", "$80,000 – $89,999", 
+                   "$90,000 – $99,999", "$100,000 – $149,999", "More than $150,000", 
+                   "Prefer not to say")
+
+levels_age <- c("Under 18", "18 – 24", "25 – 34", "35 – 44", "45 – 54", 
+                "55 – 64", "65 – 74", "75 – 84", "85 or older")
+
+attention1_answer <- c("Green", "Yellow")
+attention2_answer <- "Blue"
+levels_attention <- c("Correct", "Incorrect")
 
 # Qualtrics stores question information in the first 3 rows. All we care about
 # are the column names in the first row.
@@ -62,5 +84,44 @@ results <- results_raw %>%
          funding = recode(funding, `government donors` = "Government",
                           `individual, private donors` = "Private")) %>%
   mutate(crackdown = ifelse(str_detect(crackdown, "harshly restrict"), 
-                            "Crackdown", "No crackdown"))
+                            "Crackdown", "No crackdown")) %>% 
+  # Attention checks
+  mutate(attention1_correct = str_split(Q1.3, ",") %>% 
+           map_lgl(~ all(attention1_answer %in% .) & length(.) == length(attention1_answer)),
+         attention2_correct = Q3.8 == attention2_answer) %>% 
+  # Factorize variables
+  mutate(donate_likely = factor(donate_likely, levels = likelihood, ordered = TRUE)) %>% 
+  mutate_at(vars(favor_humanitarian, favor_human_rights, favor_development),
+            funs(factor(., levels = favorability, ordered = TRUE))) %>% 
+  mutate(give_charity = factor(give_charity, 
+                               levels = frequency_charity, ordered = TRUE),
+         political_knowledge = factor(political_knowledge, 
+                                      levels = frequency_public_affairs, ordered = TRUE),
+         ideology = factor(ideology, levels = levels_ideology, ordered = TRUE),
+         education = factor(education, levels = levels_education, ordered = TRUE),
+         religiosity = factor(religiosity, levels = frequency_religion, ordered = TRUE),
+         gender = recode(gender, `Other:` = "Other"),
+         gender = factor(gender, levels = levels_gender, ordered = TRUE),
+         income = factor(income, levels = levels_income, ordered = TRUE),
+         age = factor(age, levels = levels_age, ordered = TRUE),
+         check1 = factor(attention1_correct, levels = c(TRUE, FALSE),
+                         labels = levels_attention, ordered = TRUE),
+         check2 = factor(attention2_correct, levels = c(TRUE, FALSE),
+                         labels = levels_attention, ordered = TRUE)) %>% 
+  # Dichotomize variables
+  mutate(donate_likely_bin = fct_recode(donate_likely,
+                                        `Not likely` = "Extremely unlikely",
+                                        `Not likely` = "Somewhat unlikely",
+                                        `Not likely` = "Neither likely nor unlikely",
+                                        Likely = "Somewhat likely",
+                                        Likely = "Extremely likely")) %>% 
+  mutate_at(vars(favor_humanitarian, favor_human_rights, favor_development),
+            funs(bin = fct_recode(., 
+                                  `Not favorable` = "Very unfavorable",
+                                  `Not favorable` = "Unfavorable",
+                                  `Not favorable` = "Neutral",
+                                  Favorable = "Favorable",
+                                  Favorable = "Very favorable")))
+
+saveRDS(results, file.path(here(), "data", "results_clean.rds"))
 ```
