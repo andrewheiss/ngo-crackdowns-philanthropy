@@ -4,17 +4,171 @@ author: "Andrew Heiss and Suparna Chaudhry"
 date: "Last run: `r format(Sys.time(), '%B %e, %Y')`"
 output: 
   html_document:
-    code_folding: show
+    code_folding: hide
 editor_options: 
   chunk_output_type: console
 ---
 
+```{r load-libraries-data, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(ggstance)
+library(pander)
+library(scales)
+library(skimr)
+library(janitor)
+library(here)
+
+source(file.path(here(), "lib", "graphics.R"))
+source(file.path(here(), "lib", "pander_options.R"))
+
+# Load data
+results <- readRDS(file.path(here(), "data", "results_clean.rds"))
+
+# Helpful functions
+safe_mean <- function(x, ...) suppressWarnings(mean(as.numeric(x), ...))
+safe_sd <- function(x, ...) suppressWarnings(sd(as.numeric(x), ...))
+
+my_as_numeric <- function(x) {
+  is_num <- suppressWarnings(!any(is.na(as.numeric(x))))
+  
+  if (is_num) {
+    as.numeric(x)
+  } else {
+    x
+  }
+}
+
+level_summary <- function(x, variable, df = results) {
+  variable <- as.character(variable)
+  if (is.factor(df[[variable]])) {
+    x_levels <- levels(df[[variable]])
+  } else {
+    x_levels <- unique(df[[variable]])
+  }
+  
+  data_frame(x) %>% 
+    count(x) %>%
+    mutate(pct = n / sum(n),
+           fancy = paste0(x, " (", n, "; ", percent(pct), ")"),
+           x = factor(x, levels = x_levels, ordered = TRUE)) %>% 
+    arrange(x) %>% 
+    pull(fancy) %>% 
+    paste(collapse = " | ")
+}
+
+numeric_summary <- function(x) {
+  paste0("Mean: ", round(mean(x, na.rm = TRUE), 2), 
+         " | Std. Dev.: ", round(sd(x, na.rm = TRUE), 2),
+         " | ", inline_hist(x))
+}
+
+my_summary <- function(x, variable, df) {
+  x <- my_as_numeric(x)
+  
+  if (is.numeric(x)) {
+    numeric_summary(x)
+  } else {
+    level_summary(x, variable, df)
+  }
+}
+```
+
+# Overview of data
+
+## Balance of experimental conditions
+
+```{r check-conditions, results="asis"}
+results %>% count(crackdown, issue, funding) %>% 
+  janitor::adorn_totals(where = "row") %>% 
+  pandoc.table()
+```
+
+## Descriptive statistics
+
+```{r tbl-descriptive-statistics, results="asis", warning=FALSE}
+vars_to_summarize <- tribble(
+  ~variable, ~clean_name,
+  "donate_likely", "Likelihood of donation",
+  "donate_likely_bin", "Likelihood of donation (binary)",
+  "amount_donate", "Amount hypothetically donated ($)",
+  "favor_humanitarian", "Prior favorability towards humanitarian NGOs",
+  "favor_humanitarian_bin", "Prior favorability towards humanitarian NGOs (binary)",
+  "favor_human_rights", "Prior favorability towards human rights NGOs",
+  "favor_human_rights_bin", "Prior favorability towards human rights NGOs (binary)",
+  "favor_development", "Prior favorability towards development NGOs",
+  "favor_development_bin", "Prior favorability towards development NGOs (binary)",
+  "give_charity", "Frequency of charitable donations",
+  "volunteer", "Volunteered in past 12 months",
+  "political_knowledge", "Frequency of following public affairs",
+  "ideology", "Political views",
+  "education", "Education",
+  "religiosity", "Frequency of attending religious services",
+  "gender", "Gender",
+  "income", "Income",
+  "age", "Age",
+  "check1", "Attention check 1",
+  "check2", "Attention check 2"
+)
+
+results_summary_stats <- results %>% 
+  select(one_of(vars_to_summarize$variable)) %>% 
+  gather(variable, value) %>% 
+  group_by(variable) %>% 
+  nest() %>% 
+  mutate(N = data %>% map_int(~ nrow(.)),
+         Details = map2_chr(.x = data, .y = variable, ~ my_summary(.x$value, .y, results))) %>% 
+  left_join(vars_to_summarize, by = "variable") %>% 
+  mutate(variable = factor(variable, levels = vars_to_summarize$variable, ordered = TRUE)) %>% 
+  arrange(variable) %>% 
+  select(-data, -variable) %>% 
+  select(Variable = clean_name, everything())
+
+results_summary_stats %>% knitr::kable()
+```
+
+```{r fig-ngo-favorability, fig.width=7, fig.height=4}
+ngo_favorability_raw <- results %>%
+  select(favor_humanitarian, favor_human_rights, favor_development) %>% 
+  gather(variable, value) %>% 
+  count(variable, value) %>% 
+  left_join(vars_to_summarize, by = "variable") %>% 
+  left_join(favorability_cols_5, by = "value") %>% 
+  mutate(clean_name = str_replace(clean_name, "towards", "towards\n")) %>% 
+  mutate(value = factor(value, levels = levels(results$favor_humanitarian), ordered = TRUE),
+         clean_name = fct_inorder(clean_name, ordered = TRUE)) %>%
+  arrange(value) %>% 
+  mutate(color = fct_inorder(color, ordered = TRUE))
+
+ngo_favorability_high <- ngo_favorability_raw %>% 
+  filter(!str_detect(value, "nfav")) %>% 
+  mutate(n = ifelse(value == "Neutral", n / 2, n),
+         n_plot = n,
+         value = fct_rev(value), color = fct_rev(color))
+
+ngo_favorability_low <- ngo_favorability_raw %>% 
+  filter(str_detect(value, "nfav") | value == "Neutral") %>% 
+  mutate(n = ifelse(value == "Neutral", n / 2, n),
+         n_plot = -n)
+
+ggplot(mapping = aes(x = n_plot, y = clean_name, fill = color)) +
+  geom_barh(data = ngo_favorability_high, stat = "identity") +
+  geom_barh(data = ngo_favorability_low, stat = "identity") +
+  geom_vline(xintercept = 0, color = "black") +
+  scale_x_continuous(labels = abs) +
+  scale_fill_identity(labels = levels(ngo_favorability_raw$value), 
+                      breaks = levels(ngo_favorability_raw$color),
+                      guide = "legend", name = NULL) +
+  labs(x = NULL, y = NULL) +
+  theme_ngos() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major.y = element_blank())
+```
+
+
 ```{r skeleton, eval=FALSE}
+# Amount donated by binary likelihood of donation
+results %>% group_by(donate_likely_bin) %>% summarize(avg_donation = mean(amount_donate))
 
-# Check distribution of experimental conditions
-results %>% count(crackdown, issue, funding)
-
-# Average amount donated, by condition
 # Individual frames
 results %>% group_by(crackdown) %>% summarize(avg_donation = mean(amount_donate))
 results %>% group_by(issue) %>% summarize(avg_donation = mean(amount_donate))
@@ -38,30 +192,6 @@ results %>% group_by(crackdown, issue, funding) %>% summarize(avg_donation = mea
 
 ```
 
-```{r stuff}
-#   mutate(likelihood_bin = fct_recode(likelihood,
-#                                      Unlikely = "Extremely unlikely",
-#                                      Unlikely = "Somewhat unlikely",
-#                                      Unlikely = "Neither likely nor unlikely",
-#                                      Likely = "Somewhat likely",
-#                                      Likely = "Extremely likely"))
-#   
-# plot(results$likelihood)
-# plot(results$likelihood_bin)
-```
-
-
-```{r var-summary}
-# results_summary <- results %>%
-#   select(favorability, donation, keep,
-#          crackdown, issue, funding)
-```
-
-```{r check-balance}
-# balance <- results %>%
-#   group_by(crackdown) %>%
-#   summarise_at(vars(volunteered), mean)  # THIS IS WRONG THOUGH
-```
 
 ```{r}
 # wilcox.test(donation ~ crackdown, data = results) 
