@@ -28,8 +28,10 @@ theme_ngos <- function(base_size = 11, base_family = "Encode Sans Condensed") {
           strip.text = element_text(size = rel(1), face = "plain",
                                     family = "Encode Sans Condensed SemiBold"),
           panel.border = element_blank(), 
-          axis.ticks = element_blank(),
           strip.background = element_rect(fill = "#ffffff", colour = NA),
+          axis.ticks = element_blank(),
+          axis.title.x = element_text(margin = margin(t = 10)),
+          legend.margin = margin(t = 0),
           legend.title = element_text(size = rel(0.8)),
           legend.position = "bottom")
   ret
