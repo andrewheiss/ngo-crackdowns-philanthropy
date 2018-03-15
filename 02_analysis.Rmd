@@ -369,9 +369,73 @@ ggplot(coefs_amount, aes(x = estimate, y = fct_rev(term_clean_fct),
 
 ## Predicted medians
 
-```{r models-predicted}
-newdata_conditions <- results %>% 
-  expand(nesting(crackdown, issue, funding))
+**Just the crackdown condition**
+
+```{r models-predicted-crackdown}
+newdata_conditions <- results %>% expand(nesting(crackdown))
+
+posterior_fit <- posterior_predict(m_amount_crackdown, 
+                                   newdata = newdata_conditions,
+                                   re.form = NA, draws = 50, seed = BAYES_SEED)
+
+nested_draws <- posterior_fit %>% 
+  as_data_frame() %>% 
+  gather(id, value) %>% 
+  group_by(id) %>%
+  nest()
+
+all_posterior_draws <- bind_cols(newdata_conditions, nested_draws) %>% unnest(data)
+
+newdata <- newdata_conditions %>% 
+  bind_cols(tidyMCMC(as.mcmc(posterior_fit), conf.int = TRUE, 
+                     conf.level = 0.9, conf.method = "HPDinterval"))
+
+ggplot(newdata, aes(y = estimate, x = crackdown)) + 
+  geom_point(data = all_posterior_draws, aes(y = value, x = crackdown), 
+             color = "grey50", size = 1.5, alpha = 0.25) +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high)) + 
+  scale_y_continuous(labels = dollar) +
+  labs(x = "Crackdown condition", y = "Median amount donated") +
+  coord_cartesian(ylim = c(0, 100)) +
+  theme_ngos()
+```
+
+**Crackdown and issue conditions**
+
+```{r models-predicted-crackdown-issue}
+newdata_conditions <- results %>% expand(nesting(crackdown, issue))
+
+posterior_fit <- posterior_predict(m_amount_crackdown, 
+                                   newdata = newdata_conditions,
+                                   re.form = NA, draws = 50, seed = BAYES_SEED)
+
+nested_draws <- posterior_fit %>% 
+  as_data_frame() %>% 
+  gather(id, value) %>% 
+  group_by(id) %>%
+  nest()
+
+all_posterior_draws <- bind_cols(newdata_conditions, nested_draws) %>% unnest(data)
+
+newdata <- newdata_conditions %>% 
+  bind_cols(tidyMCMC(as.mcmc(posterior_fit), conf.int = TRUE, 
+                     conf.level = 0.9, conf.method = "HPDinterval"))
+
+ggplot(newdata, aes(y = estimate, x = crackdown)) + 
+  geom_point(data = all_posterior_draws, aes(y = value, x = crackdown), 
+             color = "grey50", size = 1.5, alpha = 0.25) +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high)) + 
+  scale_y_continuous(labels = dollar) +
+  labs(x = "Crackdown condition", y = "Median amount donated") +
+  coord_cartesian(ylim = c(0, 100)) +
+  theme_ngos() +
+  facet_wrap(~ issue)
+```
+
+**Crackdown, issue, and funding conditions**
+
+```{r models-predicted-crackdown-issue-funding}
+newdata_conditions <- results %>% expand(nesting(crackdown, issue, funding))
 
 posterior_fit <- posterior_predict(m_amount_crackdown_issue_funding, 
                                    newdata = newdata_conditions,
@@ -389,13 +453,13 @@ newdata <- newdata_conditions %>%
   bind_cols(tidyMCMC(as.mcmc(posterior_fit), conf.int = TRUE, 
                      conf.level = 0.9, conf.method = "HPDinterval"))
 
-ggplot(newdata, aes(y = estimate, x = funding)) + 
-  geom_point(data = all_posterior_draws, aes(y = value, x = funding), 
+ggplot(newdata, aes(y = estimate, x = crackdown)) + 
+  geom_point(data = all_posterior_draws, aes(y = value, x = crackdown), 
              color = "grey50", size = 1.5, alpha = 0.25) +
   geom_pointrange(aes(ymin = conf.low, ymax = conf.high)) + 
   scale_y_continuous(labels = dollar) +
-  labs(x = "Funding", y = "Average amount donated") +
+  labs(x = "Crackdown condition", y = "Median amount donated") +
   coord_cartesian(ylim = c(0, 100)) +
   theme_ngos() +
-  facet_wrap(~ crackdown + issue)
+  facet_wrap(~ issue + funding)
 ```
