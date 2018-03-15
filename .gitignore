@@ -5,6 +5,10 @@ data/*
 # Site output
 _site/*
 
+# knitr stuff
+*_files/*
+*_cache/*
+
 # Manuscript output
 manuscript/**.docx
 manuscript/**.html
