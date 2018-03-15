@@ -85,6 +85,12 @@ results <- results_raw %>%
                           `individual, private donors` = "Private")) %>%
   mutate(crackdown = ifelse(str_detect(crackdown, "harshly restrict"), 
                             "Crackdown", "No crackdown")) %>% 
+  mutate(crackdown = factor(crackdown, levels = c("No crackdown", "Crackdown"), 
+                            ordered = TRUE),
+         issue = factor(issue, levels = c("Human rights", "Humanitarian assistance"), 
+                        ordered = TRUE),
+         funding = factor(funding, levels = c("Government", "Private"), 
+                          ordered = TRUE)) %>% 
   # Attention checks
   mutate(attention1_correct = str_split(Q1.3, ",") %>% 
            map_lgl(~ all(attention1_answer %in% .) & length(.) == length(attention1_answer)),
