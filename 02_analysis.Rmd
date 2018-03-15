@@ -11,18 +11,24 @@ editor_options:
 
 ```{r load-libraries-data, warning=FALSE, message=FALSE}
 library(tidyverse)
+library(rstanarm)
+library(broom)
+library(coda)
 library(ggstance)
 library(pander)
 library(scales)
 library(skimr)
 library(janitor)
+library(huxtable)
 library(here)
 
 source(file.path(here(), "lib", "graphics.R"))
 source(file.path(here(), "lib", "pander_options.R"))
+source(file.path(here(), "lib", "modeling.R"))
 
 # Load data
 results <- readRDS(file.path(here(), "data", "results_clean.rds"))
+
 
 # Helpful functions
 safe_mean <- function(x, ...) suppressWarnings(mean(as.numeric(x), ...))
@@ -71,6 +77,24 @@ my_summary <- function(x, variable, df) {
     level_summary(x, variable, df)
   }
 }
+
+if (isTRUE(getOption('knitr.in.progress'))) {
+  file_format <- rmarkdown::all_output_formats(knitr::current_input())
+} else {
+  file_format <- ""
+}
+
+print_hux <- function(x) {
+  if ("html_document" %in% file_format) {
+    print_html(x)
+  } else if ("pdf_document" %in% file_format) {
+    print_latex(x)
+  } else if ("word_document" %in% file_format) {
+    print_md(x)
+  } else {
+    print(x)
+  }
+}
 ```
 
 # Overview of data
@@ -83,7 +107,7 @@ results %>% count(crackdown, issue, funding) %>%
   pandoc.table()
 ```
 
-## Descriptive statistics
+## Descriptive statistics table
 
 ```{r tbl-descriptive-statistics, results="asis", warning=FALSE}
 vars_to_summarize <- tribble(
@@ -126,6 +150,9 @@ results_summary_stats <- results %>%
 results_summary_stats %>% knitr::kable()
 ```
 
+
+## Visualize important variables
+
 ```{r fig-ngo-favorability, fig.width=7, fig.height=4}
 ngo_favorability_raw <- results %>%
   select(favor_humanitarian, favor_human_rights, favor_development) %>% 
@@ -164,54 +191,151 @@ ggplot(mapping = aes(x = n_plot, y = clean_name, fill = color)) +
         panel.grid.major.y = element_blank())
 ```
 
+## Average likelihood and amount donated across conditions
 
-```{r skeleton, eval=FALSE}
-# Amount donated by binary likelihood of donation
-results %>% group_by(donate_likely_bin) %>% summarize(avg_donation = mean(amount_donate))
+```{r tbl-results-conditions, results="asis"}
+conditions_summary <- bind_rows(group_by(results, crackdown, issue, funding) %>% nest(),
+                                group_by(results, crackdown, issue) %>% nest(),
+                                group_by(results, crackdown) %>% nest(),
+                                results %>% nest()) %>% 
+  arrange(crackdown, issue, funding) %>% 
+  mutate(summary = data %>%
+           map(~ summarize(., pct_likely = table(donate_likely_bin)[["Likely"]] /
+                             length(donate_likely_bin),
+                           mean_donation = mean(amount_donate, na.rm = TRUE),
+                           sd_donation = sd(amount_donate, na.rm = TRUE),
+                           N = nrow(.)))) %>% 
+  unnest(summary) %>% select(-data)
 
-# Individual frames
-results %>% group_by(crackdown) %>% summarize(avg_donation = mean(amount_donate))
-results %>% group_by(issue) %>% summarize(avg_donation = mean(amount_donate))
-results %>% group_by(funding) %>% summarize(avg_donation = mean(amount_donate))
-results %>% group_by(crackdown, funding) %>% summarize(avg_donation = mean(amount_donate))
-results %>% group_by(crackdown, issue) %>% summarize(avg_donation = mean(amount_donate))
-results %>% group_by(crackdown, issue, funding) %>% summarize(avg_donation = mean(amount_donate))
+conditions_summary_clean <- conditions_summary %>% 
+  mutate(funding = ifelse(is.na(funding) & !is.na(issue) , "*Total*", as.character(funding)),
+         issue = ifelse(is.na(issue) & !is.na(crackdown), "*Total*", as.character(issue)),
+         crackdown = ifelse(is.na(crackdown), "*Total*", as.character(crackdown))) %>% 
+  group_by(crackdown) %>% 
+  mutate(issue = replace(issue, duplicated(issue), NA)) %>% 
+  ungroup() %>% 
+  mutate(crackdown = replace(crackdown, duplicated(crackdown), NA)) %>% 
+  mutate(pct_likely = percent(pct_likely)) %>% 
+  rename(`Crackdown condition` = crackdown, `Issue condition` = issue,
+         `Funding condition` = funding, `% likely to donate` = pct_likely,
+         `Amount donated (mean)` = mean_donation, `Amount donated (sd)` = sd_donation)
 
-# Amount / propensity to donate based on predisposition towards nonprofits
-# Amount / propensity to donate based on charitableness
-# Amount / propensity to donate based on voluntarism
-# Amount / propensity to donate based on political knowledge
-# Amount / propensity to donate based on political ideology
-# Amount / propensity to donate based on education
-# Amount / propensity to donate based on religiosity
-# Amount / propensity to donate based on gender
-# Amount / propensity to donate based on income
-# Amount / propensity to donate based on age
-
-# Control for all those things
-
+conditions_summary_clean %>% pandoc.table()
 ```
 
+\
 
-```{r}
-# wilcox.test(donation ~ crackdown, data = results) 
-# t.test(donation ~ crackdown, data = results)
+# Interpreting models
+
+This is like using ANOVA, but more complex and flexible. Coefficients represent changes from the baseline intercept value.
+
+# Amount donated
+
+## Models
+
+```{r build-models-amount, warning=FALSE, message=FALSE, cache=TRUE}
+# Basic interaction models
+m_amount_crackdown <- 
+  stan_glm(amount_donate ~ crackdown,
+           data = results, family = gaussian(),
+           prior = student_t(df = 1, location = 0),
+           prior_intercept = student_t(df = 1, location = 0),
+           chains = CHAINS, iter = ITER, warmup = WARMUP, seed = BAYES_SEED)
+
+m_amount_crackdown_issue <- 
+  update(m_amount_crackdown, . ~ . + issue + crackdown * issue)
+
+m_amount_crackdown_issue_funding <- 
+  update(m_amount_crackdown, . ~ . + 
+           issue + funding + crackdown * issue + crackdown * funding + 
+           issue * funding + crackdown * issue * funding)
+
+# Interaction models with extra controls
+m_amount_crackdown_full <- 
+  update(m_amount_crackdown, . ~ . + 
+           favor_humanitarian_bin + favor_human_rights_bin + favor_development_bin)
+
+m_amount_crackdown_issue_full <- 
+  update(m_amount_crackdown_issue, . ~ . + 
+           favor_humanitarian_bin + favor_human_rights_bin + favor_development_bin)
+
+m_amount_crackdown_issue_funding_full <- 
+  update(m_amount_crackdown_issue_funding, . ~ . + 
+           favor_humanitarian_bin + favor_human_rights_bin + favor_development_bin)
+
+# m_propensity_small <- stan_glm(donate_likely_bin ~ crackdown + issue + funding + 
+#                                  crackdown * issue + crackdown * funding + issue * funding +
+#                                  crackdown * issue * funding,
+#                                data = results, family = binomial(link = "logit"),
+#                                prior = student_t(df = 1, location = 0),
+#                                prior_intercept = student_t(df = 1, location = 0),
+#                                chains = CHAINS, iter = ITER, warmup = WARMUP, seed = BAYES_SEED)
 ```
 
+```{r models-table, results="asis"}
+huxreg(m_amount_crackdown, m_amount_crackdown_issue, 
+       m_amount_crackdown_issue_funding, 
+       m_amount_crackdown_full, m_amount_crackdown_issue_full, 
+       m_amount_crackdown_issue_funding_full,
+       coefs = clean_coefs_named,
+       statistics = model_stats_bayes,
+       stars = NULL) %>% 
+  print_hux()
+```
 
+## Coefficient plot
 
-- Demographic balance across main crackdown condition
+```{r models-plot}
+coefs_amount <- data_frame(model_name = c("Basic model", "Full model"),
+                           model = list(m_amount_crackdown_issue_funding,
+                                        m_amount_crackdown_issue_funding_full)) %>% 
+  mutate(tidy = model %>% map(~ tidyMCMC(., conf.int = TRUE, conf.level = 0.9,
+                                         conf.method = "HPDinterval"))) %>% 
+  unnest(tidy) %>% 
+  left_join(clean_coefs, by = "term") %>% 
+  filter(term_clean != "Intercept")
 
-- Differences of these across conditions:
+ggplot(coefs_amount, aes(x = estimate, y = fct_rev(term_clean_fct), 
+                         color = fct_rev(model_name))) +
+  geom_pointrangeh(aes(xmin = conf.high, xmax = conf.low), 
+                   position = position_dodgev(height = 0.5)) +
+  geom_vline(xintercept = 0) + 
+  scale_color_manual(values = c(ngo_red, ngo_blue), 
+                     guide = guide_legend(title = NULL, reverse = TRUE)) +
+  labs(x = "Posterior median estimate + 90% credible interval", y = NULL) +
+  theme_ngos() +
+  theme(panel.grid.major.y = element_blank())
+```
 
-    - Mean likelihood
-    - Mean likelihood collapsed to binary
-    - Mean donation to NGO
-    - Mean amount kept for person
+## Predicted medians
 
-- Modeling:
+```{r models-predicted}
+newdata_conditions <- results %>% 
+  expand(nesting(crackdown, issue, funding))
 
-    - donation ~ frames (OLS)
-    - likelihood binary  ~ frames (multinomial)
-    - likelihood ~ frames (multinomial)
-    - those models with controls
+posterior_fit <- posterior_predict(m_amount_crackdown_issue_funding, 
+                                   newdata = newdata_conditions,
+                                   re.form = NA, draws = 50, seed = BAYES_SEED)
+
+nested_draws <- posterior_fit %>% 
+  as_data_frame() %>% 
+  gather(id, value) %>% 
+  group_by(id) %>%
+  nest()
+
+all_posterior_draws <- bind_cols(newdata_conditions, nested_draws) %>% unnest(data)
+
+newdata <- newdata_conditions %>% 
+  bind_cols(tidyMCMC(as.mcmc(posterior_fit), conf.int = TRUE, 
+                     conf.level = 0.9, conf.method = "HPDinterval"))
+
+ggplot(newdata, aes(y = estimate, x = funding)) + 
+  geom_point(data = all_posterior_draws, aes(y = value, x = funding), 
+             color = "grey50", size = 1.5, alpha = 0.25) +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high)) + 
+  scale_y_continuous(labels = dollar) +
+  labs(x = "Funding", y = "Average amount donated") +
+  coord_cartesian(ylim = c(0, 100)) +
+  theme_ngos() +
+  facet_wrap(~ crackdown + issue)
+```
