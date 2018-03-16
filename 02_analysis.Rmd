@@ -15,6 +15,7 @@ library(rstanarm)
 library(broom)
 library(coda)
 library(ggstance)
+library(patchwork)
 library(pander)
 library(scales)
 library(skimr)
@@ -94,6 +95,37 @@ print_hux <- function(x) {
   } else {
     print(x)
   }
+}
+
+mcmc_pairwise_diffs <- function(chains) {
+  # Calculate the pairwise differences between columns
+  # Adapted from http://stackoverflow.com/a/28187446/120898
+  pair_names <- outer(colnames(chains), colnames(chains),
+                      paste, sep = " − ")
+  pairs_to_omit <- which(lower.tri(pair_names, diag = TRUE))
+  
+  mcmc_diffs <- outer(1:ncol(chains), 1:ncol(chains),
+                      function(x, y) chains[,x] - chains[,y]) %>% 
+    magrittr::set_colnames(pair_names) %>% 
+    select(-pairs_to_omit)
+
+  return(mcmc_diffs)
+}
+
+tidy_diffs <- function(diffs_pairs) {
+  diffs_pairs %>% 
+    gather(pair, value) %>% 
+    group_by(pair) %>% 
+    summarise(mean = mean(value),
+              median = median(value),
+              q2.5 = quantile(value, probs = 0.025),
+              q5 = quantile(value, probs = 0.05),
+              q25 = quantile(value, probs = 0.25),
+              q75 = quantile(value, probs = 0.75),
+              q95 = quantile(value, probs = 0.95),
+              q97.5 = quantile(value, probs = 0.975),
+              p.greater0 = mean(value > 0),
+              p.less0 = mean(value < 0))
 }
 ```
 
@@ -295,33 +327,27 @@ conditions_summary_clean %>%
 
 ```{r build-models-amount, warning=FALSE, message=FALSE, cache=TRUE}
 # Basic interaction models
-m_amount_crackdown <- 
-  stan_glm(amount_donate ~ crackdown,
-           data = results, family = gaussian(),
-           prior = student_t(df = 1, location = 0),
-           prior_intercept = student_t(df = 1, location = 0),
-           chains = CHAINS, iter = ITER, warmup = WARMUP, seed = BAYES_SEED)
+m_amount_c <- stan_glm(amount_donate ~ crackdown,
+                       data = results, family = gaussian(),
+                       prior = student_t(df = 1, location = 0),
+                       prior_intercept = student_t(df = 1, location = 0),
+                       chains = CHAINS, iter = ITER, warmup = WARMUP, seed = BAYES_SEED)
 
-m_amount_crackdown_issue <- 
-  update(m_amount_crackdown, . ~ . + issue + crackdown * issue)
+m_amount_ci <- update(m_amount_c, . ~ . + issue + crackdown * issue)
 
-m_amount_crackdown_issue_funding <- 
-  update(m_amount_crackdown, . ~ . + 
-           issue + funding + crackdown * issue + crackdown * funding + 
-           issue * funding + crackdown * issue * funding)
+m_amount_cif <- update(m_amount_c, . ~ . + 
+                         issue + funding + crackdown * issue + crackdown * funding + 
+                         issue * funding + crackdown * issue * funding)
 
 # Interaction models with extra controls
-m_amount_crackdown_full <- 
-  update(m_amount_crackdown, . ~ . + 
-           favor_humanitarian_bin + favor_human_rights_bin + favor_development_bin)
+m_amount_c_full <- update(m_amount_c, . ~ . + 
+                            favor_humanitarian_bin + favor_human_rights_bin + favor_development_bin)
 
-m_amount_crackdown_issue_full <- 
-  update(m_amount_crackdown_issue, . ~ . + 
-           favor_humanitarian_bin + favor_human_rights_bin + favor_development_bin)
+m_amount_ci_full <- update(m_amount_ci, . ~ . + 
+                             favor_humanitarian_bin + favor_human_rights_bin + favor_development_bin)
 
-m_amount_crackdown_issue_funding_full <- 
-  update(m_amount_crackdown_issue_funding, . ~ . + 
-           favor_humanitarian_bin + favor_human_rights_bin + favor_development_bin)
+m_amount_cif_full <-update(m_amount_cif, . ~ . + 
+                             favor_humanitarian_bin + favor_human_rights_bin + favor_development_bin)
 
 # m_propensity_small <- stan_glm(donate_likely_bin ~ crackdown + issue + funding + 
 #                                  crackdown * issue + crackdown * funding + issue * funding +
@@ -333,10 +359,8 @@ m_amount_crackdown_issue_funding_full <-
 ```
 
 ```{r models-table, results="asis"}
-huxreg(m_amount_crackdown, m_amount_crackdown_issue, 
-       m_amount_crackdown_issue_funding, 
-       m_amount_crackdown_full, m_amount_crackdown_issue_full, 
-       m_amount_crackdown_issue_funding_full,
+huxreg(m_amount_c, m_amount_ci, m_amount_cif, 
+       m_amount_c_full, m_amount_ci_full, m_amount_cif_full,
        coefs = clean_coefs_named,
        statistics = model_stats_bayes,
        stars = NULL) %>% 
@@ -347,8 +371,8 @@ huxreg(m_amount_crackdown, m_amount_crackdown_issue,
 
 ```{r models-plot}
 coefs_amount <- data_frame(model_name = c("Basic model", "Full model"),
-                           model = list(m_amount_crackdown_issue_funding,
-                                        m_amount_crackdown_issue_funding_full)) %>% 
+                           model = list(m_amount_cif,
+                                        m_amount_cif_full)) %>% 
   mutate(tidy = model %>% map(~ tidyMCMC(., conf.int = TRUE, conf.level = 0.9,
                                          conf.method = "HPDinterval"))) %>% 
   unnest(tidy) %>% 
@@ -369,97 +393,242 @@ ggplot(coefs_amount, aes(x = estimate, y = fct_rev(term_clean_fct),
 
 ## Predicted medians
 
-**Just the crackdown condition**
+The Stan people really really don't like `posterior_linepred()`, since it throws away a lot of the uncertainty that comes from actually getting a posterior distribution. But this approach here mirrors using `predict()` to combine all the coefficients and intercept terms in a regular frequentist linear model and it's probably appropriate for this situation because all the coefficients are actually linked together behind the scenes and create group mean estimates. If I use the full force of `posterior_predict()`, I add more uncertainty with each added coefficient (so in a 2×2×2 version, the 8th condition is actually the sum of all 8 coefficients, which means it gets 8 levels of uncertainity, which is probably excessive). But we do it both ways too, just to be on the safe side.
 
-```{r models-predicted-crackdown}
-newdata_conditions <- results %>% expand(nesting(crackdown))
+```{r amount-median-c}
+newdata_conditions_c <- results %>% expand(nesting(crackdown))
 
-posterior_fit <- posterior_predict(m_amount_crackdown, 
-                                   newdata = newdata_conditions,
-                                   re.form = NA, draws = 50, seed = BAYES_SEED)
+chains_fitted_c <- posterior_linpred(m_amount_c, 
+                                   newdata = newdata_conditions_c)
 
-nested_draws <- posterior_fit %>% 
-  as_data_frame() %>% 
-  gather(id, value) %>% 
-  group_by(id) %>%
-  nest()
+# posterior_fit <- posterior_predict(m_amount_c, 
+#                                    newdata = newdata_conditions_c,
+#                                    draws = 50, seed = BAYES_SEED)
 
-all_posterior_draws <- bind_cols(newdata_conditions, nested_draws) %>% unnest(data)
+coef_summary_c <- newdata_conditions_c %>% 
+  bind_cols(tidyMCMC(as.mcmc(chains_fitted_c), estimate.method = "median",
+                     conf.int = TRUE, conf.level = 0.9, conf.method = "HPDinterval"))
 
-newdata <- newdata_conditions %>% 
-  bind_cols(tidyMCMC(as.mcmc(posterior_fit), conf.int = TRUE, 
-                     conf.level = 0.9, conf.method = "HPDinterval"))
+# newdata <- newdata_conditions %>% 
+#   bind_cols(tidyMCMC(as.mcmc(posterior_fit), estimate.method = "median",
+#                      conf.int = TRUE, conf.level = 0.9, conf.method = "HPDinterval"))
 
-ggplot(newdata, aes(y = estimate, x = crackdown)) + 
-  geom_point(data = all_posterior_draws, aes(y = value, x = crackdown), 
-             color = "grey50", size = 1.5, alpha = 0.25) +
-  geom_pointrange(aes(ymin = conf.low, ymax = conf.high)) + 
+plot_amount_c <- ggplot(coef_summary_c, aes(y = estimate, x = crackdown)) + 
+  # geom_point(data = results, aes(y = amount_donate, x = crackdown),
+  #            color = "grey50", size = 0.5, alpha = 0.25) +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), color = ngo_green) + 
   scale_y_continuous(labels = dollar) +
-  labs(x = "Crackdown condition", y = "Median amount donated") +
-  coord_cartesian(ylim = c(0, 100)) +
-  theme_ngos()
+  labs(x = NULL, y = "Median amount donated") +
+  # coord_cartesian(ylim = c(0, 100)) +
+  theme_ngos() +
+  theme(panel.grid.major.x = element_blank())
 ```
 
-**Crackdown and issue conditions**
+```{r amount-median-ci}
+newdata_conditions_ci <- results %>% expand(nesting(crackdown, issue))
 
-```{r models-predicted-crackdown-issue}
-newdata_conditions <- results %>% expand(nesting(crackdown, issue))
+chains_fitted_ci <- posterior_linpred(m_amount_ci, 
+                                   newdata = newdata_conditions_ci)
 
-posterior_fit <- posterior_predict(m_amount_crackdown, 
-                                   newdata = newdata_conditions,
-                                   re.form = NA, draws = 50, seed = BAYES_SEED)
+coef_summary_ci <- newdata_conditions_ci %>% 
+  bind_cols(tidyMCMC(as.mcmc(chains_fitted_ci), estimate.method = "median",
+                     conf.int = TRUE, conf.level = 0.9, conf.method = "HPDinterval"))
 
-nested_draws <- posterior_fit %>% 
-  as_data_frame() %>% 
-  gather(id, value) %>% 
-  group_by(id) %>%
-  nest()
-
-all_posterior_draws <- bind_cols(newdata_conditions, nested_draws) %>% unnest(data)
-
-newdata <- newdata_conditions %>% 
-  bind_cols(tidyMCMC(as.mcmc(posterior_fit), conf.int = TRUE, 
-                     conf.level = 0.9, conf.method = "HPDinterval"))
-
-ggplot(newdata, aes(y = estimate, x = crackdown)) + 
-  geom_point(data = all_posterior_draws, aes(y = value, x = crackdown), 
-             color = "grey50", size = 1.5, alpha = 0.25) +
-  geom_pointrange(aes(ymin = conf.low, ymax = conf.high)) + 
+plot_amount_ci <- ggplot(coef_summary_ci, aes(y = estimate, x = crackdown)) + 
+  # geom_point(data = results, aes(y = amount_donate, x = crackdown),
+  #            color = "grey50", size = 0.5, alpha = 0.25) +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), color = ngo_blue) + 
   scale_y_continuous(labels = dollar) +
-  labs(x = "Crackdown condition", y = "Median amount donated") +
-  coord_cartesian(ylim = c(0, 100)) +
+  labs(x = NULL, y = "Median amount donated") +
+  # coord_cartesian(ylim = c(0, 100)) +
   theme_ngos() +
+  theme(panel.grid.major.x = element_blank(),
+        strip.text = element_text(margin = margin(5, 0, 2, 0, "pt"))) +
   facet_wrap(~ issue)
 ```
 
-**Crackdown, issue, and funding conditions**
+```{r amount-median-cif}
+newdata_conditions_cif <- results %>% expand(nesting(crackdown, issue, funding))
 
-```{r models-predicted-crackdown-issue-funding}
-newdata_conditions <- results %>% expand(nesting(crackdown, issue, funding))
+chains_fitted_cif <- posterior_linpred(m_amount_cif, 
+                                   newdata = newdata_conditions_cif)
 
-posterior_fit <- posterior_predict(m_amount_crackdown_issue_funding, 
-                                   newdata = newdata_conditions,
-                                   re.form = NA, draws = 50, seed = BAYES_SEED)
+coef_summary_cif <- newdata_conditions_cif %>% 
+  bind_cols(tidyMCMC(as.mcmc(chains_fitted_cif), estimate.method = "median",
+                     conf.int = TRUE, conf.level = 0.9, conf.method = "HPDinterval"))
 
-nested_draws <- posterior_fit %>% 
+plot_amount_cif <- ggplot(coef_summary_cif, aes(y = estimate, x = crackdown)) + 
+  # geom_point(data = results, aes(y = amount_donate, x = crackdown),
+  #            color = "grey50", size = 0.5, alpha = 0.5) +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), color = ngo_red) +
+  scale_y_continuous(labels = dollar) +
+  labs(x = NULL, y = "Median amount donated") +
+  theme_ngos() +
+  theme(panel.grid.major.x = element_blank(),
+        strip.text = element_text(margin = margin(5, 0, 2, 0, "pt"))) +
+  facet_wrap(~ issue + funding)
+```
+
+```{r plot-all-amount-medians, fig.width=8, fig.height=6}
+((plot_amount_c + 
+   labs(title = "Median donation in control and crackdown groups,\nconditioned by other experimental groups",
+        subtitle = "90% credible intervals shown around each point")) / 
+   plot_amount_ci) | plot_amount_cif
+```
+
+
+## Differences in medians
+
+```{r amount-diffs-c}
+diffs_coef_pairs_c <- chains_fitted_c %>% 
   as_data_frame() %>% 
-  gather(id, value) %>% 
-  group_by(id) %>%
+  magrittr::set_colnames(levels(newdata_conditions_c$crackdown)) %>% 
+  mcmc_pairwise_diffs()
+
+diffs_coef_pairs_detail_c <- tidy_diffs(diffs_coef_pairs_c)
+
+pairs_plot_data_c <- diffs_coef_pairs_c %>%
+  gather(pair, value) %>%
+  mutate(pair1 = pair) %>%
+  separate(pair1, into = c("group1", "group2"), sep = " − ") %>%
+  mutate(pair = ifelse(nchar(pair) > 25,
+                       str_replace(pair, "−", "−\n"),
+                       pair))
+  
+plot_diffs_c <- ggplot() + 
+  geom_density(data = pairs_plot_data_c, aes(x = value),
+               fill = ngo_green, colour = NA, alpha = 0.4) + 
+  geom_segment(data = diffs_coef_pairs_detail_c, 
+               aes(x = q5, xend = q95, y = 0, yend = 0),
+               size = 3) +
+  geom_vline(data = diffs_coef_pairs_detail_c, aes(xintercept = median), size = 0.25) +
+  geom_vline(xintercept = 0, linetype = "dotted") +
+  guides(fill = FALSE, color = FALSE) +
+  labs(x = "Difference in medians") +
+  theme_ngos(density = TRUE) +
+  facet_wrap(~ pair)
+```
+
+```{r amount-diffs-ci}
+# Nest each fitted chain into a single row that corresponds to each newdata_condition
+chains_nested_ci <- chains_fitted_ci %>% 
+  as_data_frame() %>% 
+  mutate(id = 1:n()) %>% 
+  gather(condition, value, -id) %>% 
+  group_by(condition) %>% 
   nest()
 
-all_posterior_draws <- bind_cols(newdata_conditions, nested_draws) %>% unnest(data)
+# Add the fitted chains to the conditions, spread the main crackdown condition
+# into two columns, then nest everything by issue
+all_chains_ci <- bind_cols(newdata_conditions_ci, chains_nested_ci) %>% 
+  unnest(data) %>% 
+  select(-condition) %>% 
+  group_by(issue) %>% 
+  spread(crackdown, value) %>% 
+  select(-id) %>% 
+  nest()
 
-newdata <- newdata_conditions %>% 
-  bind_cols(tidyMCMC(as.mcmc(posterior_fit), conf.int = TRUE, 
-                     conf.level = 0.9, conf.method = "HPDinterval"))
+# All the pairwise differences in a single data frame, grouped by issue
+pairs_conditions_ci <- all_chains_ci %>% 
+  mutate(diffs_coef_pairs = data %>% map(~ mcmc_pairwise_diffs(.)),
+         diffs_coef_pairs_detail = diffs_coef_pairs %>% map(~ tidy_diffs(.)))
 
-ggplot(newdata, aes(y = estimate, x = crackdown)) + 
-  geom_point(data = all_posterior_draws, aes(y = value, x = crackdown), 
-             color = "grey50", size = 1.5, alpha = 0.25) +
-  geom_pointrange(aes(ymin = conf.low, ymax = conf.high)) + 
-  scale_y_continuous(labels = dollar) +
-  labs(x = "Crackdown condition", y = "Median amount donated") +
-  coord_cartesian(ylim = c(0, 100)) +
-  theme_ngos() +
-  facet_wrap(~ issue + funding)
+# Extract coefficient details and plot data
+diffs_coef_pairs_detail_ci <- pairs_conditions_ci %>% 
+  unnest(diffs_coef_pairs_detail) %>% 
+  select(-data, -diffs_coef_pairs)
+
+pairs_plot_data_ci <- pairs_conditions_ci %>% 
+  select(issue, diffs_coef_pairs) %>% 
+  unnest(diffs_coef_pairs) %>%
+  gather(pair, value, -issue) %>%
+  mutate(pair1 = pair) %>%
+  separate(pair1, into = c("group1", "group2"), sep = " − ") %>%
+  mutate(pair = ifelse(nchar(pair) > 25,
+                       str_replace(pair, "−", "−\n"),
+                       pair))
+
+plot_diffs_ci <- ggplot() + 
+  geom_density(data = pairs_plot_data_ci, aes(x = value),
+               fill = ngo_blue, colour = NA, alpha = 0.4) + 
+  geom_segment(data = diffs_coef_pairs_detail_ci, 
+               aes(x = q5, xend = q95, y = 0, yend = 0),
+               size = 3) +
+  geom_vline(data = diffs_coef_pairs_detail_ci, aes(xintercept = median), size = 0.25) +
+  geom_vline(xintercept = 0, linetype = "dotted") +
+  guides(fill = FALSE, color = FALSE) +
+  labs(x = "Difference in medians") +
+  theme_ngos(density = TRUE) +
+  facet_wrap(~ issue + pair)
+```
+
+```{r amount-diffs-cif}
+# Nest each fitted chain into a single row that corresponds to each newdata_condition
+chains_nested_cif <- chains_fitted_cif %>% 
+  as_data_frame() %>% 
+  mutate(id = 1:n()) %>% 
+  gather(condition, value, -id) %>% 
+  group_by(condition) %>% 
+  nest()
+
+# Add the fitted chains to the conditions, spread the main crackdown condition
+# into two columns, then nest everything by issue
+all_chains_cif <- bind_cols(newdata_conditions_cif, chains_nested_cif) %>% 
+  unnest(data) %>% 
+  select(-condition) %>% 
+  group_by(issue, funding) %>% 
+  spread(crackdown, value) %>% 
+  select(-id) %>% 
+  nest()
+
+# All the pairwise differences in a single data frame, grouped by issue
+pairs_conditions_cif <- all_chains_cif %>% 
+  mutate(diffs_coef_pairs = data %>% map(~ mcmc_pairwise_diffs(.)),
+         diffs_coef_pairs_detail = diffs_coef_pairs %>% map(~ tidy_diffs(.)))
+
+# Extract coefficient details and plot data
+diffs_coef_pairs_detail_cif <- pairs_conditions_cif %>% 
+  unnest(diffs_coef_pairs_detail) %>% 
+  select(-data, -diffs_coef_pairs)
+
+pairs_plot_data_cif <- pairs_conditions_cif %>% 
+  select(issue, funding, diffs_coef_pairs) %>% 
+  unnest(diffs_coef_pairs) %>%
+  gather(pair, value, -issue, -funding) %>%
+  mutate(pair1 = pair) %>%
+  separate(pair1, into = c("group1", "group2"), sep = " − ") %>%
+  mutate(pair = ifelse(nchar(pair) > 25,
+                       str_replace(pair, "−", "−\n"),
+                       pair))
+
+plot_diffs_cif <- ggplot() + 
+  geom_density(data = pairs_plot_data_cif, aes(x = value),
+               fill = ngo_red, colour = NA, alpha = 0.4) + 
+  geom_segment(data = diffs_coef_pairs_detail_cif, 
+               aes(x = q5, xend = q95, y = 0, yend = 0),
+               size = 3) +
+  geom_vline(data = diffs_coef_pairs_detail_cif, aes(xintercept = median), size = 0.25) +
+  geom_vline(xintercept = 0, linetype = "dotted") +
+  guides(fill = FALSE, color = FALSE) +
+  labs(x = "Difference in medians") +
+  theme_ngos(density = TRUE) +
+  facet_wrap(~ issue + funding + pair)
+```
+
+```{r plot-all-amount-diffs, fig.width=8, fig.height=6}
+((plot_diffs_c + 
+   labs(title = "Differences in median amount donated in control and crackdown groups,\nconditioned by other experimental groups",
+        subtitle = "90% credible intervals shown in black. Solid vertical line = median; dotted vertical line = 0")) / 
+   plot_diffs_ci) | plot_diffs_cif
+```
+
+```{r tbl-all-amount-diffs, results="asis"}
+bind_rows(diffs_coef_pairs_detail_c,
+          diffs_coef_pairs_detail_ci,
+          diffs_coef_pairs_detail_cif) %>% 
+  select(Issue = issue, Funding = funding, 
+         `No crackdown − crackdown (median)` = median, 
+         `P(m > 0)` = p.greater0, `P(m < 0)` = p.less0) %>% 
+  pandoc.table(missing = "—", 
+               caption = 'Median difference between amounts donated in "no crackdown" (control) and "crackdown" conditions')
 ```
