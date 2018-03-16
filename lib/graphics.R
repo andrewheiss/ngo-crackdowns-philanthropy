@@ -14,7 +14,7 @@ favorability_cols_5 <- data_frame(value = c("Very unfavorable", "Unfavorable", "
                                   color = c(ngo_red, ngo_orange, ngo_yellow,
                                             ngo_green, ngo_blue))
 
-theme_ngos <- function(base_size = 11, base_family = "Encode Sans Condensed") {
+theme_ngos <- function(base_size = 11, base_family = "Encode Sans Condensed", density = FALSE) {
   update_geom_defaults("label", list(family = "Encode Sans Condensed Medium"))
   update_geom_defaults("text", list(family = "Encode Sans Condensed Medium"))
   
@@ -34,5 +34,14 @@ theme_ngos <- function(base_size = 11, base_family = "Encode Sans Condensed") {
           legend.margin = margin(t = 0),
           legend.title = element_text(size = rel(0.8)),
           legend.position = "bottom")
-  ret
+  
+  if (density) {
+    ret <- ret +
+      theme(panel.grid = element_blank(),
+            axis.title.y = element_blank(),
+            axis.text.y = element_blank(),
+            strip.text = element_text(margin = margin(5, 0, 2, 0, "pt")))
+  } else {
+    ret
+  }
 }
