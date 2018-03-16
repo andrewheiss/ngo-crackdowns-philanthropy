@@ -182,8 +182,43 @@ results_summary_stats <- results %>%
 results_summary_stats %>% knitr::kable()
 ```
 
+## Average likelihood and amount donated across conditions
 
-## Visualize important variables
+```{r tbl-results-conditions, results="asis"}
+conditions_summary <- bind_rows(group_by(results, crackdown, issue, funding) %>% nest(),
+                                group_by(results, crackdown, issue) %>% nest(),
+                                group_by(results, crackdown) %>% nest(),
+                                results %>% nest()) %>% 
+  arrange(crackdown, issue, funding) %>% 
+  mutate(summary = data %>%
+           map(~ summarize(., pct_likely = table(donate_likely_bin)[["Likely"]] /
+                             length(donate_likely_bin),
+                           mean_donation = mean(amount_donate, na.rm = TRUE),
+                           sd_donation = sd(amount_donate, na.rm = TRUE),
+                           N = nrow(.)))) %>% 
+  unnest(summary) %>% select(-data)
+
+conditions_summary_clean <- conditions_summary %>% 
+  mutate(funding = ifelse(is.na(funding) & !is.na(issue) , "*Total*", as.character(funding)),
+         issue = ifelse(is.na(issue) & !is.na(crackdown), "*Total*", as.character(issue)),
+         crackdown = ifelse(is.na(crackdown), "*Total*", as.character(crackdown))) %>% 
+  group_by(crackdown) %>% 
+  mutate(issue = replace(issue, duplicated(issue), NA)) %>% 
+  ungroup() %>% 
+  mutate(crackdown = replace(crackdown, duplicated(crackdown), NA)) %>% 
+  mutate(pct_likely = percent(pct_likely)) %>% 
+  rename(`Crackdown condition` = crackdown, `Issue condition` = issue,
+         `Funding condition` = funding, `% likely to donate` = pct_likely,
+         `Amount donated (mean)` = mean_donation, `Amount donated (sd)` = sd_donation)
+
+conditions_summary_clean %>% pandoc.table()
+```
+
+\
+
+# Visualize important variables
+
+## Prior favorability towards NGOs
 
 ```{r fig-ngo-favorability, fig.width=7, fig.height=4}
 ngo_favorability_raw <- results %>%
@@ -221,38 +256,6 @@ ggplot(mapping = aes(x = n_plot, y = clean_name, fill = color)) +
   theme_ngos() +
   theme(panel.grid.minor = element_blank(),
         panel.grid.major.y = element_blank())
-```
-
-## Average likelihood and amount donated across conditions
-
-```{r tbl-results-conditions, results="asis"}
-conditions_summary <- bind_rows(group_by(results, crackdown, issue, funding) %>% nest(),
-                                group_by(results, crackdown, issue) %>% nest(),
-                                group_by(results, crackdown) %>% nest(),
-                                results %>% nest()) %>% 
-  arrange(crackdown, issue, funding) %>% 
-  mutate(summary = data %>%
-           map(~ summarize(., pct_likely = table(donate_likely_bin)[["Likely"]] /
-                             length(donate_likely_bin),
-                           mean_donation = mean(amount_donate, na.rm = TRUE),
-                           sd_donation = sd(amount_donate, na.rm = TRUE),
-                           N = nrow(.)))) %>% 
-  unnest(summary) %>% select(-data)
-
-conditions_summary_clean <- conditions_summary %>% 
-  mutate(funding = ifelse(is.na(funding) & !is.na(issue) , "*Total*", as.character(funding)),
-         issue = ifelse(is.na(issue) & !is.na(crackdown), "*Total*", as.character(issue)),
-         crackdown = ifelse(is.na(crackdown), "*Total*", as.character(crackdown))) %>% 
-  group_by(crackdown) %>% 
-  mutate(issue = replace(issue, duplicated(issue), NA)) %>% 
-  ungroup() %>% 
-  mutate(crackdown = replace(crackdown, duplicated(crackdown), NA)) %>% 
-  mutate(pct_likely = percent(pct_likely)) %>% 
-  rename(`Crackdown condition` = crackdown, `Issue condition` = issue,
-         `Funding condition` = funding, `% likely to donate` = pct_likely,
-         `Amount donated (mean)` = mean_donation, `Amount donated (sd)` = sd_donation)
-
-conditions_summary_clean %>% pandoc.table()
 ```
 
 \
@@ -320,6 +323,7 @@ conditions_summary_clean %>%
   pandoc.table()
 ```
 
+\
 
 # Amount donated
 
@@ -632,3 +636,15 @@ bind_rows(diffs_coef_pairs_detail_c,
   pandoc.table(missing = "—", 
                caption = 'Median difference between amounts donated in "no crackdown" (control) and "crackdown" conditions')
 ```
+
+\
+
+# Likelihood of donation
+
+## Models
+
+## Coefficient plot
+
+## Predicted medians
+
+## Differences in medians
