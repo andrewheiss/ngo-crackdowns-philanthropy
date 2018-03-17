@@ -352,17 +352,9 @@ m_amount_ci_full <- update(m_amount_ci, . ~ . +
 
 m_amount_cif_full <-update(m_amount_cif, . ~ . + 
                              favor_humanitarian_bin + favor_human_rights_bin + favor_development_bin)
-
-# m_propensity_small <- stan_glm(donate_likely_bin ~ crackdown + issue + funding + 
-#                                  crackdown * issue + crackdown * funding + issue * funding +
-#                                  crackdown * issue * funding,
-#                                data = results, family = binomial(link = "logit"),
-#                                prior = student_t(df = 1, location = 0),
-#                                prior_intercept = student_t(df = 1, location = 0),
-#                                chains = CHAINS, iter = ITER, warmup = WARMUP, seed = BAYES_SEED)
 ```
 
-```{r models-table, results="asis"}
+```{r tbl-models-amount, results="asis"}
 huxreg(m_amount_c, m_amount_ci, m_amount_cif, 
        m_amount_c_full, m_amount_ci_full, m_amount_cif_full,
        coefs = clean_coefs_named,
@@ -403,7 +395,7 @@ The Stan people really really don't like `posterior_linepred()`, since it throws
 newdata_conditions_c <- results %>% expand(nesting(crackdown))
 
 chains_fitted_c <- posterior_linpred(m_amount_c, 
-                                   newdata = newdata_conditions_c)
+                                     newdata = newdata_conditions_c)
 
 # posterior_fit <- posterior_predict(m_amount_c, 
 #                                    newdata = newdata_conditions_c,
@@ -432,7 +424,7 @@ plot_amount_c <- ggplot(coef_summary_c, aes(y = estimate, x = crackdown)) +
 newdata_conditions_ci <- results %>% expand(nesting(crackdown, issue))
 
 chains_fitted_ci <- posterior_linpred(m_amount_ci, 
-                                   newdata = newdata_conditions_ci)
+                                      newdata = newdata_conditions_ci)
 
 coef_summary_ci <- newdata_conditions_ci %>% 
   bind_cols(tidyMCMC(as.mcmc(chains_fitted_ci), estimate.method = "median",
@@ -455,7 +447,7 @@ plot_amount_ci <- ggplot(coef_summary_ci, aes(y = estimate, x = crackdown)) +
 newdata_conditions_cif <- results %>% expand(nesting(crackdown, issue, funding))
 
 chains_fitted_cif <- posterior_linpred(m_amount_cif, 
-                                   newdata = newdata_conditions_cif)
+                                       newdata = newdata_conditions_cif)
 
 coef_summary_cif <- newdata_conditions_cif %>% 
   bind_cols(tidyMCMC(as.mcmc(chains_fitted_cif), estimate.method = "median",
@@ -643,8 +635,283 @@ bind_rows(diffs_coef_pairs_detail_c,
 
 ## Models
 
+```{r build-models-likely, warning=FALSE, message=FALSE, cache=TRUE}
+# Basic interaction models
+# Weakly informative normal priors, since these coefficients are log-odds
+m_likely_c <- stan_glm(donate_likely_bin ~ crackdown,
+                       data = results, family = binomial(link = "logit"),
+                       prior = normal(-1, 1),
+                       prior_intercept = normal(-1, 1),
+                       chains = CHAINS, iter = ITER, warmup = WARMUP, seed = BAYES_SEED)
+
+m_likely_ci <- update(m_likely_c, . ~ . + issue + crackdown * issue)
+
+m_likely_cif <- update(m_likely_c, . ~ . + 
+                         issue + funding + crackdown * issue + crackdown * funding + 
+                         issue * funding + crackdown * issue * funding)
+
+# Interaction models with extra controls
+m_likely_c_full <- update(m_likely_c, . ~ . + 
+                            favor_humanitarian_bin + favor_human_rights_bin + favor_development_bin)
+
+m_likely_ci_full <- update(m_likely_ci, . ~ . + 
+                             favor_humanitarian_bin + favor_human_rights_bin + favor_development_bin)
+
+m_likely_cif_full <-update(m_likely_cif, . ~ . + 
+                             favor_humanitarian_bin + favor_human_rights_bin + favor_development_bin)
+```
+
+```{r tbl-models-likely, results="asis"}
+huxreg(m_likely_c, m_likely_ci, m_likely_cif, 
+       m_likely_c_full, m_likely_ci_full, m_likely_cif_full,
+       coefs = clean_coefs_named,
+       statistics = model_stats_bayes,
+       stars = NULL) %>% 
+  print_hux()
+```
+
 ## Coefficient plot
 
 ## Predicted medians
 
+```{r likely-median-c}
+newdata_conditions_c <- results %>% expand(nesting(crackdown))
+
+# transform = TRUE does the same thing as plogis(as.matrix(m_likely_c))
+chains_fitted_likely_c <- posterior_linpred(m_likely_c, 
+                                            newdata = newdata_conditions_c, 
+                                            transform = TRUE)
+
+coef_summary_likely_c <- newdata_conditions_c %>% 
+  bind_cols(tidyMCMC(as.mcmc(chains_fitted_likely_c), estimate.method = "median",
+                     conf.int = TRUE, conf.level = 0.9, conf.method = "HPDinterval"))
+
+plot_likely_c <- ggplot(coef_summary_likely_c, aes(y = estimate, x = crackdown)) + 
+  # geom_point(data = results, aes(y = amount_donate, x = crackdown),
+  #            color = "grey50", size = 0.5, alpha = 0.25) +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), color = ngo_green) + 
+  scale_y_continuous(labels = percent) +
+  labs(x = NULL, y = "Probability of donating") +
+  # coord_cartesian(ylim = c(0, 100)) +
+  theme_ngos() +
+  theme(panel.grid.major.x = element_blank())
+```
+
+```{r likely-median-ci}
+newdata_conditions_ci <- results %>% expand(nesting(crackdown, issue))
+
+chains_fitted_likely_ci <- posterior_linpred(m_likely_ci, 
+                                             newdata = newdata_conditions_ci,
+                                             transform = TRUE)
+
+coef_summary_likely_ci <- newdata_conditions_ci %>% 
+  bind_cols(tidyMCMC(as.mcmc(chains_fitted_likely_ci), estimate.method = "median",
+                     conf.int = TRUE, conf.level = 0.9, conf.method = "HPDinterval"))
+
+plot_likely_ci <- ggplot(coef_summary_likely_ci, aes(y = estimate, x = crackdown)) + 
+  # geom_point(data = results, aes(y = amount_donate, x = crackdown),
+  #            color = "grey50", size = 0.5, alpha = 0.25) +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), color = ngo_blue) + 
+  scale_y_continuous(labels = percent) +
+  labs(x = NULL, y = "Probability of donating") +
+  # coord_cartesian(ylim = c(0, 100)) +
+  theme_ngos() +
+  theme(panel.grid.major.x = element_blank(),
+        strip.text = element_text(margin = margin(5, 0, 2, 0, "pt"))) +
+  facet_wrap(~ issue)
+```
+
+```{r likely-median-cif}
+newdata_conditions_cif <- results %>% expand(nesting(crackdown, issue, funding))
+
+chains_fitted_likely_cif <- posterior_linpred(m_likely_cif, 
+                                              newdata = newdata_conditions_cif,
+                                              transform = TRUE)
+
+coef_summary_likely_cif <- newdata_conditions_cif %>% 
+  bind_cols(tidyMCMC(as.mcmc(chains_fitted_likely_cif), estimate.method = "median",
+                     conf.int = TRUE, conf.level = 0.9, conf.method = "HPDinterval"))
+
+plot_likely_cif <- ggplot(coef_summary_likely_cif, aes(y = estimate, x = crackdown)) + 
+  # geom_point(data = results, aes(y = amount_donate, x = crackdown),
+  #            color = "grey50", size = 0.5, alpha = 0.5) +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), color = ngo_red) +
+  scale_y_continuous(labels = percent) +
+  labs(x = NULL, y = "Probability of donating") +
+  theme_ngos() +
+  theme(panel.grid.major.x = element_blank(),
+        strip.text = element_text(margin = margin(5, 0, 2, 0, "pt"))) +
+  facet_wrap(~ issue + funding)
+```
+
+```{r plot-all-likely-medians, fig.width=8, fig.height=6}
+((plot_likely_c + 
+   labs(title = "Median likelihood of donation in control and crackdown groups,\nconditioned by other experimental groups",
+        subtitle = "90% credible intervals shown around each point")) / 
+   plot_likely_ci) | plot_likely_cif
+```
+
+
 ## Differences in medians
+
+```{r likely-diffs-c}
+diffs_coef_likely_pairs_c <- chains_fitted_likely_c %>% 
+  as_data_frame() %>% 
+  magrittr::set_colnames(levels(newdata_conditions_c$crackdown)) %>% 
+  mcmc_pairwise_diffs()
+
+diffs_coef_likely_pairs_detail_c <- tidy_diffs(diffs_coef_likely_pairs_c)
+
+pairs_likely_plot_data_c <- diffs_coef_likely_pairs_c %>%
+  gather(pair, value) %>%
+  mutate(pair1 = pair) %>%
+  separate(pair1, into = c("group1", "group2"), sep = " − ") %>%
+  mutate(pair = ifelse(nchar(pair) > 25,
+                       str_replace(pair, "−", "−\n"),
+                       pair))
+  
+plot_diffs_likely_c <- ggplot() + 
+  geom_density(data = pairs_likely_plot_data_c, aes(x = value),
+               fill = ngo_green, colour = NA, alpha = 0.4) + 
+  geom_segment(data = diffs_coef_likely_pairs_detail_c, 
+               aes(x = q5, xend = q95, y = 0, yend = 0),
+               size = 3) +
+  geom_vline(data = diffs_coef_likely_pairs_detail_c, 
+             aes(xintercept = median), size = 0.25) +
+  geom_vline(xintercept = 0, linetype = "dotted") +
+  guides(fill = FALSE, color = FALSE) +
+  scale_x_continuous(labels = percent) +
+  labs(x = "Difference in medians") +
+  theme_ngos(density = TRUE) +
+  facet_wrap(~ pair)
+```
+
+```{r likely-diffs-ci}
+# Nest each fitted chain into a single row that corresponds to each newdata_condition
+chains_nested_likely_ci <- chains_fitted_likely_ci %>% 
+  as_data_frame() %>% 
+  mutate(id = 1:n()) %>% 
+  gather(condition, value, -id) %>% 
+  group_by(condition) %>% 
+  nest()
+
+# Add the fitted chains to the conditions, spread the main crackdown condition
+# into two columns, then nest everything by issue
+all_chains_likely_ci <- bind_cols(newdata_conditions_ci, 
+                                  chains_nested_likely_ci) %>% 
+  unnest(data) %>% 
+  select(-condition) %>% 
+  group_by(issue) %>% 
+  spread(crackdown, value) %>% 
+  select(-id) %>% 
+  nest()
+
+# All the pairwise differences in a single data frame, grouped by issue
+pairs_likely_conditions_ci <- all_chains_likely_ci %>% 
+  mutate(diffs_coef_pairs = data %>% map(~ mcmc_pairwise_diffs(.)),
+         diffs_coef_pairs_detail = diffs_coef_pairs %>% map(~ tidy_diffs(.)))
+
+# Extract coefficient details and plot data
+diffs_coef_likely_pairs_detail_ci <- pairs_likely_conditions_ci %>% 
+  unnest(diffs_coef_pairs_detail) %>% 
+  select(-data, -diffs_coef_pairs)
+
+pairs_likely_plot_data_ci <- pairs_likely_conditions_ci %>% 
+  select(issue, diffs_coef_pairs) %>% 
+  unnest(diffs_coef_pairs) %>%
+  gather(pair, value, -issue) %>%
+  mutate(pair1 = pair) %>%
+  separate(pair1, into = c("group1", "group2"), sep = " − ") %>%
+  mutate(pair = ifelse(nchar(pair) > 25,
+                       str_replace(pair, "−", "−\n"),
+                       pair))
+
+plot_diffs_likely_ci <- ggplot() + 
+  geom_density(data = pairs_likely_plot_data_ci, aes(x = value),
+               fill = ngo_blue, colour = NA, alpha = 0.4) + 
+  geom_segment(data = diffs_coef_likely_pairs_detail_ci, 
+               aes(x = q5, xend = q95, y = 0, yend = 0),
+               size = 3) +
+  geom_vline(data = diffs_coef_likely_pairs_detail_ci, 
+             aes(xintercept = median), size = 0.25) +
+  geom_vline(xintercept = 0, linetype = "dotted") +
+  guides(fill = FALSE, color = FALSE) +
+  scale_x_continuous(labels = percent) +
+  labs(x = "Difference in medians") +
+  theme_ngos(density = TRUE) +
+  facet_wrap(~ issue + pair)
+```
+
+```{r likely-diffs-cif}
+# Nest each fitted chain into a single row that corresponds to each newdata_condition
+chains_nested_likely_cif <- chains_fitted_likely_cif %>% 
+  as_data_frame() %>% 
+  mutate(id = 1:n()) %>% 
+  gather(condition, value, -id) %>% 
+  group_by(condition) %>% 
+  nest()
+
+# Add the fitted chains to the conditions, spread the main crackdown condition
+# into two columns, then nest everything by issue
+all_chains_likely_cif <- bind_cols(newdata_conditions_cif, 
+                                   chains_nested_likely_cif) %>% 
+  unnest(data) %>% 
+  select(-condition) %>% 
+  group_by(issue, funding) %>% 
+  spread(crackdown, value) %>% 
+  select(-id) %>% 
+  nest()
+
+# All the pairwise differences in a single data frame, grouped by issue
+pairs_likely_conditions_cif <- all_chains_likely_cif %>% 
+  mutate(diffs_coef_pairs = data %>% map(~ mcmc_pairwise_diffs(.)),
+         diffs_coef_pairs_detail = diffs_coef_pairs %>% map(~ tidy_diffs(.)))
+
+# Extract coefficient details and plot data
+diffs_coef_likely_pairs_detail_cif <- pairs_likely_conditions_cif %>% 
+  unnest(diffs_coef_pairs_detail) %>% 
+  select(-data, -diffs_coef_pairs)
+
+pairs_likely_plot_data_cif <- pairs_likely_conditions_cif %>% 
+  select(issue, funding, diffs_coef_pairs) %>% 
+  unnest(diffs_coef_pairs) %>%
+  gather(pair, value, -issue, -funding) %>%
+  mutate(pair1 = pair) %>%
+  separate(pair1, into = c("group1", "group2"), sep = " − ") %>%
+  mutate(pair = ifelse(nchar(pair) > 25,
+                       str_replace(pair, "−", "−\n"),
+                       pair))
+
+plot_diffs_likely_cif <- ggplot() + 
+  geom_density(data = pairs_likely_plot_data_cif, aes(x = value),
+               fill = ngo_red, colour = NA, alpha = 0.4) + 
+  geom_segment(data = diffs_coef_likely_pairs_detail_cif, 
+               aes(x = q5, xend = q95, y = 0, yend = 0),
+               size = 3) +
+  geom_vline(data = diffs_coef_likely_pairs_detail_cif, 
+             aes(xintercept = median), size = 0.25) +
+  geom_vline(xintercept = 0, linetype = "dotted") +
+  guides(fill = FALSE, color = FALSE) +
+  scale_x_continuous(labels = percent) +
+  labs(x = "Difference in medians") +
+  theme_ngos(density = TRUE) +
+  facet_wrap(~ issue + funding + pair)
+```
+
+```{r plot-all-likely-diffs, fig.width=8, fig.height=6}
+((plot_diffs_likely_c + 
+   labs(title = "Differences in donation likelihood in control and crackdown groups,\nconditioned by other experimental groups",
+        subtitle = "90% credible intervals shown in black. Solid vertical line = median; dotted vertical line = 0")) / 
+   plot_diffs_likely_ci) | plot_diffs_likely_cif
+```
+
+```{r tbl-all-likely-diffs, results="asis"}
+bind_rows(diffs_coef_likely_pairs_detail_c,
+          diffs_coef_likely_pairs_detail_ci,
+          diffs_coef_likely_pairs_detail_cif) %>% 
+  select(Issue = issue, Funding = funding, 
+         `No crackdown − crackdown (median)` = median, 
+         `P(m > 0)` = p.greater0, `P(m < 0)` = p.less0) %>% 
+  pandoc.table(missing = "—", 
+               caption = 'Median difference between likelihood to donate in "no crackdown" (control) and "crackdown" conditions')
+```
