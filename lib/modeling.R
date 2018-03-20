@@ -25,7 +25,16 @@ clean_coefs <- tribble(
   "crackdownCrackdown:issueHumanitarian assistance:fundingPrivate", "Crackdown × Issue × Funding",
   "favor_humanitarian_binFavorable", "Prior favorability towards humanitarian NGOs",
   "favor_human_rights_binFavorable", "Prior favorability towards human rights NGOs",
-  "favor_development_binFavorable", "Prior favorability towards development NGOs"
+  "favor_development_binFavorable", "Prior favorability towards development NGOs",
+  "give_charity_3Once a month-once a year", "Give to charity once a month–once a year",
+  "give_charity_3At least once a month", "Give to charity at least once a month",
+  "volunteerYes", "Volunteered in past year",
+  "political_knowledge_binOften", "Follow current political evens often",
+  "ideology_binLiberal", "Liberal political views",
+  "education_binBA and above", "Bachelor's degree or higher",
+  "religiosity_binAt least once a month", "Attend religious services at least once a month",
+  "income_binAt least $60,000 – $69,999", "Income $60,000 or higher",
+  "age_binAt least 45 – 54", "Age 45 or higher"
 ) %>% 
   mutate(term_clean_fct = fct_inorder(term_clean, ordered = TRUE))
 

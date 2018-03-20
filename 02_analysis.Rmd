@@ -345,13 +345,22 @@ m_amount_cif <- update(m_amount_c, . ~ . +
 
 # Interaction models with extra controls
 m_amount_c_full <- update(m_amount_c, . ~ . + 
-                            favor_humanitarian_bin + favor_human_rights_bin + favor_development_bin)
+                            favor_humanitarian_bin + favor_human_rights_bin + favor_development_bin +
+                            give_charity_3 + volunteer + political_knowledge_bin +
+                            ideology_bin + education_bin + religiosity_bin +
+                            income_bin + age_bin)
 
 m_amount_ci_full <- update(m_amount_ci, . ~ . + 
-                             favor_humanitarian_bin + favor_human_rights_bin + favor_development_bin)
+                             favor_humanitarian_bin + favor_human_rights_bin + favor_development_bin +
+                             give_charity_3 + volunteer + political_knowledge_bin +
+                             ideology_bin + education_bin + religiosity_bin +
+                             income_bin + age_bin)
 
 m_amount_cif_full <-update(m_amount_cif, . ~ . + 
-                             favor_humanitarian_bin + favor_human_rights_bin + favor_development_bin)
+                             favor_humanitarian_bin + favor_human_rights_bin + favor_development_bin +
+                             give_charity_3 + volunteer + political_knowledge_bin +
+                             ideology_bin + education_bin + religiosity_bin +
+                             income_bin + age_bin)
 ```
 
 ```{r tbl-models-amount, results="asis"}
@@ -652,13 +661,22 @@ m_likely_cif <- update(m_likely_c, . ~ . +
 
 # Interaction models with extra controls
 m_likely_c_full <- update(m_likely_c, . ~ . + 
-                            favor_humanitarian_bin + favor_human_rights_bin + favor_development_bin)
+                            favor_humanitarian_bin + favor_human_rights_bin + favor_development_bin +
+                            give_charity_3 + volunteer + political_knowledge_bin +
+                            ideology_bin + education_bin + religiosity_bin +
+                            income_bin + age_bin)
 
 m_likely_ci_full <- update(m_likely_ci, . ~ . + 
-                             favor_humanitarian_bin + favor_human_rights_bin + favor_development_bin)
+                             favor_humanitarian_bin + favor_human_rights_bin + favor_development_bin +
+                             give_charity_3 + volunteer + political_knowledge_bin +
+                             ideology_bin + education_bin + religiosity_bin +
+                             income_bin + age_bin)
 
 m_likely_cif_full <-update(m_likely_cif, . ~ . + 
-                             favor_humanitarian_bin + favor_human_rights_bin + favor_development_bin)
+                             favor_humanitarian_bin + favor_human_rights_bin + favor_development_bin +
+                             give_charity_3 + volunteer + political_knowledge_bin +
+                             ideology_bin + education_bin + religiosity_bin +
+                             income_bin + age_bin)
 ```
 
 ```{r tbl-models-likely, results="asis"}
@@ -667,6 +685,7 @@ huxreg(m_likely_c, m_likely_ci, m_likely_cif,
        coefs = clean_coefs_named,
        statistics = model_stats_bayes,
        stars = NULL) %>% 
+  quick_docx()
   print_hux()
 ```
 
