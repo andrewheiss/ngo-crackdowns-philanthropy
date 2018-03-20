@@ -4,6 +4,7 @@ data/*
 
 # Site output
 _site/*
+site_libs/*
 
 # knitr stuff
 *_files/*
