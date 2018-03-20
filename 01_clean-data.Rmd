@@ -13,6 +13,25 @@ editor_options:
 library(tidyverse)
 library(here)
 
+# Calculate the quantile (and median) of an ordered factor
+# Borrowed from @jrnold: https://gist.github.com/jrnold/6759254
+#
+# In the case of ties, the first in order will win. For instance, 
+# bloop <- factor(c("A", "A", "B", "B"), ordered = TRUE)
+# median(bloop)  # "A"
+quantile.ordered <- function(x, probs = seq(0, 1, 0.25)) {
+  tab <- table(x)
+  cdf <- cumsum(tab / sum(tab))
+  idx <- sapply(probs, function(p) min(which(cdf >= p)))
+  levels(x)[idx] 
+}
+
+quantile.factor <- quantile.ordered
+median.ordered <- function(x) quantile(x, 0.5)
+median.factor <- median.ordered
+
+
+# Load data
 results_file <- file.path(here(), "Data", "test_data.csv")
 
 # Possible answers
@@ -101,6 +120,7 @@ results <- results_raw %>%
             funs(factor(., levels = favorability, ordered = TRUE))) %>% 
   mutate(give_charity = factor(give_charity, 
                                levels = frequency_charity, ordered = TRUE),
+         volunteer = factor(volunteer, levels = c("No", "Yes"), ordered = TRUE),
          political_knowledge = factor(political_knowledge, 
                                       levels = frequency_public_affairs, ordered = TRUE),
          ideology = factor(ideology, levels = levels_ideology, ordered = TRUE),
@@ -127,7 +147,52 @@ results <- results_raw %>%
                                   `Not favorable` = "Unfavorable",
                                   `Not favorable` = "Neutral",
                                   Favorable = "Favorable",
-                                  Favorable = "Very favorable")))
+                                  Favorable = "Very favorable"))) %>% 
+  mutate(give_charity_3 = fct_recode(give_charity,
+                                     `At least once a month` = "Once a week",
+                                     `At least once a month` = "Once a month",
+                                     `Once a month-once a year` = "Once every three months",
+                                     `Once a month-once a year` = "Once every six months",
+                                     `Once a month-once a year` = "Once a year",
+                                     Rarely = "Once every few years",
+                                     Rarely = "Never") %>% fct_rev()) %>% 
+  mutate(political_knowledge_bin = fct_recode(political_knowledge,
+                                              `Often` = "Most of the time",
+                                              `Often` = "Some of the time",
+                                              `Not often` = "Only now and then",
+                                              `Not often` = "Hardly at all") %>% fct_rev()) %>% 
+  mutate(ideology_3 = fct_recode(ideology,
+                                 `Liberal` = "Strong liberal",
+                                 `Liberal` = "Liberal",
+                                 `Liberal` = "Independent, leaning liberal",
+                                 `Independent` = "Independent",
+                                 `Conservative` = "Independent, leaning conservative",
+                                 `Conservative` = "Conservative",
+                                 `Conservative` = "Very conservative") %>% fct_rev()) %>% 
+  mutate(ideology_bin = fct_recode(ideology_3,
+                                   `Not liberal` = "Independent",
+                                   `Not liberal` = "Conservative")) %>% 
+  mutate(education_bin = fct_recode(education,
+                                    `No BA` = "Less than high school",
+                                    `No BA` = "High school graduate",
+                                    `No BA` = "Some college",
+                                    `No BA` = "2 year degree",
+                                    `BA and above` = "4 year degree",
+                                    `BA and above` = "Graduate or professional degree",
+                                    `BA and above` = "Doctorate")) %>% 
+  mutate(religiosity_bin = fct_recode(religiosity,
+                                      `At least once a month` = "More than once a week",
+                                      `At least once a month` = "Once a week",
+                                      `At least once a month` = "Once or twice a month",
+                                      `Rarely` = "A few times a year",
+                                      `Rarely` = "Seldom",
+                                      `Rarely` = "Never",
+                                      NULL = "Don't know") %>% fct_rev()) %>% 
+  mutate(income_clean = fct_recode(income, NULL = "Prefer not to say"),
+         income_bin = factor(income_clean >= median(.$income), levels = c(FALSE, TRUE),
+                             labels = paste(c("Less than", "At least"), median(.$income)))) %>% 
+  mutate(age_bin = factor(age >= median(.$age), levels = c(FALSE, TRUE),
+                          labels = paste(c("Less than", "At least"), median(.$age))))
 
 saveRDS(results, file.path(here(), "data", "results_clean.rds"))
 ```
