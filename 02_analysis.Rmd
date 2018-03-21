@@ -333,8 +333,8 @@ conditions_summary_clean %>%
 # Basic interaction models
 m_amount_c <- stan_glm(amount_donate ~ crackdown,
                        data = results, family = gaussian(),
-                       prior = student_t(df = 1, location = 0),
-                       prior_intercept = student_t(df = 1, location = 0),
+                       prior = cauchy(location = 0, scale = 2.5),
+                       prior_intercept = cauchy(location = 0, scale = 10),
                        chains = CHAINS, iter = ITER, warmup = WARMUP, seed = BAYES_SEED)
 
 m_amount_ci <- update(m_amount_c, . ~ . + issue + crackdown * issue)
@@ -646,11 +646,12 @@ bind_rows(diffs_coef_pairs_detail_c,
 
 ```{r build-models-likely, warning=FALSE, message=FALSE, cache=TRUE}
 # Basic interaction models
-# Weakly informative normal priors, since these coefficients are log-odds
+# Weakly informative student t priors, since these coefficients are log-odds
+# See https://github.com/stan-dev/stan/wiki/Prior-Choice-Recommendations#prior-for-the-regression-coefficients-in-logistic-regression-non-sparse-case and https://arxiv.org/abs/1507.07170
 m_likely_c <- stan_glm(donate_likely_bin ~ crackdown,
                        data = results, family = binomial(link = "logit"),
-                       prior = normal(-1, 1),
-                       prior_intercept = normal(-1, 1),
+                       prior = student_t(3, 0, 2.5),
+                       prior_intercept = student_t(3, 0, 10),
                        chains = CHAINS, iter = ITER, warmup = WARMUP, seed = BAYES_SEED)
 
 m_likely_ci <- update(m_likely_c, . ~ . + issue + crackdown * issue)
@@ -685,7 +686,6 @@ huxreg(m_likely_c, m_likely_ci, m_likely_cif,
        coefs = clean_coefs_named,
        statistics = model_stats_bayes,
        stars = NULL) %>% 
-  quick_docx()
   print_hux()
 ```
 
