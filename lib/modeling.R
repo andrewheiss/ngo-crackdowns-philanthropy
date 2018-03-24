@@ -33,8 +33,8 @@ clean_coefs <- tribble(
   "ideology_binLiberal", "Liberal political views",
   "education_binBA and above", "Bachelor's degree or higher",
   "religiosity_binAt least once a month", "Attend religious services at least once a month",
-  "income_binAt least $60,000 – $69,999", "Income $60,000 or higher",
-  "age_binAt least 45 – 54", "Age 45 or higher"
+  "income_binAt least $50,000 – $59,999", "Income $50,000 or higher",
+  "age_binAt least 35 – 44", "Age 35 or higher"
 ) %>% 
   mutate(term_clean_fct = fct_inorder(term_clean, ordered = TRUE))
 

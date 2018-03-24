@@ -32,7 +32,9 @@ median.factor <- median.ordered
 
 
 # Load data
-results_file <- file.path(here(), "Data", "test_data.csv")
+# results_file <- file.path(here(), "data", "test_data.csv")
+results_file <- file.path(here(), "private", 
+                          "NGO Crackdowns and Philanthropy, March 2018 pilot_March 23, 2018_20.01.csv")
 
 # Possible answers
 favorability <- c("Very unfavorable", "Unfavorable", "Neutral", 
@@ -79,16 +81,26 @@ levels_attention <- c("Correct", "Incorrect")
 # are the column names in the first row.
 results_meta <- read_csv(results_file, n_max = 2)
 
-# The first 8 rows need to be skipped because the consent question has a bunch
+# The first 10 rows need to be skipped because the consent question has a bunch
 # of line breaks and it messes with CSV line counting. The actual responses
-# start on row 9. This doesn't entirely make sense, since read_csv can read the
+# start on row 11. This doesn't entirely make sense, since read_csv can read the
 # line break-filled row in just fine. Skipping said lines makes it choke. <shrug>
-results_raw <- read_csv(results_file, skip = 8,
+results_raw <- read_csv(results_file, skip = 10,
                         col_names = colnames(results_meta))
 
+# Confirmation codes to exclude. These are people who failed the attention
+# checks or who took the survey outside of MTurk.
+#
+# The code for determining these is in a script that is excluded from the main
+# repository because of privacy issues (it deals directly with MTurk worker
+# IDs), called "private/approve_mturkers.R". It outputs this text list of codes.
+codes_to_exclude <- readLines(file.path(here(), "data", "codes_to_exclude.txt")) %>% 
+  as.numeric()
+
+# Clean everything
 results <- results_raw %>%
   # Only select necessary columns
-  select(id = ResponseId, duration = `Duration (in seconds)`,
+  select(id = ResponseId, confirmation_code = mTurkCode, duration = `Duration (in seconds)`,
          start_date = StartDate, end_date = EndDate,
          crackdown, issue, funding, starts_with("Q")) %>%
   rename(favor_humanitarian = Q2.1_1, favor_human_rights = Q2.1_2, 
@@ -114,6 +126,11 @@ results <- results_raw %>%
   mutate(attention1_correct = str_split(Q1.3, ",") %>% 
            map_lgl(~ all(attention1_answer %in% .) & length(.) == length(attention1_answer)),
          attention2_correct = Q3.8 == attention2_answer) %>% 
+  # This person contacted me separately to say that they accidentally did the first
+  # attention check wrong, but that they did pay attention: 6518634
+  mutate(attention1_correct = ifelse(confirmation_code == 6518634,
+                                     TRUE, attention1_correct)) %>% 
+  filter(!(confirmation_code %in% codes_to_exclude)) %>%
   # Factorize variables
   mutate(donate_likely = factor(donate_likely, levels = likelihood, ordered = TRUE)) %>% 
   mutate_at(vars(favor_humanitarian, favor_human_rights, favor_development),
@@ -195,4 +212,5 @@ results <- results_raw %>%
                           labels = paste(c("Less than", "At least"), median(.$age))))
 
 saveRDS(results, file.path(here(), "data", "results_clean.rds"))
+write_csv(results, file.path(here(), "data", "results_clean.csv"))
 ```
