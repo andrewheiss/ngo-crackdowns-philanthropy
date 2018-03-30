@@ -12,6 +12,7 @@ editor_options:
 ```{r clean-data, warning=FALSE, message=FALSE}
 library(tidyverse)
 library(here)
+library(csvy)
 
 # Calculate the quantile (and median) of an ordered factor
 # Borrowed from @jrnold: https://gist.github.com/jrnold/6759254
@@ -212,5 +213,6 @@ results <- results_raw %>%
                           labels = paste(c("Less than", "At least"), median(.$age))))
 
 saveRDS(results, file.path(here(), "data", "results_clean.rds"))
-write_csv(results, file.path(here(), "data", "results_clean.csv"))
+write_csvy(results, file = file.path(here(), "data", "results_clean.csv"),
+           metadata = file.path(here(), "data", "results_clean.yaml"), na = "NA")
 ```
