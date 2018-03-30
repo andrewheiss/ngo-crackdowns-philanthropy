@@ -125,9 +125,30 @@ tidy_diffs <- function(diffs_pairs) {
               q95 = quantile(value, probs = 0.95),
               q97.5 = quantile(value, probs = 0.975),
               p.greater0 = mean(value > 0),
-              p.less0 = mean(value < 0))
+              p.less0 = mean(value < 0),
+              p.diff.not0 = ifelse(median > 0, p.greater0, p.less0))
 }
 ```
+
+# Miscellaneous details
+
+## Average time to complete survey
+
+```{r avg-time}
+results %>% summarize(min = min(duration),
+                      max = max(duration),
+                      mean = mean(duration),
+                      sd = sd(duration),
+                      median = median(duration))
+```
+
+## Attention check #2
+
+```{r attention-check-2}
+results %>% count(attention2_correct)
+```
+
+
 
 # Overview of data
 
@@ -135,8 +156,11 @@ tidy_diffs <- function(diffs_pairs) {
 
 ```{r check-conditions, results="asis"}
 results %>% count(crackdown, issue, funding) %>% 
-  janitor::adorn_totals(where = "row") %>% 
-  pandoc.table()
+  rename(Crackdown = crackdown, Issue = issue, Funding = funding) %>% 
+  janitor::adorn_totals(where = "row") %T>% 
+  pandoc.table() %>% 
+  pandoc.table.return(caption = "Balance of experimental conditions {#tbl:experimental-conditions}") %>% 
+  cat(file = file.path(here(), "output", "tables", "tbl-experimental-conditions.md"))
 ```
 
 ## Descriptive statistics table
@@ -147,22 +171,21 @@ vars_to_summarize <- tribble(
   "donate_likely", "Likelihood of donation",
   "donate_likely_bin", "Likelihood of donation (binary)",
   "amount_donate", "Amount hypothetically donated ($)",
+  "gender", "Gender",
+  "age", "Age",
+  "income", "Income",
+  "education", "Education",
+  "religiosity", "Frequency of attending religious services",
+  "ideology", "Political views",
+  "political_knowledge", "Frequency of following public affairs",
+  "give_charity", "Frequency of charitable donations",
+  "volunteer", "Volunteered in past 12 months",
   "favor_humanitarian", "Prior favorability towards humanitarian NGOs",
   "favor_humanitarian_bin", "Prior favorability towards humanitarian NGOs (binary)",
   "favor_human_rights", "Prior favorability towards human rights NGOs",
   "favor_human_rights_bin", "Prior favorability towards human rights NGOs (binary)",
   "favor_development", "Prior favorability towards development NGOs",
   "favor_development_bin", "Prior favorability towards development NGOs (binary)",
-  "give_charity", "Frequency of charitable donations",
-  "volunteer", "Volunteered in past 12 months",
-  "political_knowledge", "Frequency of following public affairs",
-  "ideology", "Political views",
-  "education", "Education",
-  "religiosity", "Frequency of attending religious services",
-  "gender", "Gender",
-  "income", "Income",
-  "age", "Age",
-  "check1", "Attention check 1",
   "check2", "Attention check 2"
 )
 
@@ -179,7 +202,12 @@ results_summary_stats <- results %>%
   select(-data, -variable) %>% 
   select(Variable = clean_name, everything())
 
-results_summary_stats %>% knitr::kable()
+results_summary_stats %>% 
+  select(-N) %>% 
+  pandoc.table.return(caption = "Descriptive statistics {#tbl:descriptive-stats}",
+                      split.cell = 80, split.table = Inf) %T>% 
+  cat(file = file.path(here(), "output", "tables", "tbl-descriptive-stats.md")) %>% 
+  cat()
 ```
 
 ## Average likelihood and amount donated across conditions
@@ -211,7 +239,10 @@ conditions_summary_clean <- conditions_summary %>%
          `Funding condition` = funding, `% likely to donate` = pct_likely,
          `Amount donated (mean)` = mean_donation, `Amount donated (sd)` = sd_donation)
 
-conditions_summary_clean %>% pandoc.table()
+conditions_summary_clean %T>% 
+  pandoc.table() %>% 
+  pandoc.table.return(caption = "Average likelihood and amount donated across experimental conditions {#tbl:avg-results}") %>% 
+  cat(file = file.path(here(), "output", "tables", "tbl-avg-results.md"))
 ```
 
 \
@@ -319,8 +350,10 @@ interpretation <- tribble(
 conditions_summary_clean %>% 
   select(1:3) %>% 
   slice(-n()) %>% 
-  bind_cols(interpretation) %>% 
-  pandoc.table()
+  bind_cols(interpretation) %T>% 
+  pandoc.table() %>% 
+  pandoc.table.return(caption = "Combinations of coefficients to add to determine means across experimental conditions {#tbl:coefficients-to-add}") %>% 
+  cat(file = file.path(here(), "output", "tables", "tbl-coefficients-to-add.md"))
 ```
 
 \
@@ -363,13 +396,15 @@ m_amount_cif_full <-update(m_amount_cif, . ~ . +
                              income_bin + age_bin)
 ```
 
-```{r tbl-models-amount, results="asis"}
+```{r tbl-models-amount, warning=FALSE, results="asis"}
 huxreg(m_amount_c, m_amount_ci, m_amount_cif, 
        m_amount_c_full, m_amount_ci_full, m_amount_cif_full,
        coefs = clean_coefs_named,
        statistics = model_stats_bayes,
-       stars = NULL) %>% 
-  print_hux()
+       stars = NULL) %T>% 
+  print_hux() %>% 
+  to_md(max_width = 100) %>% 
+  cat(file = file.path(here(), "output", "tables", "tbl-models-amount.md"))
 ```
 
 ## Coefficient plot
@@ -479,6 +514,13 @@ plot_amount_cif <- ggplot(coef_summary_cif, aes(y = estimate, x = crackdown)) +
    labs(title = "Median donation in control and crackdown groups,\nconditioned by other experimental groups",
         subtitle = "90% credible intervals shown around each point")) / 
    plot_amount_ci) | plot_amount_cif
+
+((plot_amount_c / plot_amount_ci) | 
+    plot_amount_cif + labs(caption = "90% credible intervals shown around each point")) %T>% 
+  ggsave(., filename = file.path(here(), "output", "figures", "amount-medians.pdf"),
+         width = 8, height = 4, units = "in", device = cairo_pdf) %>% 
+  ggsave(., filename = file.path(here(), "output", "figures", "amount-medians.png"),
+         width = 8, height = 4, units = "in", type = "cairo", dpi = 300)
 ```
 
 
@@ -625,6 +667,13 @@ plot_diffs_cif <- ggplot() +
    labs(title = "Differences in median amount donated in control and crackdown groups,\nconditioned by other experimental groups",
         subtitle = "90% credible intervals shown in black. Solid vertical line = median; dotted vertical line = 0")) / 
    plot_diffs_ci) | plot_diffs_cif
+
+((plot_diffs_c / plot_diffs_ci) | 
+    plot_diffs_cif + labs(caption = "90% credible intervals shown in black. Solid vertical line = median; dotted vertical line = 0")) %T>% 
+  ggsave(., filename = file.path(here(), "output", "figures", "amount-diffs.pdf"),
+         width = 8, height = 5, units = "in", device = cairo_pdf) %>% 
+  ggsave(., filename = file.path(here(), "output", "figures", "amount-diffs.png"),
+         width = 8, height = 5, units = "in", type = "cairo", dpi = 300)
 ```
 
 ```{r tbl-all-amount-diffs, results="asis"}
@@ -633,9 +682,11 @@ bind_rows(diffs_coef_pairs_detail_c,
           diffs_coef_pairs_detail_cif) %>% 
   select(Issue = issue, Funding = funding, 
          `No crackdown − crackdown (median)` = median, 
-         `P(m > 0)` = p.greater0, `P(m < 0)` = p.less0) %>% 
-  pandoc.table(missing = "—", 
-               caption = 'Median difference between amounts donated in "no crackdown" (control) and "crackdown" conditions')
+         `p(∆ > 0)` = p.greater0, `p(∆ < 0)` = p.less0, `p(∆ ≠ 0)` = p.diff.not0) %>% 
+  pandoc.table.return(missing = "—", 
+                      caption = 'Median difference between amounts donated in "no crackdown" (control) and "crackdown" conditions') %T>%
+  cat() %>% 
+  cat(file = file.path(here(), "output", "tables", "tbl-amount-diffs.md"))
 ```
 
 \
@@ -680,13 +731,15 @@ m_likely_cif_full <-update(m_likely_cif, . ~ . +
                              income_bin + age_bin)
 ```
 
-```{r tbl-models-likely, results="asis"}
+```{r tbl-models-likely, warning=FALSE, results="asis"}
 huxreg(m_likely_c, m_likely_ci, m_likely_cif, 
        m_likely_c_full, m_likely_ci_full, m_likely_cif_full,
        coefs = clean_coefs_named,
        statistics = model_stats_bayes,
-       stars = NULL) %>% 
-  print_hux()
+       stars = NULL) %T>% 
+  print_hux() %>% 
+  to_md(max_width = 100) %>% 
+  cat(file = file.path(here(), "output", "tables", "tbl-models-likelihood.md"))
 ```
 
 ## Coefficient plot
@@ -768,6 +821,13 @@ plot_likely_cif <- ggplot(coef_summary_likely_cif, aes(y = estimate, x = crackdo
    labs(title = "Median likelihood of donation in control and crackdown groups,\nconditioned by other experimental groups",
         subtitle = "90% credible intervals shown around each point")) / 
    plot_likely_ci) | plot_likely_cif
+
+((plot_likely_c / plot_likely_ci) | 
+    plot_likely_cif + labs(caption = "90% credible intervals shown around each point")) %T>% 
+  ggsave(., filename = file.path(here(), "output", "figures", "likelihood-medians.pdf"),
+         width = 8, height = 4, units = "in", device = cairo_pdf) %>% 
+  ggsave(., filename = file.path(here(), "output", "figures", "likelihood-medians.png"),
+         width = 8, height = 4, units = "in", type = "cairo", dpi = 300)
 ```
 
 
@@ -922,6 +982,13 @@ plot_diffs_likely_cif <- ggplot() +
    labs(title = "Differences in donation likelihood in control and crackdown groups,\nconditioned by other experimental groups",
         subtitle = "90% credible intervals shown in black. Solid vertical line = median; dotted vertical line = 0")) / 
    plot_diffs_likely_ci) | plot_diffs_likely_cif
+
+((plot_diffs_likely_c / plot_diffs_likely_ci) | 
+    plot_diffs_likely_cif + labs(caption = "90% credible intervals shown in black. Solid vertical line = median; dotted vertical line = 0")) %T>% 
+  ggsave(., filename = file.path(here(), "output", "figures", "likelihood-diffs.pdf"),
+         width = 8, height = 5, units = "in", device = cairo_pdf) %>% 
+  ggsave(., filename = file.path(here(), "output", "figures", "likelihood-diffs.png"),
+         width = 8, height = 5, units = "in", type = "cairo", dpi = 300)
 ```
 
 ```{r tbl-all-likely-diffs, results="asis"}
@@ -930,7 +997,9 @@ bind_rows(diffs_coef_likely_pairs_detail_c,
           diffs_coef_likely_pairs_detail_cif) %>% 
   select(Issue = issue, Funding = funding, 
          `No crackdown − crackdown (median)` = median, 
-         `P(m > 0)` = p.greater0, `P(m < 0)` = p.less0) %>% 
-  pandoc.table(missing = "—", 
-               caption = 'Median difference between likelihood to donate in "no crackdown" (control) and "crackdown" conditions')
+         `p(∆ > 0)` = p.greater0, `p(∆ < 0)` = p.less0, `p(∆ ≠ 0)` = p.diff.not0) %>% 
+  pandoc.table.return(missing = "—", 
+                      caption = 'Median difference between likelihood to donate in "no crackdown" (control) and "crackdown" conditions') %T>%
+  cat() %>% 
+  cat(file = file.path(here(), "output", "tables", "tbl-likelihood-diffs.md"))
 ```
