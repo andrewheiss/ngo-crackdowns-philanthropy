@@ -11,10 +11,10 @@ site_libs/*
 *_cache/*
 
 # Manuscript output
-manuscript/**.docx
-manuscript/**.html
-manuscript/**.pdf
-manuscript/**.tex
+manuscript/*.docx
+manuscript/*.html
+manuscript/*.pdf
+manuscript/*.tex
 manuscript/tex_out/*
 manuscript/vc*
 
