@@ -23,6 +23,7 @@ manuscript/Papers/*
 sandbox/*
 misc/*
 private/*
+presentations/*
 
 # R stuff
 .Rproj.user
