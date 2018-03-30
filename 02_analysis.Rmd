@@ -62,7 +62,7 @@ level_summary <- function(x, variable, df = results) {
     pull(fancy) %>% paste(collapse = " | ")
   
   fig_bar <- ggplot(factor_summary, aes(x = x, y = n)) +
-    geom_bar(stat = "identity", fill = "black") +
+    geom_bar(stat = "identity", fill = "grey50") +
     theme_spark()
   
   file_name <- gsub("\\.| ", "_", tolower(variable))
@@ -84,7 +84,7 @@ numeric_summary <- function(x, variable) {
                            " | Std. Dev.: ", round(sd(x, na.rm = TRUE), 2))
   
   fig_hist <- ggplot(as.data.frame(x), aes(x = x)) +
-    geom_histogram(fill = "black", binwidth = 10) +
+    geom_histogram(fill = "grey50", binwidth = 10) +
     theme_spark()
   
   file_name <- gsub("\\.| ", "_", tolower(variable))
