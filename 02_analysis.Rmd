@@ -18,7 +18,6 @@ library(ggstance)
 library(patchwork)
 library(pander)
 library(scales)
-library(skimr)
 library(janitor)
 library(huxtable)
 library(here)
@@ -53,27 +52,59 @@ level_summary <- function(x, variable, df = results) {
     x_levels <- unique(df[[variable]])
   }
   
-  data_frame(x) %>% 
+  factor_summary <- data_frame(x) %>% 
     count(x) %>%
     mutate(pct = n / sum(n),
            fancy = paste0(x, " (", n, "; ", percent(pct), ")"),
-           x = factor(x, levels = x_levels, ordered = TRUE)) %>% 
-    arrange(x) %>% 
-    pull(fancy) %>% 
-    paste(collapse = " | ")
+           x = factor(x, levels = x_levels, ordered = TRUE)) 
+  
+  inline_summary <- factor_summary %>% arrange(x) %>% 
+    pull(fancy) %>% paste(collapse = " | ")
+  
+  fig_bar <- ggplot(factor_summary, aes(x = x, y = n)) +
+    geom_bar(stat = "identity", fill = "black") +
+    theme_spark()
+  
+  file_name <- gsub("\\.| ", "_", tolower(variable))
+  md_img <- paste0("![](../output/figures/summary-table/", file_name, ".pdf)")
+
+  ggsave(fig_bar, filename = file.path(here(), "output", "figures", "summary-table",
+                                       paste0(file_name, ".pdf")), 
+         width = 1, height = 0.2, device = cairo_pdf)
+  ggsave(fig_bar, filename = file.path(here(), "output", "figures", "summary-table",
+                                       paste0(file_name, ".png")), 
+         width = 1, height = 0.2, type = "cairo", bg = "transparent", dpi = 300)
+
+  output <- data_frame(spark = md_img, summary = inline_summary)
 }
 
-numeric_summary <- function(x) {
-  paste0("Mean: ", round(mean(x, na.rm = TRUE), 2), 
-         " | Std. Dev.: ", round(sd(x, na.rm = TRUE), 2),
-         " | ", inline_hist(x))
+numeric_summary <- function(x, variable) {
+  inline_summary <- paste0("Median: ", round(median(x, na.rm = TRUE), 2),
+                           " | Mean: ", round(mean(x, na.rm = TRUE), 2), 
+                           " | Std. Dev.: ", round(sd(x, na.rm = TRUE), 2))
+  
+  fig_hist <- ggplot(as.data.frame(x), aes(x = x)) +
+    geom_histogram(fill = "black", binwidth = 10) +
+    theme_spark()
+  
+  file_name <- gsub("\\.| ", "_", tolower(variable))
+  md_img <- paste0("![](../output/figures/summary-table/", file_name, ".pdf)")
+
+  ggsave(fig_hist, filename = file.path(here(), "output", "figures", "summary-table",
+                                        paste0(file_name, ".pdf")), 
+         width = 1, height = 0.2, device = cairo_pdf)
+  ggsave(fig_hist, filename = file.path(here(), "output", "figures", "summary-table",
+                                        paste0(file_name, ".png")), 
+         width = 1, height = 0.2, type = "cairo", bg = "transparent", dpi = 300)
+  
+  output <- data_frame(spark = md_img, summary = inline_summary)
 }
 
 my_summary <- function(x, variable, df) {
   x <- my_as_numeric(x)
   
   if (is.numeric(x)) {
-    numeric_summary(x)
+    numeric_summary(x, variable)
   } else {
     level_summary(x, variable, df)
   }
@@ -195,12 +226,13 @@ results_summary_stats <- results %>%
   group_by(variable) %>% 
   nest() %>% 
   mutate(N = data %>% map_int(~ nrow(.)),
-         Details = map2_chr(.x = data, .y = variable, ~ my_summary(.x$value, .y, results))) %>% 
+         summary = map2(.x = data, .y = variable, ~ my_summary(.x$value, .y, results))) %>% 
   left_join(vars_to_summarize, by = "variable") %>% 
   mutate(variable = factor(variable, levels = vars_to_summarize$variable, ordered = TRUE)) %>% 
   arrange(variable) %>% 
   select(-data, -variable) %>% 
-  select(Variable = clean_name, everything())
+  unnest(summary) %>% 
+  select(Variable = clean_name, N, ` ` = spark, Details = summary)
 
 results_summary_stats %>% 
   select(-N) %>% 

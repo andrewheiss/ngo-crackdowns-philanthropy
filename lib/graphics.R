@@ -14,6 +14,14 @@ favorability_cols_5 <- data_frame(value = c("Very unfavorable", "Unfavorable", "
                                   color = c(ngo_red, ngo_orange, ngo_yellow,
                                             ngo_green, ngo_blue))
 
+theme_spark <- function() {
+  theme(line = element_blank(), rect = element_blank(), text = element_blank(), 
+        panel.border = element_blank(),
+        panel.background = element_rect(fill = "transparent", color = NA),
+        plot.background = element_rect(fill = "transparent", color = NA),
+        plot.margin = unit(c(0, 0, -0.25, -0.25), "lines"))
+}
+
 theme_ngos <- function(base_size = 11, base_family = "Encode Sans Condensed", density = FALSE) {
   update_geom_defaults("label", list(family = "Encode Sans Condensed Medium"))
   update_geom_defaults("text", list(family = "Encode Sans Condensed Medium"))
