@@ -1,33 +1,33 @@
-name: "ngo-crackdowns-philanthropy-pilot"
-exclude: 
-  - data
-  - Icon?
-  - manuscript
-  - output
-  - misc
-  - sandbox
-  - lib
-  - Makefile
-  - LICENSE.html
-  - README.html
+name: ngo-crackdowns-philanthropy-pilot
+exclude:
+- data
+- Icon?
+- manuscript
+- output
+- misc
+- sandbox
+- lib
+- Makefile
+- LICENSE.html
+- README.html
 navbar:
-  title: "NGO Crackdowns and Philanthropy"
+  title: NGO Crackdowns and Philanthropy
   right:
-    - text: "Preregistration, design, IRB"
-      icon: fa-pencil-square
-      href: preregistration.html
-    - text: "Experiment"
-      icon: fa-flask
-      href: experiment.html
-    - text: "Data cleaning"
-      icon: fa-table
-      href: 01_clean-data.html
-    - text: "Results"
-      icon: fa-bar-chart
-      href: 02_analysis.html
-    - text: "Robustness checks"
-      icon: fa-bar-chart
-      href: 03_robustness.html
+  - text: Preregistration, design, IRB
+    icon: fa-pencil-square
+    href: preregistration.html
+  - text: Experiment
+    icon: fa-flask
+    href: experiment.html
+  - text: Data cleaning
+    icon: fa-table
+    href: 01_clean-data.html
+  - text: Results
+    icon: fa-bar-chart
+    href: 02_analysis.html
+  - text: Robustness checks
+    icon: fa-bar-chart
+    href: 03_robustness.html
 output:
   html_document:
     theme: spacelab
@@ -44,4 +44,7 @@ output:
     toc_depth: 4
     fig_height: 4
     fig_width: 6
+    lib_dir: site_libs
+    self_contained: no
 output_dir: _site
+
