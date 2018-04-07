@@ -1,0 +1,49 @@
+---
+title: "Additional analysis"
+author: "Andrew Heiss and Suparna Chaudhry"
+date: "Last run: `r format(Sys.time(), '%B %e, %Y')`"
+output: 
+  html_document:
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r load-libraries-data, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(rstanarm)
+library(broom)
+library(coda)
+library(ggstance)
+library(patchwork)
+library(pander)
+library(scales)
+library(huxtable)
+library(here)
+
+source(file.path(here(), "lib", "graphics.R"))
+source(file.path(here(), "lib", "pander_options.R"))
+source(file.path(here(), "lib", "modeling.R"))
+
+# Load data
+results <- readRDS(file.path(here(), "data", "results_clean.rds"))
+```
+
+# Miscellaneous survey details
+
+## Average time to complete survey
+
+```{r avg-time, results="asis"}
+results %>% summarize(min = min(duration),
+                      max = max(duration),
+                      mean = mean(duration),
+                      sd = sd(duration),
+                      median = median(duration)) %>% 
+  pandoc.table()
+```
+
+## Attention check #2
+
+```{r attention-check-2, results="asis"}
+results %>% count(attention2_correct) %>% pandoc.table()
+```

@@ -111,13 +111,6 @@ my_summary <- function(x, variable, df) {
 }
 ```
 
-## Attention check #2
-
-```{r attention-check-2}
-results %>% count(attention2_correct)
-```
-
-
 
 # Overview of data
 

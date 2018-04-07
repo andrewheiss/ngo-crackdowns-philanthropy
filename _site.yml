@@ -25,9 +25,9 @@ navbar:
   - text: Results
     icon: fa-bar-chart
     href: 02_analysis.html
-  - text: Robustness checks
+  - text: Additional analysis
     icon: fa-bar-chart
-    href: 03_robustness.html
+    href: 03_additional-analysis.html
 output:
   html_document:
     theme: spacelab
