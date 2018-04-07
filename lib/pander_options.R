@@ -1,3 +1,5 @@
+# Universal pandoc options ------------------------------------------------
+
 panderOptions("table.split.table", Inf)
 panderOptions("table.split.cells", Inf)
 panderOptions("missing", "")

@@ -1,5 +1,7 @@
+# Colors ------------------------------------------------------------------
+
 # Color palette from ColorBrewer, diverging spectral, 5 categories
-# http://colorbrewer2.org/#type=diverging&scheme=Spectral&n=3
+# http://colorbrewer2.org/#type=diverging&scheme=Spectral&n=5
 #
 # library(RColorBrewer)
 # RColorBrewer::brewer.pal(5, "Spectral")
@@ -13,6 +15,9 @@ favorability_cols_5 <- data_frame(value = c("Very unfavorable", "Unfavorable", "
                                             "Favorable", "Very favorable"),
                                   color = c(ngo_red, ngo_orange, ngo_yellow,
                                             ngo_green, ngo_blue))
+
+
+# ggplot themes -----------------------------------------------------------
 
 theme_spark <- function() {
   theme(line = element_blank(), rect = element_blank(), text = element_blank(), 
