@@ -34,11 +34,8 @@ results <- readRDS(file.path(here(), "data", "results_clean.rds"))
 ## Average time to complete survey
 
 ```{r avg-time, results="asis"}
-results %>% summarize(min = min(duration),
-                      max = max(duration),
-                      mean = mean(duration),
-                      sd = sd(duration),
-                      median = median(duration)) %>% 
+results %>% 
+  summarize_at(vars(duration), funs(min, max, mean, sd, median)) %>% 
   pandoc.table()
 ```
 
