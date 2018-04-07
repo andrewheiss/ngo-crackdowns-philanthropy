@@ -259,6 +259,51 @@ ggplot(mapping = aes(x = n_plot, y = clean_name, fill = color)) +
         panel.grid.major.y = element_blank())
 ```
 
+## Likelihood of donation
+
+```{r fig-likelihood-bars, fig.width=9, fig.height=4}
+donate_summary <- results %>% 
+  count(donate_likely) %>% 
+  mutate(perc = n / sum(n)) %>% 
+  mutate(highlight = ifelse(donate_likely %in% c("Extremely likely", "Somewhat likely"), TRUE, FALSE))
+
+plot_donate_summary <- ggplot(donate_summary, aes(x = n, y = donate_likely, 
+                                                  fill = highlight)) +
+  geom_barh(stat = "identity") +
+  scale_x_continuous(sec.axis = sec_axis(~ . / sum(donate_summary$n),
+                                         labels = percent)) +
+  scale_fill_manual(values = c(ngo_green, ngo_blue), guide = FALSE) +
+  labs(x = NULL, y = NULL) +
+  theme_ngos() +
+  theme(panel.grid.major.y = element_blank())
+
+plot_donate_summary %T>% 
+  print() %T>%
+  ggsave(., filename = file.path(here(), "output", "figures", "donate_summary.pdf"),
+         width = 9, height = 4, units = "in", device = cairo_pdf) %>% 
+  ggsave(., filename = file.path(here(), "output", "figures", "donate_summary.png"),
+         width = 9, height = 4, units = "in", type = "cairo", dpi = 300)
+```
+
+## Amount donated
+
+```{r fig-amount-bars, fig.width=9, fig.height=2.75}
+plot_amount_summary <- ggplot(results, aes(x = amount_donate)) +
+  geom_histogram(bins = 20, fill = ngo_blue) +
+  scale_x_continuous(labels = dollar) +
+  labs(x = NULL, y = NULL) +
+  theme_ngos(18) +
+  theme(panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank())
+
+plot_amount_summary %T>% 
+  print() %T>%
+  ggsave(., filename = file.path(here(), "output", "figures", "amount_summary.pdf"),
+         width = 9, height = 2.75, units = "in", device = cairo_pdf) %>% 
+  ggsave(., filename = file.path(here(), "output", "figures", "amount_summary.png"),
+         width = 9, height = 2.75, units = "in", type = "cairo", dpi = 300)
+```
+
 \
 
 # Interpreting interactions in models
