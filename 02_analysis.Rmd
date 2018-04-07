@@ -109,68 +109,6 @@ my_summary <- function(x, variable, df) {
     level_summary(x, variable, df)
   }
 }
-
-if (isTRUE(getOption('knitr.in.progress'))) {
-  file_format <- rmarkdown::all_output_formats(knitr::current_input())
-} else {
-  file_format <- ""
-}
-
-print_hux <- function(x) {
-  if ("html_document" %in% file_format) {
-    print_html(x)
-  } else if ("pdf_document" %in% file_format) {
-    print_latex(x)
-  } else if ("word_document" %in% file_format) {
-    print_md(x)
-  } else {
-    print(x)
-  }
-}
-
-mcmc_pairwise_diffs <- function(chains) {
-  # Calculate the pairwise differences between columns
-  # Adapted from http://stackoverflow.com/a/28187446/120898
-  pair_names <- outer(colnames(chains), colnames(chains),
-                      paste, sep = " − ")
-  pairs_to_omit <- which(lower.tri(pair_names, diag = TRUE))
-  
-  mcmc_diffs <- outer(1:ncol(chains), 1:ncol(chains),
-                      function(x, y) chains[,x] - chains[,y]) %>% 
-    magrittr::set_colnames(pair_names) %>% 
-    select(-pairs_to_omit)
-
-  return(mcmc_diffs)
-}
-
-tidy_diffs <- function(diffs_pairs) {
-  diffs_pairs %>% 
-    gather(pair, value) %>% 
-    group_by(pair) %>% 
-    summarise(mean = mean(value),
-              median = median(value),
-              q2.5 = quantile(value, probs = 0.025),
-              q5 = quantile(value, probs = 0.05),
-              q25 = quantile(value, probs = 0.25),
-              q75 = quantile(value, probs = 0.75),
-              q95 = quantile(value, probs = 0.95),
-              q97.5 = quantile(value, probs = 0.975),
-              p.greater0 = mean(value > 0),
-              p.less0 = mean(value < 0),
-              p.diff.not0 = ifelse(median > 0, p.greater0, p.less0))
-}
-```
-
-# Miscellaneous details
-
-## Average time to complete survey
-
-```{r avg-time}
-results %>% summarize(min = min(duration),
-                      max = max(duration),
-                      mean = mean(duration),
-                      sd = sd(duration),
-                      median = median(duration))
 ```
 
 ## Attention check #2

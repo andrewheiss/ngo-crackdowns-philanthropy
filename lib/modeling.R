@@ -1,9 +1,49 @@
-# Stan stuff
+# Stan details ------------------------------------------------------------
+
 CHAINS <- 4
 ITER <-2000
 WARMUP <- 1000
 BAYES_SEED <- 1234
 options(mc.cores = parallel::detectCores())
+
+
+# Helper functions for comparing models -----------------------------------
+
+# Calculate the pairwise differences between columns
+# Adapted from http://stackoverflow.com/a/28187446/120898
+mcmc_pairwise_diffs <- function(chains) {
+  pair_names <- outer(colnames(chains), colnames(chains),
+                      paste, sep = " − ")
+  pairs_to_omit <- which(lower.tri(pair_names, diag = TRUE))
+  
+  mcmc_diffs <- outer(1:ncol(chains), 1:ncol(chains),
+                      function(x, y) chains[,x] - chains[,y]) %>% 
+    magrittr::set_colnames(pair_names) %>% 
+    select(-pairs_to_omit)
+  
+  return(mcmc_diffs)
+}
+
+# Summarize the differences between MCMC pairs
+tidy_diffs <- function(diffs_pairs) {
+  diffs_pairs %>% 
+    gather(pair, value) %>% 
+    group_by(pair) %>% 
+    summarise(mean = mean(value),
+              median = median(value),
+              q2.5 = quantile(value, probs = 0.025),
+              q5 = quantile(value, probs = 0.05),
+              q25 = quantile(value, probs = 0.25),
+              q75 = quantile(value, probs = 0.75),
+              q95 = quantile(value, probs = 0.95),
+              q97.5 = quantile(value, probs = 0.975),
+              p.greater0 = mean(value > 0),
+              p.less0 = mean(value < 0),
+              p.diff.not0 = ifelse(median > 0, p.greater0, p.less0))
+}
+
+
+# Ordered factor modeling setup -------------------------------------------
 
 # By default, R uses polynomial contrasts for ordered factors in linear models
 # options("contrasts") 
@@ -13,6 +53,9 @@ options(contrasts = rep("contr.treatment", 2))
 # contrasts(df$x) <- "contr.treatment"
 
 
+# Coefficient naming ------------------------------------------------------
+
+# Table of coefficients and their clean names
 clean_coefs <- tribble(
   ~term, ~term_clean,
   "(Intercept)", "Intercept",
@@ -38,6 +81,13 @@ clean_coefs <- tribble(
 ) %>% 
   mutate(term_clean_fct = fct_inorder(term_clean, ordered = TRUE))
 
+clean_coefs_named <- clean_coefs %>% pull(term) %>% 
+  set_names(clean_coefs$term_clean)
+
+
+# Huxtable stuff ----------------------------------------------------------
+
+# Specify extra statistics to show in huxtable regression tables
 model_stats_ols = c(Observations = "nobs", 
                     R2 = "r.squared", 
                     `Adjusted R2` = "adj.r.squared",
@@ -49,5 +99,27 @@ model_stats_bayes <- c(Observations = "nobs",
                        `Posterior sample size` = "pss",
                        Sigma = "sigma")
 
-clean_coefs_named <- clean_coefs %>% pull(term) %>% 
-  set_names(clean_coefs$term_clean)
+# Print correct huxtable table depending on the type of output.
+#
+# Technically this isn't completely necessary, since huxtable can output a
+# markdown table, which is ostensibly universal for all output types. However,
+# markdown tables are inherently limited in how fancy they can be (e.g. they
+# don't support column spans), so I instead let the regression table use
+# huxtable's fancy formatting for html and PDF and markdown everywhere else.
+if (isTRUE(getOption('knitr.in.progress'))) {
+  file_format <- rmarkdown::all_output_formats(knitr::current_input())
+} else {
+  file_format <- ""
+}
+
+print_hux <- function(x) {
+  if ("html_document" %in% file_format) {
+    print_html(x)
+  } else if ("pdf_document" %in% file_format) {
+    print_latex(x)
+  } else if ("word_document" %in% file_format) {
+    print_md(x)
+  } else {
+    print(x)
+  }
+}
