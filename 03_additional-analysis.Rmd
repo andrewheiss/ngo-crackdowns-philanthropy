@@ -20,6 +20,7 @@ library(patchwork)
 library(pander)
 library(scales)
 library(huxtable)
+library(lubridate)
 library(modelr)
 library(here)
 
@@ -38,13 +39,19 @@ results <- readRDS(file.path(here(), "data", "results_clean.rds"))
 ```{r avg-time, results="asis"}
 results %>% 
   summarize_at(vars(duration), funs(min, max, mean, sd, median)) %>% 
+  gather(Statistic, value) %>% 
+  mutate(value = seconds_to_period(value)) %>% 
+  mutate(Minutes = sprintf("%02d:%02d", minute(value), second(value))) %>% 
+  select(-value) %>% 
   pandoc.table()
 ```
 
 ## Attention check #2
 
 ```{r attention-check-2, results="asis"}
-results %>% count(attention2_correct) %>% pandoc.table()
+results %>% count(attention2_correct) %>% 
+  rename(`Attention check 2 correct` = attention2_correct, Count = n) %>% 
+  pandoc.table()
 ```
 
 \
