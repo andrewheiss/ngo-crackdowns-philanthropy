@@ -15,10 +15,12 @@ library(rstanarm)
 library(broom)
 library(coda)
 library(ggstance)
+library(ggridges)
 library(patchwork)
 library(pander)
 library(scales)
 library(huxtable)
+library(modelr)
 library(here)
 
 source(file.path(here(), "lib", "graphics.R"))
@@ -43,4 +45,225 @@ results %>%
 
 ```{r attention-check-2, results="asis"}
 results %>% count(attention2_correct) %>% pandoc.table()
+```
+
+\
+
+# Amount donated (full)
+
+## Models
+
+```{r build-models-amount-full, warning=FALSE, message=FALSE, cache=TRUE}
+# Basic model
+m_amount_c <- stan_glm(amount_donate ~ crackdown,
+                       data = results, family = gaussian(),
+                       prior = cauchy(location = 0, scale = 2.5),
+                       prior_intercept = cauchy(location = 0, scale = 10),
+                       chains = CHAINS, iter = ITER, warmup = WARMUP, seed = BAYES_SEED)
+
+m_amount_ci <- update(m_amount_c, . ~ . + issue + crackdown * issue)
+
+m_amount_cif <- update(m_amount_c, . ~ . + 
+                         issue + funding + crackdown * issue + crackdown * funding + 
+                         issue * funding + crackdown * issue * funding)
+
+# Interaction models with extra controls
+m_amount_c_full <- update(m_amount_c, . ~ . + 
+                            favor_humanitarian_bin + 
+                            give_charity_3 + volunteer + political_knowledge_bin +
+                            ideology_bin + education_bin + religiosity_bin +
+                            income_bin + age_bin)
+
+m_amount_ci_full <- update(m_amount_ci, . ~ . + 
+                             favor_humanitarian_bin + 
+                             give_charity_3 + volunteer + political_knowledge_bin +
+                             ideology_bin + education_bin + religiosity_bin +
+                             income_bin + age_bin)
+
+m_amount_cif_full <-update(m_amount_cif, . ~ . + 
+                             favor_humanitarian_bin +
+                             give_charity_3 + volunteer + political_knowledge_bin +
+                             ideology_bin + education_bin + religiosity_bin +
+                             income_bin + age_bin)
+```
+
+```{r tbl-models-amount-full, warning=FALSE, results="asis"}
+huxreg(m_amount_c, m_amount_ci, m_amount_cif, 
+       m_amount_c_full, m_amount_ci_full, m_amount_cif_full,
+       coefs = clean_coefs_named,
+       statistics = model_stats_bayes,
+       stars = NULL) %T>% 
+  print_hux() %>% 
+  to_md(max_width = 100) %>% 
+  cat(file = file.path(here(), "output", "tables", "tbl-models-amount-full.md"))
+```
+
+## Coefficient plot
+
+```{r models-coefs-plot-amount, warning=FALSE, message=FALSE, fig.width=8, fig.height=5}
+posterior_details <- data_frame(model_name = c("Basic model", "Full model"),
+                                model = list(m_amount_cif,
+                                             m_amount_cif_full)) %>% 
+  mutate(posterior = model %>% map(~ as_data_frame(.)),
+         tidy_summary = model %>% map(~ tidyMCMC(., conf.int = TRUE, conf.level = 0.9,
+                                                 conf.method = "HPDinterval"))) 
+
+coefs_posterior <- posterior_details %>%
+  unnest(posterior) %>% 
+  gather(term, value, -model_name) %>% 
+  left_join(clean_coefs, by = "term") %>% 
+  filter(term_clean != "Intercept") %>% 
+  mutate(full_model = !simple_model)
+
+coefs_summary <- posterior_details %>% 
+  unnest(tidy_summary) %>% 
+  left_join(clean_coefs, by = "term") %>% 
+  filter(term_clean != "Intercept") %>% 
+  mutate(full_model = !simple_model)
+
+ggplot(coefs_posterior, aes(x = value, y = fct_rev(term_clean_fct))) +
+  stat_density_ridges(aes(fill = model_name), alpha = 0.6, color = "black",
+                      rel_min_height = 0.01, scale = 1.5, 
+                      quantile_lines = TRUE, quantiles = 2) +
+  geom_segment(data = coefs_summary, 
+               aes(x = conf.low, xend = conf.high, 
+                   y = fct_rev(term_clean_fct), yend = fct_rev(term_clean_fct)),
+               size = 1) +
+  geom_vline(xintercept = 0, linetype = "dotted", size = 1) + 
+  scale_fill_manual(values = c(ngo_red, ngo_blue), name = NULL) +
+  labs(x = "Posterior median estimate + 90% credible interval", y = NULL,
+       caption = "90% credible intervals shown in black. Solid vertical line = median; dotted vertical line = 0") +
+  facet_wrap(~ full_model, scales = "free") + 
+  theme_ngos() +
+  theme(legend.position = "bottom",
+        strip.text = element_blank())
+```
+
+## Predicted medians across different variables
+
+**Charitable giving**
+
+```{r plot-charity-amounts, fig.width=5, fig.height=4}
+newdata_means <- results %>% 
+  select(favor_humanitarian_bin, favor_human_rights_bin, favor_development_bin,
+         give_charity_3, volunteer, political_knowledge_bin,
+         ideology_bin, education_bin, religiosity_bin, income_bin, age_bin) %>% 
+  summarize_all(typical) %>% 
+  mutate(id = 1)
+
+newdata_conditions_c <- results %>% expand(nesting(crackdown, give_charity_3)) %>% 
+  mutate(id = 1) %>% 
+  left_join(select(newdata_means, -give_charity_3), by = "id") %>% 
+  select(-id)
+
+chains_fitted_c <- posterior_linpred(m_amount_c_full, 
+                                     newdata = newdata_conditions_c)
+
+coef_summary_c <- newdata_conditions_c %>% 
+  bind_cols(tidyMCMC(as.mcmc(chains_fitted_c), estimate.method = "median",
+                     conf.int = TRUE, conf.level = 0.9, conf.method = "HPDinterval")) %>% 
+  mutate_at(vars(crackdown, give_charity_3), funs(fct_inorder(., ordered = TRUE)))
+
+ggplot(coef_summary_c, aes(x = fct_rev(give_charity_3), y = estimate)) +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high, color = crackdown), 
+                  position = position_dodge(width = 0.5)) +
+  scale_color_manual(values = c(ngo_orange, ngo_green), name = NULL) +
+  scale_y_continuous(labels = dollar) +
+  labs(x = "How often do you give to charity?", y = "Median amount donated") +
+  theme_ngos() +
+  theme(legend.position = "bottom",
+        panel.grid.major.x = element_blank())
+```
+
+
+\
+
+# Likelihood of donation (full)
+
+## Models
+
+```{r build-models-likely-full, warning=FALSE, message=FALSE, cache=TRUE}
+# Basic models
+m_likely_c <- stan_glm(donate_likely_bin ~ crackdown,
+                       data = results, family = binomial(link = "logit"),
+                       prior = student_t(3, 0, 2.5),
+                       prior_intercept = student_t(3, 0, 10),
+                       chains = CHAINS, iter = ITER, warmup = WARMUP, seed = BAYES_SEED)
+
+m_likely_ci <- update(m_likely_c, . ~ . + issue + crackdown * issue)
+
+m_likely_cif <- update(m_likely_c, . ~ . + 
+                         issue + funding + crackdown * issue + crackdown * funding + 
+                         issue * funding + crackdown * issue * funding)
+
+# Interaction models with extra controls
+m_likely_c_full <- update(m_likely_c, . ~ . + 
+                            favor_humanitarian_bin +
+                            give_charity_3 + volunteer + political_knowledge_bin +
+                            ideology_bin + education_bin + religiosity_bin +
+                            income_bin + age_bin)
+
+m_likely_ci_full <- update(m_likely_ci, . ~ . + 
+                             favor_humanitarian_bin +
+                             give_charity_3 + volunteer + political_knowledge_bin +
+                             ideology_bin + education_bin + religiosity_bin +
+                             income_bin + age_bin)
+
+m_likely_cif_full <-update(m_likely_cif, . ~ . + 
+                             favor_humanitarian_bin +
+                             give_charity_3 + volunteer + political_knowledge_bin +
+                             ideology_bin + education_bin + religiosity_bin +
+                             income_bin + age_bin)
+```
+
+```{r tbl-models-likely-full, warning=FALSE, results="asis"}
+huxreg(m_likely_c, m_likely_ci, m_likely_cif, 
+       m_likely_c_full, m_likely_ci_full, m_likely_cif_full,
+       coefs = clean_coefs_named,
+       statistics = model_stats_bayes,
+       stars = NULL) %T>% 
+  print_hux() %>% 
+  to_md(max_width = 100) %>% 
+  cat(file = file.path(here(), "output", "tables", "tbl-models-likelihood-full.md"))
+```
+
+## Coefficient plot
+
+```{r models-coefs-plot-likely, warning=FALSE, message=FALSE, fig.width=8, fig.height=5}
+posterior_details_likely <- data_frame(model_name = c("Basic model", "Full model"),
+                                       model = list(m_likely_cif,
+                                                    m_likely_cif_full)) %>% 
+  mutate(posterior = model %>% map(~ as_data_frame(.)),
+         tidy_summary = model %>% map(~ tidyMCMC(., conf.int = TRUE, conf.level = 0.9,
+                                                 conf.method = "HPDinterval"))) 
+
+coefs_posterior_likely <- posterior_details_likely %>%
+  unnest(posterior) %>% 
+  gather(term, value, -model_name) %>% 
+  left_join(clean_coefs, by = "term") %>% 
+  filter(term_clean != "Intercept") %>% 
+  mutate(full_model = !simple_model)
+
+coefs_summary_likely <- posterior_details_likely %>% 
+  unnest(tidy_summary) %>% 
+  left_join(clean_coefs, by = "term") %>% 
+  filter(term_clean != "Intercept") %>% 
+  mutate(full_model = !simple_model)
+
+ggplot(coefs_posterior_likely, aes(x = value, y = fct_rev(term_clean_fct))) +
+  stat_density_ridges(aes(fill = model_name), alpha = 0.6, color = "black",
+                      rel_min_height = 0.01, scale = 1.5, 
+                      quantile_lines = TRUE, quantiles = 2) +
+  geom_segment(data = coefs_summary_likely, 
+               aes(x = conf.low, xend = conf.high, 
+                   y = fct_rev(term_clean_fct), yend = fct_rev(term_clean_fct)),
+               size = 1) +
+  geom_vline(xintercept = 0, linetype = "dotted", size = 1) + 
+  scale_fill_manual(values = c(ngo_red, ngo_blue), name = NULL) +
+  labs(x = "Posterior median estimate + 90% credible interval", y = NULL,
+       caption = "90% credible intervals shown in black. Solid vertical line = median; dotted vertical line = 0") +
+  facet_wrap(~ full_model, scales = "free") + 
+  theme_ngos() +
+  theme(legend.position = "bottom",
+        strip.text = element_blank())
 ```
