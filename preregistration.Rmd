@@ -6,14 +6,14 @@ bibliography: manuscript/bibliography.bib
 
 # Preregistration
 
-We will preregister this study with the [Center for Open Science's](https://cos.io/) [Open Science Framework](https://osf.io/).
+We preregistered this study with the [Center for Open Science's](https://cos.io/) [Open Science Framework](https://osf.io/).
 
-<p><a href="#" class="btn btn-primary btn-md btn-success disabled" target="_blank">
+<p><a href="https://osf.io/dx973/register/565fb3678c5e4a66b5582f67" class="btn btn-primary btn-md btn-success" target="_blank">
 <i class="fa fa-pencil-square" aria-hidden="true"></i>&nbsp;
 OSF preregistration protocol &raquo;
 </a></p>
 
-We will also participate in COS's [Preregistration Challenge](https://cos.io/our-services/prereg-more-information/), and will submit our final article to one of the following eligible journals:
+We are participating in COS's [Preregistration Challenge](https://cos.io/our-services/prereg-more-information/), and will submit our final article to one of the following eligible journals:
 
 - *Voluntas*
 - *International Interactions*
@@ -83,17 +83,19 @@ Thus, the total sample size is **`r round(n_total, 2)`**, with **`r round(n_grou
 
 # Human subjects and IRB approval
 
-This project has received IRB approval from the human subjects research committees at both Duke and Dartmouth. We have included a generic version of our protocol below.
+This project has received IRB approval from the human subjects research committees at both BYU and Christopher Newport. We have included a generic version of our protocol below.
 
-<p><a href="files/duke-irb-approval.pdf" class="btn btn-primary btn-md btn-success" target="_blank">
+<p><a href="files/byu-irb-approval.pdf" class="btn btn-primary btn-md btn-success" target="_blank">
 <i class="fa fa-check-circle" aria-hidden="true"></i>&nbsp;
-Duke IRB approval
+BYU IRB approval
 </a> 
 &nbsp;
-<a href="#" class="btn btn-primary btn-md btn-success disabled" target="_blank">
+<a href="files/cnu-irb-approval.pdf" class="btn btn-primary btn-md btn-success" target="_blank">
 <i class="fa fa-check-circle" aria-hidden="true"></i>&nbsp;
-Dartmouth IRB approval
+Christopher Newport IRB approval
 </a></p>
+
+\
 
 ## Project title
 
