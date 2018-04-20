@@ -158,25 +158,59 @@ newdata_means <- results %>%
   summarize_all(typical) %>% 
   mutate(id = 1)
 
-newdata_conditions_c <- results %>% expand(nesting(crackdown, give_charity_3)) %>% 
+newdata_conditions_charity <- results %>% expand(nesting(crackdown, give_charity_3)) %>% 
   mutate(id = 1) %>% 
   left_join(select(newdata_means, -give_charity_3), by = "id") %>% 
   select(-id)
 
-chains_fitted_c <- posterior_linpred(m_amount_c_full, 
-                                     newdata = newdata_conditions_c)
+chains_fitted_charity <- posterior_linpred(m_amount_c_full, 
+                                           newdata = newdata_conditions_charity)
 
-coef_summary_c <- newdata_conditions_c %>% 
-  bind_cols(tidyMCMC(as.mcmc(chains_fitted_c), estimate.method = "median",
+coef_summary_charity <- newdata_conditions_charity %>% 
+  bind_cols(tidyMCMC(as.mcmc(chains_fitted_charity), estimate.method = "median",
                      conf.int = TRUE, conf.level = 0.9, conf.method = "HPDinterval")) %>% 
   mutate_at(vars(crackdown, give_charity_3), funs(fct_inorder(., ordered = TRUE)))
 
-ggplot(coef_summary_c, aes(x = fct_rev(give_charity_3), y = estimate)) +
+ggplot(coef_summary_charity, aes(x = fct_rev(give_charity_3), y = estimate)) +
   geom_pointrange(aes(ymin = conf.low, ymax = conf.high, color = crackdown), 
                   position = position_dodge(width = 0.5)) +
   scale_color_manual(values = c(ngo_orange, ngo_green), name = NULL) +
   scale_y_continuous(labels = dollar) +
   labs(x = "How often do you give to charity?", y = "Median amount donated") +
+  theme_ngos() +
+  theme(legend.position = "bottom",
+        panel.grid.major.x = element_blank())
+```
+
+**Voluntarism and religiosity**
+
+```{r plot-vol-relig-amounts}
+newdata_conditions_vol_relig <- results %>% 
+  expand(nesting(crackdown, volunteer, religiosity_bin)) %>% 
+  filter(!is.na(religiosity_bin)) %>% 
+  mutate(id = 1) %>% 
+  left_join(select(newdata_means, -volunteer, -religiosity_bin), by = "id") %>% 
+  select(-id)
+
+chains_fitted_vol_relig <- posterior_linpred(m_amount_c_full, 
+                                             newdata = newdata_conditions_vol_relig)
+
+coef_summary_vol_relig <- newdata_conditions_vol_relig %>% 
+  bind_cols(tidyMCMC(as.mcmc(chains_fitted_vol_relig), estimate.method = "median",
+                     conf.int = TRUE, conf.level = 0.9, conf.method = "HPDinterval")) %>% 
+  mutate_at(vars(crackdown, volunteer, religiosity_bin), funs(fct_inorder(., ordered = TRUE))) %>% 
+  mutate(religiosity_bin = fct_recode(religiosity_bin,
+                                      `Rarely attend religious services` = "Rarely",
+                                      `Attend religious services\nat least once a month` = 
+                                        "At least once a month"))
+
+ggplot(coef_summary_vol_relig, aes(x = fct_rev(volunteer), y = estimate)) +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high, color = crackdown), 
+                  position = position_dodge(width = 0.5)) +
+  scale_color_manual(values = c(ngo_orange, ngo_green), name = NULL) +
+  scale_y_continuous(labels = dollar) +
+  labs(x = "Have you volunteered in the last 12 months?", y = "Median amount donated") +
+  facet_wrap(~ religiosity_bin) +
   theme_ngos() +
   theme(legend.position = "bottom",
         panel.grid.major.x = element_blank())
