@@ -86,7 +86,7 @@ results_meta <- read_csv(results_file, n_max = 2)
 # of line breaks and it messes with CSV line counting. The actual responses
 # start on row 11. This doesn't entirely make sense, since read_csv can read the
 # line break-filled row in just fine. Skipping said lines makes it choke. <shrug>
-results_raw <- read_csv(results_file, skip = 10,
+results_raw <- read_csv(results_file, skip = 16,
                         col_names = colnames(results_meta))
 
 # Confirmation codes to exclude. These are people who failed the attention

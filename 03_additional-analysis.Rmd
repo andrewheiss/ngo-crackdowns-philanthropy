@@ -17,7 +17,7 @@ editor_options:
 # has already been loaded in previous scripts
 if (isTRUE(getOption('knitr.in.progress')) & !is.null(names(sessionInfo()$otherPkgs))) {
   invisible(suppressWarnings(sapply(paste0("package:", names(sessionInfo()$otherPkgs)),
-                                    detach, character.only = TRUE, unload = TRUE)))
+                                    detach, character.only = TRUE)))
 }
 
 # Load libraries again
@@ -52,7 +52,7 @@ results %>%
   summarize_at(vars(duration), funs(min, max, mean, sd, median)) %>% 
   gather(Statistic, value) %>% 
   mutate(value = seconds_to_period(value)) %>% 
-  mutate(Minutes = sprintf("%02d:%02d", minute(value), second(value))) %>% 
+  mutate(Minutes = sprintf("%02.0f:%02.0f", minute(value), second(value))) %>% 
   select(-value) %>% 
   pandoc.table()
 ```
