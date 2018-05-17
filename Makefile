@@ -1,5 +1,5 @@
 remote_host = cloud
-remote_dir = ~/sites/stats/public_html/ngo-crackdowns-philanthropy-pilot
+remote_dir = ~/sites/stats/public_html/ngo-crackdowns-philanthropy
 remote_dest = $(remote_host):$(remote_dir)
 
 .PHONY: clean html upload
