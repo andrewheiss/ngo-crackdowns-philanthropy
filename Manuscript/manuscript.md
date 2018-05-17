@@ -20,7 +20,7 @@ thanks: >-
 
 The January 2011 Egyptian uprisings against the Mubarak regime presented a window of opportunity for Egyptian NGOs to transform themselves into agents of democracy. Domestic human rights organizations ramped up their work while many development NGOs embarked on projects related to politics, policy, and social change. However, just as NGOs started to take advantage of new levels of public engagement and civic freedoms, both the interim military regime and Mohamed Morsi's regime proposed new legislation designed to restrict funding for Egyptian NGOs. They denied any requests to affiliate with foreign NGOs, accusing such organizations of "grand treason, conspiracy against Egypt, and carrying out foreign agendas to harm Egyptian national security" [@hrw:2011]. Though these proposed restrictions were not officially passed and ratified until 2017, between 2012–2017, many international donor agencies cut support for Egyptian NGOs out of concern that they would be accused of offering illegal support for domestic civil society organizations [@Brechenmacher:2017]. Such legal restrictions on funding for NGOs is not limited to Egypt, and many other countries have followed suit, including India, Bolivia, Hungary, China, and Russia. Between the lack of a local philanthropic culture towards these rights-based groups and the suspension of official state funds from abroad, many NGOs across developing countries are now completely dependent on private foreign donors. But how do individual donors feel about donating to legally beseiged NGOs abroad? How do these legal restrictions on NGOs impact private donors? 
 
-These questions are important for three main reasons. First, while an increasingly large amount of private philanthropy is directed towards civil society groups in developing countries, there is little research on the structural determinants of such giving. In 2010, US philanthropy to developing countries exceeded US official development assistance (ODA) by almost \$9 billion. By 2014, US private philanthropy amounted to \$43.9 billion -- \$15 billion of which was given towards international causes. By 2016, the amount directed towards civil society groups working in international affairs increased to \$22.03 billion [@givingusa:2017]. Further, as Daniel Runde pointed out in a statement before a US Senate subcommittee on multilateral institutions, "U.S. philanthropy is significant [for global philanthropic efforts] but it is mainly Ms. Smith and Mr. Johnson, [n]ot Mr. and Mrs. Gates" [-@Runde:2017]. While a substantive literature exists on understanding state-based ODA and foreign aid to developing countries, we know comparatively lesser about the factors that motivate the average donor to donate to causes in foreign countries. 
+These questions are important for three main reasons. First, while an increasingly large amount of private philanthropy is directed towards civil society groups in developing countries, there is little research on the structural determinants of such giving. In 2010, US philanthropy to developing countries exceeded US official development assistance (ODA) by almost \$9 billion. By 2014, US private philanthropy amounted to \$43.9 billion—\$15 billion of which was given towards international causes. By 2016, the amount directed towards civil society groups working in international affairs increased to \$22.03 billion [@givingusa:2017]. Further, as Daniel Runde pointed out in a statement before a US Senate subcommittee on multilateral institutions, "U.S. philanthropy is significant [for global philanthropic efforts] but it is mainly Ms. Smith and Mr. Johnson, [n]ot Mr. and Mrs. Gates" [-@Runde:2017]. While a substantive literature exists on understanding state-based ODA and foreign aid to developing countries, we know comparatively lesser about the factors that motivate the average donor to donate to causes in foreign countries. 
 
 Second, a number of NGOs working in developing countries rely on funds from private donors in Western countries, in part because domestic government grants often provide funding only for NGOs working in non-contentious issues such as humanitarian assistance, disaster relief, or international development, lest the work of human rights NGOs threaten regime stability [@Chaudhry:2016; @Heiss:2017]. Further, in places where local philanthropic capacity exists, it is often directed towards charitable activities such as health, education, or religious services, rather than rights or policy work that Western aid providers generally sponsor [@Carothers:2015]. Even when domestic donors wish to donate to NGOs working in contentious areas, they are often deterred by dismal tax incentives or threats by governments to take away business permits. Consequently, domestic NGOs in foreign countries are forced to rely on private donors abroad.
 
@@ -78,15 +78,23 @@ We also propose that legal crackdowns correlate and interact with other structur
 
 We expect that donors will be more likely to donate to humanitarian causes because these are seen as uncontroversial, apolitical, and directed towards the most deserving of need, such as emergency relief in life-threatening circumstances. On the other hand, human rights organizations can often be seen as politically motivated, especially when concentrating on work such as state-sanctioned abuse. This work is also contentious since it often attempts to change popular prejudices and discriminatory attitudes that threaten rights of marginalized and unpopular social groups [@Crowther:2015]. We expect that crackdowns abroad will amplify donor affinity for humanitarian NGOs, leading to two versions of our second hypothesis:
 
-> **H~2a~**:  Donors will be more likely to give to legally besieged NGOs working on humanitarian issues.
+> **H~2a~**:  Donors will be more likely to give to NGOs working on humanitarian issues.
 > 
-> **H~2b~**:  Donors will give more to legally besieged NGOs working on humanitarian issues.
+> **H~2b~**:  Donors will give more to NGOs working on humanitarian issues.
+>
+> **H~2c~**:  Donors will be more likely to give to legally besieged NGOs working on humanitarian issues.
+> 
+> **H~2d~**:  Donors will give more to legally besieged NGOs working on humanitarian issues.
 
 Finally, we argue that the source of NGO funding should influence donor behavior. It is unlikely that most donors are aware that the legal environment for international NGOs is increasingly hostile towards organizations receiving foreign government funding, but the distinction between private and government funding can nonetheless signal an organization's deservingness. We expect that donors who see that organizations are privately funded will feel that they can also contribute and help, while donors who see that organizations are funded by the government will feel less inclined to contribute, since the NGO does not need (or might not even typically accept) their donation. This sets up two versions of our final hypothesis:
 
-> **H~3a~**:  Donors will be more likely to give to legally besieged NGOs that do not receive substantial funding from government sources.
+> **H~3a~**:  Donors will be more likely to give to NGOs that do not receive substantial funding from government sources.
 > 
-> **H~3b~**:  Donors will give more to legally besieged NGOs that do not receive substantial funding from government sources.
+> **H~3b~**:  Donors will give more to NGOs that do not receive substantial funding from government sources.
+> 
+> **H~3c~**:  Donors will be more likely to give to legally besieged NGOs that do not receive substantial funding from government sources.
+> 
+> **H~3d~**:  Donors will give more to legally besieged NGOs that do not receive substantial funding from government sources.
 
 
 # Methods
@@ -227,14 +235,14 @@ Table: Results for models predicting amount respondents are willing to donate {#
 
 \clearpage
 
-![Differences in median amount donated in control and crackdown groups, conditioned by other experimental groups](../output/figures/likelihood-diffs.pdf){#fig:amount-diffs}
+![Differences in median amount donated in control and crackdown groups, conditioned by other experimental groups](../output/figures/amount-diffs.pdf){#fig:amount-diffs}
 
 !INCLUDE "../output/tables/tbl-amount-diffs.md"
 
 \clearpage
 
 
-[^1]: Prior to launching the survey, we preregistered our hypotheses and research design—see [https://osf.io/dx973/](https://osf.io/dx973/).
+[^1]: Prior to launching the survey, we preregistered our hypotheses and research design at the Open Science Framework, and our preregistration protocol is available at [https://osf.io/dx973/](https://osf.io/dx973/). We made the following deviations from the original preregistration: TODO - we only specified the a and b versions of our hypotheses, but we specified the c and d versions in the data analysis plan—we just inadvertently didn't include the text versions of them in the actual hypotheses
 
 [^2]: We estimated that the survey would take 5 minutes to complete and paid participants the equivalent of a $9/hour wage. On average, participants completed the survey in 3 minutes and 20 seconds.
 
@@ -276,4 +284,4 @@ Table: Results for models predicting amount respondents are willing to donate {#
 
 [^2a]: For the purposes of this paper, even though we are using the term NGOs, it also includes organizations such as civil society organizations (CSOs) and charities. This is because the scope of organizations covered by laws differs across countries.
 
-[^3a]: There is no single definition of what constitutes as a 'political' activity by an NGO. Numerous governments define this differently, and some (such as Russia and India) leave it intentionally vague so that they have the liberty to crack down on any any threatening NGO.
+[^3a]: There is no single definition of what constitutes as a "political" activity by an NGO. Numerous governments define this differently, and some (such as Russia and India) intentionally leave the definition vague to allow for more latitude in restricting threatening NGOs.
