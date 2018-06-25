@@ -148,7 +148,7 @@ ggplot(coefs_posterior, aes(x = value, y = fct_rev(term_clean_fct))) +
                    y = fct_rev(term_clean_fct), yend = fct_rev(term_clean_fct)),
                size = 1) +
   geom_vline(xintercept = 0, linetype = "dotted", size = 1) + 
-  scale_fill_manual(values = c(ngo_red, ngo_blue), name = NULL) +
+  scale_fill_manual(values = ngo_cols("red", "blue", name = FALSE), name = NULL) +
   labs(x = "Posterior median estimate + 90% credible interval", y = NULL,
        caption = "90% credible intervals shown in black. Solid vertical line = median; dotted vertical line = 0") +
   facet_wrap(~ full_model, scales = "free") + 
@@ -185,7 +185,7 @@ coef_summary_charity <- newdata_conditions_charity %>%
 ggplot(coef_summary_charity, aes(x = fct_rev(give_charity_3), y = estimate)) +
   geom_pointrange(aes(ymin = conf.low, ymax = conf.high, color = crackdown), 
                   position = position_dodge(width = 0.5)) +
-  scale_color_manual(values = c(ngo_orange, ngo_green), name = NULL) +
+  scale_color_manual(values = ngo_cols("orange", "green", name = FALSE), name = NULL) +
   scale_y_continuous(labels = dollar) +
   labs(x = "How often do you give to charity?", y = "Median amount donated") +
   theme_ngos() +
@@ -218,7 +218,7 @@ coef_summary_vol_relig <- newdata_conditions_vol_relig %>%
 ggplot(coef_summary_vol_relig, aes(x = fct_rev(volunteer), y = estimate)) +
   geom_pointrange(aes(ymin = conf.low, ymax = conf.high, color = crackdown), 
                   position = position_dodge(width = 0.5)) +
-  scale_color_manual(values = c(ngo_orange, ngo_green), name = NULL) +
+  scale_color_manual(values = ngo_cols("orange", "green", name = FALSE), name = NULL) +
   scale_y_continuous(labels = dollar) +
   labs(x = "Have you volunteered in the last 12 months?", y = "Median amount donated") +
   facet_wrap(~ religiosity_bin) +
@@ -311,7 +311,7 @@ ggplot(coefs_posterior_likely, aes(x = value, y = fct_rev(term_clean_fct))) +
                    y = fct_rev(term_clean_fct), yend = fct_rev(term_clean_fct)),
                size = 1) +
   geom_vline(xintercept = 0, linetype = "dotted", size = 1) + 
-  scale_fill_manual(values = c(ngo_red, ngo_blue), name = NULL) +
+  scale_fill_manual(values = ngo_cols("red", "blue", name = FALSE), name = NULL) +
   labs(x = "Posterior median estimate + 90% credible interval", y = NULL,
        caption = "90% credible intervals shown in black. Solid vertical line = median; dotted vertical line = 0") +
   facet_wrap(~ full_model, scales = "free") + 
