@@ -22,6 +22,7 @@ if (isTRUE(getOption('knitr.in.progress')) & !is.null(names(sessionInfo()$otherP
 
 # Load libraries again
 library(tidyverse)
+library(magrittr)
 library(rstanarm)
 library(broom)
 library(coda)
