@@ -3,10 +3,13 @@ exclude:
 - data
 - Icon?
 - manuscript
-- output
 - misc
 - sandbox
 - lib
+- presentations
+- submissions
+- text
+- private
 - Makefile
 - LICENSE.html
 - README.html
