@@ -100,7 +100,6 @@ else
 endif
 
 # Targets
-PDF=$(SRC:.md=.pdf)
 HTML=$(SRC:.md=.html)
 TEX=$(SRC:.md=.tex)
 ODT=$(SRC:.md=.odt)
@@ -109,9 +108,8 @@ MS_ODT=$(SRC:.md=-manuscript.odt)
 MS_DOCX=$(SRC:.md=-manuscript.docx)
 BIB=$(SRC:.md=.bib)
 
-all:	clean $(PDF) $(HTML) $(ODT) $(DOCX) $(MS_ODT) $(MS_DOCX) $(TEX) $(BIB)
+all:	clean $(HTML) $(ODT) $(DOCX) $(MS_ODT) $(MS_DOCX) $(TEX) $(BIB)
 
-pdf:	clean $(PDF)
 html:	clean $(HTML)
 odt:	clean $(ODT)
 docx:	clean $(DOCX)
@@ -127,28 +125,12 @@ bib:	$(BIB)
 		$(CROSSREF) \
 		--default-image-extension=png \
 		--mathjax \
+		--table-of-contents \
 		--template=$(PREFIX)/templates/html.template \
 		--css=$(PREFIX)/styles/marked/kultiad-serif.css \
 		--filter pandoc-citeproc \
 		--csl=$(PREFIX)/csl/$(CSL).csl \
 		--bibliography=$(BIB_FILE) \
-	-o $@
-	@echo "$(OK_COLOR)All done!$(NO_COLOR)"
-
-%.pdf:	%.md
-	@echo "$(WARN_COLOR)Converting Markdown to PDF using hikma-article template...$(NO_COLOR)"
-	replace_includes $< | replace_reference_title | \
-	pandoc -r markdown+simple_tables+table_captions+yaml_metadata_block+smart -w latex -s \
-		$(CROSSREF) \
-		--default-image-extension=pdf \
-		--latex-engine=xelatex \
-		--template=$(PREFIX)/templates/xelatex.template \
-		--filter pandoc-citeproc \
-		--csl=$(PREFIX)/csl/$(CSL).csl \
-		--bibliography=$(BIB_FILE) \
-		-V chapterstyle=hikma-article \
-		-V pagestyle=ath \
-		--base-header-level=2 \
 	-o $@
 	@echo "$(OK_COLOR)All done!$(NO_COLOR)"
 
@@ -161,6 +143,7 @@ bib:	$(BIB)
 		--default-image-extension=pdf \
 		--filter pandoc-latex-fontsize \
 		--pdf-engine=xelatex \
+		--table-of-contents \
 		--template=$(PREFIX)/templates/xelatex.template \
 		--biblatex \
 		-V $(TEX_REF) \
@@ -214,7 +197,7 @@ bib:	$(BIB)
 
 clean:
 	@echo "$(WARN_COLOR)Deleting all existing targets...$(NO_COLOR)"
-	rm -f $(addsuffix .html, $(BASE)) $(addsuffix .pdf, $(BASE)) \
+	rm -f $(addsuffix .html, $(BASE)) \
 		$(addsuffix .odt, $(BASE)) $(addsuffix .docx, $(BASE)) \
 		$(addsuffix -manuscript.odt, $(BASE)) $(addsuffix -manuscript.docx, $(BASE)) \
 		$(addsuffix .tex, $(BASE)) $(addsuffix .bib, $(BASE))
