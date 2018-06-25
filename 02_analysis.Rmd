@@ -5,6 +5,9 @@ date: "Last run: `r format(Sys.time(), '%B %e, %Y')`"
 output: 
   html_document:
     code_folding: hide
+    pandoc_args: [
+      "--default-image-extension=png"
+    ]
 editor_options: 
   chunk_output_type: console
 ---
@@ -66,7 +69,7 @@ level_summary <- function(x, variable, df = results) {
     theme_spark()
   
   file_name <- gsub("\\.| ", "_", tolower(variable))
-  md_img <- paste0("![](../output/figures/summary-table/", file_name, ".pdf)")
+  md_img <- paste0("![](output/figures/summary-table/", file_name, ")")
 
   ggsave(fig_bar, filename = file.path(here(), "output", "figures", "summary-table",
                                        paste0(file_name, ".pdf")), 
@@ -76,6 +79,7 @@ level_summary <- function(x, variable, df = results) {
          width = 1, height = 0.2, type = "cairo", bg = "transparent", dpi = 300)
 
   output <- data_frame(spark = md_img, summary = inline_summary)
+  return(output)
 }
 
 numeric_summary <- function(x, variable) {
@@ -88,7 +92,7 @@ numeric_summary <- function(x, variable) {
     theme_spark()
   
   file_name <- gsub("\\.| ", "_", tolower(variable))
-  md_img <- paste0("![](../output/figures/summary-table/", file_name, ".pdf)")
+  md_img <- paste0("![](output/figures/summary-table/", file_name, ")")
 
   ggsave(fig_hist, filename = file.path(here(), "output", "figures", "summary-table",
                                         paste0(file_name, ".pdf")), 
@@ -98,6 +102,7 @@ numeric_summary <- function(x, variable) {
          width = 1, height = 0.2, type = "cairo", bg = "transparent", dpi = 300)
   
   output <- data_frame(spark = md_img, summary = inline_summary)
+  return(output)
 }
 
 my_summary <- function(x, variable, df) {
@@ -119,7 +124,7 @@ my_summary <- function(x, variable, df) {
 ```{r check-conditions, results="asis"}
 results %>% count(crackdown, issue, funding) %>% 
   rename(Crackdown = crackdown, Issue = issue, Funding = funding) %>% 
-  janitor::adorn_totals(where = "row") %T>% 
+  janitor::adorn_totals(., where = "row") %T>% 
   pandoc.table() %>% 
   pandoc.table.return(caption = "Balance of experimental conditions {#tbl:experimental-conditions}") %>% 
   cat(file = file.path(here(), "output", "tables", "tbl-experimental-conditions.md"))
