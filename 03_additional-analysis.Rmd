@@ -30,6 +30,7 @@ library(glue)
 library(ggstance)
 library(ggridges)
 library(grid)
+library(gridExtra)
 library(Gmisc)
 library(patchwork)
 library(pander)
@@ -207,24 +208,56 @@ walk(full_chart, ~ print(.))
 ## Average time to complete survey
 
 ```{r avg-time, results="asis"}
-results %>% 
-  summarize_at(vars(duration), funs(min, max, mean, sd, median)) %>% 
+fmt_ms <- function(x) {
+  n_seconds <- seconds_to_period(x)
+  sprintf("%02.0f:%02.0f", minute(n_seconds), second(n_seconds))
+}
+
+theme_ngos_table <- ttheme_minimal(
+  core = 
+    list(fg_params = 
+           list(hjust = 0, x = 0.1,
+                fontsize = 7, fontface = "plain",
+                fontfamily = "Encode Sans Condensed Light"),
+         bg_params = list(fill = "white")),
+  colhead = 
+    list(fg_params = 
+           list(hjust = 0, x = 0.1, col = "white",
+                fontsize = 7, fontface = "plain",
+                fontfamily = "Encode Sans Condensed SemiBold"),
+         bg_params = list(fill = ngo_cols("blue"))),
+  padding = unit(c(4, 2), "mm"))
+
+time_summary <- results %>% 
+  summarize_at(vars(duration), funs(Minimum = min, Maximum = max, Mean = mean, 
+                                    `Standard deviation` = sd, Median = median)) %>% 
   gather(Statistic, value) %>% 
-  mutate(value = seconds_to_period(value)) %>% 
-  mutate(Minutes = sprintf("%02.0f:%02.0f", minute(value), second(value))) %>% 
-  select(-value) %>% 
-  pandoc.table()
+  mutate(Minutes = fmt_ms(value)) %>% 
+  select(-value) 
+
+pandoc.table(time_summary)
 ```
 
-## Attention check #2
+```{r avg-time-plot, fig.height=2.5, fig.width=4}
+summary_stats <- tableGrob(time_summary, rows = NULL, theme = theme_ngos_table) %>% 
+  gtable::gtable_add_grob(., grobs = rectGrob(gp = gpar(fill = NA, lwd = 1)),
+                          t = 1, b = nrow(.), l = 1, r = ncol(.))
 
-```{r attention-check-2, results="asis"}
-results %>% count(attention2_correct) %>% 
-  rename(`Attention check 2 correct` = attention2_correct, Count = n) %>% 
-  pandoc.table()
+plot_avg_time <- ggplot(results, aes(x = duration)) +
+  geom_histogram(bins = 50, fill = ngo_cols("blue")) +
+  scale_x_time(labels = fmt_ms) +
+  annotation_custom(summary_stats, xmin = 700, xmax = 900, ymin = 30, ymax = 60) +
+  labs(x = "Minutes spent on experiment", y = "Count") +
+  theme_ngos() +
+  theme(panel.grid.minor = element_blank())
+
+plot_avg_time %T>% 
+  print() %T>%
+  ggsave(., filename = file.path(here(), "output", "figures", "avg-time.pdf"),
+         width = 4, height = 2.5, units = "in", device = cairo_pdf) %>% 
+  ggsave(., filename = file.path(here(), "output", "figures", "avg-time.png"),
+         width = 4, height = 2.5, units = "in", type = "cairo", dpi = 300)
 ```
-
-\
 
 # Amount donated (full)
 
