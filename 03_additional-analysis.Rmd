@@ -49,7 +49,7 @@ results <- readRDS(file.path(here(), "data", "results_clean.rds"))
 
 # CONSORT flow
 
-```{r build-consort, results="hide", fig.width=10, fig.height=6}
+```{r build-consort}
 consort <- readRDS(file.path(here(), "data", "completion_summary.rds")) %>% 
   spread(reason, n) %>% 
   mutate(group = 1:n(),
@@ -142,63 +142,63 @@ group8_completed <- boxGrob(filter(consort, group == 8)$completed_label,
                             x = xs[8], y = completed_y, width = width,
                             box_gp = box_gp_green, txt_gp = txt_gp)
 
-# Connect boxes
-grid.newpage()
-total; randomized; ineligible
-connectGrob(total, randomized, "v")
-connectGrob(total, ineligible, "-")
+total_random_connect <- connectGrob(total, randomized, "v")
+total_ineligible_connect <- connectGrob(total, ineligible, "-")
 
-group1; group2; group3; group4; group5; group6; group7; group8
-connectGrob(randomized, group1, "N")
-connectGrob(randomized, group2, "N")
-connectGrob(randomized, group3, "N")
-connectGrob(randomized, group4, "N")
-connectGrob(randomized, group5, "N")
-connectGrob(randomized, group6, "N")
-connectGrob(randomized, group7, "N")
-connectGrob(randomized, group8, "N")
+rand_connect1 <- connectGrob(randomized, group1, "N")
+rand_connect2 <- connectGrob(randomized, group2, "N")
+rand_connect3 <- connectGrob(randomized, group3, "N")
+rand_connect4 <- connectGrob(randomized, group4, "N")
+rand_connect5 <- connectGrob(randomized, group5, "N")
+rand_connect6 <- connectGrob(randomized, group6, "N")
+rand_connect7 <- connectGrob(randomized, group7, "N")
+rand_connect8 <- connectGrob(randomized, group8, "N")
 
-group1_completed; group2_completed; group3_completed; group4_completed; 
-group5_completed; group6_completed; group7_completed; group8_completed
-connectGrob(group1, group1_completed, "N")
-connectGrob(group2, group2_completed, "N")
-connectGrob(group3, group3_completed, "N")
-connectGrob(group4, group4_completed, "N")
-connectGrob(group5, group5_completed, "N")
-connectGrob(group6, group6_completed, "N")
-connectGrob(group7, group7_completed, "N")
-connectGrob(group8, group8_completed, "N")
+complete_connect1 <- connectGrob(group1, group1_completed, "N")
+complete_connect2 <- connectGrob(group2, group2_completed, "N")
+complete_connect3 <- connectGrob(group3, group3_completed, "N")
+complete_connect4 <- connectGrob(group4, group4_completed, "N")
+complete_connect5 <- connectGrob(group5, group5_completed, "N")
+complete_connect6 <- connectGrob(group6, group6_completed, "N")
+complete_connect7 <- connectGrob(group7, group7_completed, "N")
+complete_connect8 <- connectGrob(group8, group8_completed, "N")
 
-# Use a global plot device temporarily because each chunk starts a new viewport
-# and I want to use grid.grab() on this chunk, but I also want to hide the
-# output from grid.grab() since knitr/grid inexplicably insist on plotting a
-# second figure even when wrapping grid.grab() in invisible() or enabling
-# results="hide" in the chunk options. So, the hacky solution here is to use a
-# global device, capture the grid output in a new chunk that isn't included, and
-# turn off the global plot device later. I also include code that isn't run for
-# the sake of readability (i.e. fig_consort would come out of nowhere otherwise)
-#
-# See https://stackoverflow.com/a/17509770/120898
-knitr::opts_knit$set(global.device = TRUE)
-```
-
-```{r grab-figure-actual, include=FALSE}
-fig_consort <- grid.grab()
-```
-
-```{r grab-figure-fake, eval=FALSE}
-fig_consort <- grid.grab()
+full_chart <- list(total, randomized, ineligible, total_random_connect, total_ineligible_connect,
+                   group1, group2, group3, group4, group5, group6, group7, group8,
+                   rand_connect1, rand_connect2, rand_connect3, rand_connect4, 
+                   rand_connect5, rand_connect6, rand_connect7, rand_connect8,
+                   group1_completed, group2_completed, group3_completed, group4_completed, 
+                   group5_completed, group6_completed, group7_completed, group8_completed,
+                   complete_connect1, complete_connect2, complete_connect3, complete_connect4, 
+                   complete_connect5, complete_connect6, complete_connect7, complete_connect8) 
 ```
 
 ```{r show-save-consort, fig.width=10, fig.height=6}
-# Turn off global device
-knitr::opts_knit$set(global.device = FALSE)
+# Ordinarily, you can use grid.grab() to save the output of a grid figure into
+# an object and then use that in ggsave(). However, when knitting, this creates
+# a duplicate plot, which is frustrating. So instead, we use walk() to reprint
+# all the grobs within specific pdf and png devices
+#
+# See https://stackoverflow.com/a/17509770/120898 for a similar issue
 
-fig_consort %T>%
-  ggsave(., filename = file.path(here(), "output", "figures", "consort.pdf"),
-         width = 10, height = 6, units = "in", device = cairo_pdf) %>% 
-  ggsave(., filename = file.path(here(), "output", "figures", "consort.png"),
-         width = 10, height = 6, units = "in", type = "cairo", dpi = 300)
+# Save as PDF
+cairo_pdf(filename = file.path(here(), "output", "figures", "consort.pdf"),
+          width = 10, height = 6)
+grid.newpage()
+walk(full_chart, ~ print(.))
+invisible(dev.off())
+
+# Save as PNG
+png(filename = file.path(here(), "output", "figures", "consort.png"), 
+    width = 10, height = 6, units = "in",
+    bg = "white", res = 300, type = "cairo")
+grid.newpage()
+walk(full_chart, ~ print(.))
+invisible(dev.off())
+
+# Show in knitted document
+grid.newpage()
+walk(full_chart, ~ print(.))
 ```
 
 
