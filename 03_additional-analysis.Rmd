@@ -25,8 +25,11 @@ library(tidyverse)
 library(rstanarm)
 library(broom)
 library(coda)
+library(glue)
 library(ggstance)
 library(ggridges)
+library(grid)
+library(Gmisc)
 library(patchwork)
 library(pander)
 library(scales)
@@ -42,6 +45,161 @@ source(file.path(here(), "lib", "modeling.R"))
 # Load data
 results <- readRDS(file.path(here(), "data", "results_clean.rds"))
 ```
+
+# CONSORT flow
+
+```{r build-consort, results="hide", fig.width=10, fig.height=6}
+consort <- readRDS(file.path(here(), "data", "completion_summary.rds")) %>% 
+  spread(reason, n) %>% 
+  mutate(group = 1:n(),
+         assigned = Approved + `Failed first attention check`,
+         issue = str_replace_all(issue, "assistance", "assist.")) %>% 
+  mutate(assigned_label = glue("Allocated to Group {group}\n{crackdown}\n{issue}\n{funding} funding\n\nN = {assigned}"),
+         completed_label = glue("Completed\nN = {Approved}\n\n{`Failed first attention check`} failed\nattention check"))
+
+assessed_eligibility_n <- sum(consort$Approved, consort$`Failed first attention check`, 
+                              consort$`Took survey outisde of MTurk`)
+ineligible_n <- sum(consort$`Took survey outisde of MTurk`)
+randomized_n <- sum(consort$Approved, consort$`Failed first attention check`)
+
+
+# https://aghaynes.wordpress.com/2018/05/09/flow-charts-in-r/
+# set some parameters to use repeatedly
+width <- 0.1
+xs <- seq(0.1, 0.9, length.out = 8)
+allocated_y <- 0.375
+completed_y <- 0.125
+
+box_gp_grey <- gpar(fill = ngo_cols("light grey"))
+box_gp_blue_dk <- gpar(fill = ngo_cols("blue"), alpha = 0.75)
+box_gp_blue_lt <- gpar(fill = ngo_cols("blue"), alpha = 0.35)
+box_gp_green <- gpar(fill = ngo_cols("green"), alpha = 0.65)
+box_gp_yellow <- gpar(fill = ngo_cols("yellow"))
+box_gp_orange <- gpar(fill = ngo_cols("orange"), alpha = 0.65)
+
+txt_gp <- gpar(fontfamily = "Encode Sans Condensed Medium", 
+               fontface = "plain", fontsize = 8)
+
+# Create boxes
+total <- boxGrob(glue("Assessed for eligibility\n N = {assessed_eligibility_n}"), 
+                 x = 0.5, y = 0.9, width = 2 * width,
+                 box_gp = box_gp_blue_lt, txt_gp = txt_gp)
+randomized <- boxGrob(glue("Randomized\n N = {randomized_n}"), 
+                      x = 0.5, y = 0.65, width = 2 * width,
+                      box_gp = box_gp_blue_dk, txt_gp = txt_gp)
+ineligible <- boxGrob(glue("Participants excluded for\ncompleting Qualtrics survey\noutside of MTurk\n N = {ineligible_n}"), 
+                      x = xs[7], y = 0.775, #width = 0.25,
+                      box_gp = box_gp_yellow, txt_gp = txt_gp)
+
+group1 <- boxGrob(filter(consort, group == 1)$assigned_label,
+                  x = xs[1], y = allocated_y, width = width, 
+                  box_gp = box_gp_orange, txt_gp = txt_gp)
+group2 <- boxGrob(filter(consort, group == 2)$assigned_label,
+                  x = xs[2], y = allocated_y, width = width, 
+                  box_gp = box_gp_orange, txt_gp = txt_gp)
+group3 <- boxGrob(filter(consort, group == 3)$assigned_label,
+                  x = xs[3], y = allocated_y, width = width, 
+                  box_gp = box_gp_orange, txt_gp = txt_gp)
+group4 <- boxGrob(filter(consort, group == 4)$assigned_label,
+                  x = xs[4], y = allocated_y, width = width, 
+                  box_gp = box_gp_orange, txt_gp = txt_gp)
+group5 <- boxGrob(filter(consort, group == 5)$assigned_label,
+                  x = xs[5], y = allocated_y, width = width, 
+                  box_gp = box_gp_orange, txt_gp = txt_gp)
+group6 <- boxGrob(filter(consort, group == 6)$assigned_label,
+                  x = xs[6], y = allocated_y, width = width, 
+                  box_gp = box_gp_orange, txt_gp = txt_gp)
+group7 <- boxGrob(filter(consort, group == 7)$assigned_label,
+                  x = xs[7], y = allocated_y, width = width, 
+                  box_gp = box_gp_orange, txt_gp = txt_gp)
+group8 <- boxGrob(filter(consort, group == 8)$assigned_label,
+                  x = xs[8], y = allocated_y, width = width, 
+                  box_gp = box_gp_orange, txt_gp = txt_gp)
+
+group1_completed <- boxGrob(filter(consort, group == 1)$completed_label, 
+                            x = xs[1], y = completed_y, width = width,
+                            box_gp = box_gp_green, txt_gp = txt_gp)
+group2_completed <- boxGrob(filter(consort, group == 2)$completed_label, 
+                            x = xs[2], y = completed_y, width = width,
+                            box_gp = box_gp_green, txt_gp = txt_gp)
+group3_completed <- boxGrob(filter(consort, group == 3)$completed_label, 
+                            x = xs[3], y = completed_y, width = width,
+                            box_gp = box_gp_green, txt_gp = txt_gp)
+group4_completed <- boxGrob(filter(consort, group == 4)$completed_label, 
+                            x = xs[4], y = completed_y, width = width,
+                            box_gp = box_gp_green, txt_gp = txt_gp)
+group5_completed <- boxGrob(filter(consort, group == 5)$completed_label, 
+                            x = xs[5], y = completed_y, width = width,
+                            box_gp = box_gp_green, txt_gp = txt_gp)
+group6_completed <- boxGrob(filter(consort, group == 6)$completed_label, 
+                            x = xs[6], y = completed_y, width = width,
+                            box_gp = box_gp_green, txt_gp = txt_gp)
+group7_completed <- boxGrob(filter(consort, group == 7)$completed_label, 
+                            x = xs[7], y = completed_y, width = width,
+                            box_gp = box_gp_green, txt_gp = txt_gp)
+group8_completed <- boxGrob(filter(consort, group == 8)$completed_label, 
+                            x = xs[8], y = completed_y, width = width,
+                            box_gp = box_gp_green, txt_gp = txt_gp)
+
+# Connect boxes
+grid.newpage()
+total; randomized; ineligible
+connectGrob(total, randomized, "v")
+connectGrob(total, ineligible, "-")
+
+group1; group2; group3; group4; group5; group6; group7; group8
+connectGrob(randomized, group1, "N")
+connectGrob(randomized, group2, "N")
+connectGrob(randomized, group3, "N")
+connectGrob(randomized, group4, "N")
+connectGrob(randomized, group5, "N")
+connectGrob(randomized, group6, "N")
+connectGrob(randomized, group7, "N")
+connectGrob(randomized, group8, "N")
+
+group1_completed; group2_completed; group3_completed; group4_completed; 
+group5_completed; group6_completed; group7_completed; group8_completed
+connectGrob(group1, group1_completed, "N")
+connectGrob(group2, group2_completed, "N")
+connectGrob(group3, group3_completed, "N")
+connectGrob(group4, group4_completed, "N")
+connectGrob(group5, group5_completed, "N")
+connectGrob(group6, group6_completed, "N")
+connectGrob(group7, group7_completed, "N")
+connectGrob(group8, group8_completed, "N")
+
+# Use a global plot device temporarily because each chunk starts a new viewport
+# and I want to use grid.grab() on this chunk, but I also want to hide the
+# output from grid.grab() since knitr/grid inexplicably insist on plotting a
+# second figure even when wrapping grid.grab() in invisible() or enabling
+# results="hide" in the chunk options. So, the hacky solution here is to use a
+# global device, capture the grid output in a new chunk that isn't included, and
+# turn off the global plot device later. I also include code that isn't run for
+# the sake of readability (i.e. fig_consort would come out of nowhere otherwise)
+#
+# See https://stackoverflow.com/a/17509770/120898
+knitr::opts_knit$set(global.device = TRUE)
+```
+
+```{r grab-figure-actual, include=FALSE}
+fig_consort <- grid.grab()
+```
+
+```{r grab-figure-fake, eval=FALSE}
+fig_consort <- grid.grab()
+```
+
+```{r show-save-consort, fig.width=10, fig.height=6}
+# Turn off global device
+knitr::opts_knit$set(global.device = FALSE)
+
+fig_consort %T>%
+  ggsave(., filename = file.path(here(), "output", "figures", "consort.pdf"),
+         width = 10, height = 6, units = "in", device = cairo_pdf) %>% 
+  ggsave(., filename = file.path(here(), "output", "figures", "consort.png"),
+         width = 10, height = 6, units = "in", type = "cairo", dpi = 300)
+```
+
 
 # Miscellaneous survey details
 
