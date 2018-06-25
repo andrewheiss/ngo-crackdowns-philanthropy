@@ -215,12 +215,16 @@ conditions_summary_clean %T>%
 ## Prior favorability towards NGOs
 
 ```{r fig-ngo-favorability, fig.width=7, fig.height=4}
+favorability_cols <- data_frame(value = c("Very unfavorable", "Unfavorable", "Neutral",
+                                          "Favorable", "Very favorable"),
+                                color = ngo_pal("ordered")(5))
+
 ngo_favorability_raw <- results %>%
   select(favor_humanitarian, favor_human_rights, favor_development) %>% 
   gather(variable, value) %>% 
   count(variable, value) %>% 
   left_join(vars_to_summarize, by = "variable") %>% 
-  left_join(favorability_cols_5, by = "value") %>% 
+  left_join(favorability_cols, by = "value") %>%
   mutate(clean_name = str_replace(clean_name, "towards", "towards\n")) %>% 
   mutate(value = factor(value, levels = levels(results$favor_humanitarian), ordered = TRUE),
          clean_name = fct_inorder(clean_name, ordered = TRUE)) %>%
@@ -243,7 +247,7 @@ ggplot(mapping = aes(x = n_plot, y = clean_name, fill = color)) +
   geom_barh(data = ngo_favorability_low, stat = "identity") +
   geom_vline(xintercept = 0, color = "black") +
   scale_x_continuous(labels = abs) +
-  scale_fill_identity(labels = levels(ngo_favorability_raw$value), 
+  scale_fill_identity(labels = levels(ngo_favorability_raw$value),
                       breaks = levels(ngo_favorability_raw$color),
                       guide = "legend", name = NULL) +
   labs(x = NULL, y = NULL) +
@@ -265,10 +269,12 @@ plot_donate_summary <- ggplot(donate_summary, aes(x = n, y = donate_likely,
   geom_barh(stat = "identity") +
   scale_x_continuous(sec.axis = sec_axis(~ . / sum(donate_summary$n),
                                          labels = percent)) +
-  scale_fill_manual(values = c(ngo_green, ngo_blue), guide = FALSE) +
+  scale_fill_manual(values = ngo_cols("green", "blue", name = FALSE), guide = FALSE) +
   labs(x = NULL, y = NULL) +
   theme_ngos() +
   theme(panel.grid.major.y = element_blank())
+
+plot_donate_summary
 
 plot_donate_summary %T>% 
   print() %T>%
@@ -282,7 +288,7 @@ plot_donate_summary %T>%
 
 ```{r fig-amount-bars, fig.width=9, fig.height=2.75}
 plot_amount_summary <- ggplot(results, aes(x = amount_donate)) +
-  geom_histogram(bins = 20, fill = ngo_blue) +
+  geom_histogram(bins = 20, fill = ngo_cols("blue")) +
   scale_x_continuous(labels = dollar) +
   labs(x = NULL, y = NULL) +
   theme_ngos() +
@@ -428,7 +434,7 @@ coef_summary_c <- newdata_conditions_c %>%
 plot_amount_c <- ggplot(coef_summary_c, aes(y = estimate, x = crackdown)) + 
   # geom_point(data = results, aes(y = amount_donate, x = crackdown),
   #            color = "grey50", size = 0.5, alpha = 0.25) +
-  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), color = ngo_green) + 
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), color = ngo_cols("green")) + 
   scale_y_continuous(labels = dollar) +
   labs(x = NULL, y = "Median amount donated") +
   # coord_cartesian(ylim = c(0, 100)) +
@@ -471,7 +477,7 @@ coef_summary_ci <- newdata_conditions_ci %>%
 plot_amount_ci <- ggplot(coef_summary_ci, aes(y = estimate, x = crackdown)) + 
   # geom_point(data = results, aes(y = amount_donate, x = crackdown),
   #            color = "grey50", size = 0.5, alpha = 0.25) +
-  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), color = ngo_blue) + 
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), color = ngo_cols("blue")) + 
   scale_y_continuous(labels = dollar) +
   labs(x = NULL, y = "Median amount donated") +
   # coord_cartesian(ylim = c(0, 100)) +
@@ -494,7 +500,7 @@ coef_summary_cif <- newdata_conditions_cif %>%
 plot_amount_cif <- ggplot(coef_summary_cif, aes(y = estimate, x = crackdown)) + 
   # geom_point(data = results, aes(y = amount_donate, x = crackdown),
   #            color = "grey50", size = 0.5, alpha = 0.5) +
-  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), color = ngo_red) +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), color = ngo_cols("red")) +
   scale_y_continuous(labels = dollar) +
   labs(x = NULL, y = "Median amount donated") +
   theme_ngos() +
@@ -513,7 +519,7 @@ coef_summary_singles <- bind_rows(coef_summary_c, coef_summary_i, coef_summary_f
 plot_amount_singles <- ggplot(coef_summary_singles, aes(y = estimate, x = value)) + 
   geom_pointrange(aes(ymin = conf.low, ymax = conf.high, color = condition)) +
   scale_y_continuous(labels = dollar) +
-  scale_color_manual(values = c(ngo_green, ngo_blue, ngo_red), guide = FALSE) +
+  scale_color_manual(values = ngo_cols("green", "blue", "red", name = FALSE), guide = FALSE) +
   labs(x = NULL, y = "Median amount donated") +
   theme_ngos() +
   theme(panel.grid.major.x = element_blank(),
@@ -563,7 +569,7 @@ pairs_plot_data_c <- diffs_coef_pairs_c %>%
   
 plot_diffs_c <- ggplot() + 
   geom_density(data = pairs_plot_data_c, aes(x = value),
-               fill = ngo_green, colour = NA, alpha = 0.4) + 
+               fill = ngo_cols("green"), colour = NA, alpha = 0.4) + 
   geom_segment(data = diffs_coef_pairs_detail_c, 
                aes(x = q5, xend = q95, y = 0, yend = 0),
                size = 3) +
@@ -650,7 +656,7 @@ pairs_plot_data_ci <- pairs_conditions_ci %>%
 
 plot_diffs_ci <- ggplot() + 
   geom_density(data = pairs_plot_data_ci, aes(x = value),
-               fill = ngo_blue, colour = NA, alpha = 0.4) + 
+               fill = ngo_cols("blue"), colour = NA, alpha = 0.4) + 
   geom_segment(data = diffs_coef_pairs_detail_ci, 
                aes(x = q5, xend = q95, y = 0, yend = 0),
                size = 3) +
@@ -703,7 +709,7 @@ pairs_plot_data_cif <- pairs_conditions_cif %>%
 
 plot_diffs_cif <- ggplot() + 
   geom_density(data = pairs_plot_data_cif, aes(x = value),
-               fill = ngo_red, colour = NA, alpha = 0.4) + 
+               fill = ngo_cols("red"), colour = NA, alpha = 0.4) + 
   geom_segment(data = diffs_coef_pairs_detail_cif, 
                aes(x = q5, xend = q95, y = 0, yend = 0),
                size = 3) +
@@ -742,7 +748,7 @@ plot_diffs_singles <- ggplot() +
              aes(xintercept = median), size = 0.25) +
   geom_vline(xintercept = 0, linetype = "dotted") +
   scale_x_continuous(labels = dollar) +
-  scale_fill_manual(values = c(ngo_green, ngo_blue, ngo_red), guide = FALSE) +
+  scale_fill_manual(values = ngo_cols("green", "blue", "red", name = FALSE), guide = FALSE) +
   labs(x = "Difference in medians") +
   theme_ngos(density = TRUE) +
   facet_wrap(~ pair)
@@ -856,7 +862,7 @@ coef_summary_likely_c <- newdata_conditions_c %>%
 plot_likely_c <- ggplot(coef_summary_likely_c, aes(y = estimate, x = crackdown)) + 
   # geom_point(data = results, aes(y = amount_donate, x = crackdown),
   #            color = "grey50", size = 0.5, alpha = 0.25) +
-  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), color = ngo_green) + 
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), color = ngo_cols("green")) + 
   scale_y_continuous(labels = percent) +
   labs(x = NULL, y = "Probability of donating") +
   # coord_cartesian(ylim = c(0, 100)) +
@@ -876,7 +882,7 @@ coef_summary_likely_i <- newdata_conditions_i %>%
                      conf.int = TRUE, conf.level = 0.9, conf.method = "HPDinterval"))
 
 plot_likely_i <- ggplot(coef_summary_likely_i, aes(y = estimate, x = issue)) + 
-  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), color = ngo_green) + 
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), color = ngo_cols("green")) + 
   scale_y_continuous(labels = percent) +
   labs(x = NULL, y = "Probability of donating") +
   theme_ngos() +
@@ -895,7 +901,7 @@ coef_summary_likely_f <- newdata_conditions_f %>%
                      conf.int = TRUE, conf.level = 0.9, conf.method = "HPDinterval"))
 
 plot_likely_f <- ggplot(coef_summary_likely_f, aes(y = estimate, x = funding)) + 
-  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), color = ngo_green) + 
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), color = ngo_cols("green")) + 
   scale_y_continuous(labels = percent) +
   labs(x = NULL, y = "Probability of donating") +
   theme_ngos() +
@@ -916,7 +922,7 @@ coef_summary_likely_ci <- newdata_conditions_ci %>%
 plot_likely_ci <- ggplot(coef_summary_likely_ci, aes(y = estimate, x = crackdown)) + 
   # geom_point(data = results, aes(y = amount_donate, x = crackdown),
   #            color = "grey50", size = 0.5, alpha = 0.25) +
-  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), color = ngo_blue) + 
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), color = ngo_cols("blue")) + 
   scale_y_continuous(labels = percent) +
   labs(x = NULL, y = "Probability of donating") +
   # coord_cartesian(ylim = c(0, 100)) +
@@ -940,7 +946,7 @@ coef_summary_likely_cif <- newdata_conditions_cif %>%
 plot_likely_cif <- ggplot(coef_summary_likely_cif, aes(y = estimate, x = crackdown)) + 
   # geom_point(data = results, aes(y = amount_donate, x = crackdown),
   #            color = "grey50", size = 0.5, alpha = 0.5) +
-  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), color = ngo_red) +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), color = ngo_cols("red")) +
   scale_y_continuous(labels = percent) +
   labs(x = NULL, y = "Probability of donating") +
   theme_ngos() +
@@ -984,7 +990,7 @@ pairs_likely_plot_data_c <- diffs_coef_likely_pairs_c %>%
   
 plot_diffs_likely_c <- ggplot() + 
   geom_density(data = pairs_likely_plot_data_c, aes(x = value),
-               fill = ngo_green, colour = NA, alpha = 0.4) + 
+               fill = ngo_cols("green"), colour = NA, alpha = 0.4) + 
   geom_segment(data = diffs_coef_likely_pairs_detail_c, 
                aes(x = q5, xend = q95, y = 0, yend = 0),
                size = 3) +
@@ -1074,7 +1080,7 @@ pairs_likely_plot_data_ci <- pairs_likely_conditions_ci %>%
 
 plot_diffs_likely_ci <- ggplot() + 
   geom_density(data = pairs_likely_plot_data_ci, aes(x = value),
-               fill = ngo_blue, colour = NA, alpha = 0.4) + 
+               fill = ngo_cols("blue"), colour = NA, alpha = 0.4) + 
   geom_segment(data = diffs_coef_likely_pairs_detail_ci, 
                aes(x = q5, xend = q95, y = 0, yend = 0),
                size = 3) +
@@ -1130,7 +1136,7 @@ pairs_likely_plot_data_cif <- pairs_likely_conditions_cif %>%
 
 plot_diffs_likely_cif <- ggplot() + 
   geom_density(data = pairs_likely_plot_data_cif, aes(x = value),
-               fill = ngo_red, colour = NA, alpha = 0.4) + 
+               fill = ngo_cols("red"), colour = NA, alpha = 0.4) + 
   geom_segment(data = diffs_coef_likely_pairs_detail_cif, 
                aes(x = q5, xend = q95, y = 0, yend = 0),
                size = 3) +
@@ -1171,7 +1177,7 @@ plot_diffs_likely_singles <- ggplot() +
              aes(xintercept = median), size = 0.25) +
   geom_vline(xintercept = 0, linetype = "dotted") +
   scale_x_continuous(labels = percent) +
-  scale_fill_manual(values = c(ngo_green, ngo_blue, ngo_red), guide = FALSE) +
+  scale_fill_manual(values = ngo_cols("green", "blue", "red", name = FALSE), guide = FALSE) +
   labs(x = "Difference in medians") +
   theme_ngos(density = TRUE) +
   facet_wrap(~ pair)
