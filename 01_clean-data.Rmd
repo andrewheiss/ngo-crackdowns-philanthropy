@@ -95,11 +95,10 @@ results_raw <- read_csv(results_file, skip = 16,
 # The code for determining these is in a script that is excluded from the main
 # repository because of privacy issues (it deals directly with MTurk worker
 # IDs), called "private/approve_mturkers.R". It outputs this text list of codes.
-codes_to_exclude <- readLines(file.path(here(), "data", "codes_to_exclude.txt")) %>% 
-  as.numeric()
+codes_to_exclude <- read_csv(file.path(here(), "data", "codes_to_exclude.csv"))
 
 # Clean everything
-results <- results_raw %>%
+results_check_attention <- results_raw %>%
   # Only select necessary columns
   select(id = ResponseId, confirmation_code = mTurkCode, duration = `Duration (in seconds)`,
          start_date = StartDate, end_date = EndDate,
@@ -130,8 +129,10 @@ results <- results_raw %>%
   # This person contacted me separately to say that they accidentally did the first
   # attention check wrong, but that they did pay attention: 6518634
   mutate(attention1_correct = ifelse(confirmation_code == 6518634,
-                                     TRUE, attention1_correct)) %>% 
-  filter(!(confirmation_code %in% codes_to_exclude)) %>%
+                                     TRUE, attention1_correct)) 
+
+results <- results_check_attention %>% 
+  filter(!(confirmation_code %in% codes_to_exclude$confirmation_code)) %>%
   # Factorize variables
   mutate(donate_likely = factor(donate_likely, levels = likelihood, ordered = TRUE)) %>% 
   mutate_at(vars(favor_humanitarian, favor_human_rights, favor_development),
@@ -212,7 +213,26 @@ results <- results_raw %>%
   mutate(age_bin = factor(age >= median(.$age), levels = c(FALSE, TRUE),
                           labels = paste(c("Less than", "At least"), median(.$age))))
 
+# Save final clean data
 saveRDS(results, file.path(here(), "data", "results_clean.rds"))
 write_csvy(results, file = file.path(here(), "data", "results_clean.csv"),
            metadata = file.path(here(), "data", "results_clean.yaml"), na = "NA")
+```
+
+```{r completed-summary}
+# Save information about completion rates
+completed_skeleton <- results_check_attention %>% 
+  left_join(codes_to_exclude, by = "confirmation_code") %>% 
+  replace_na(list(reason = "Approved")) %>% 
+  expand(reason, crackdown, issue, funding)
+
+completed_summary <- results_check_attention %>% 
+  left_join(codes_to_exclude, by = "confirmation_code") %>% 
+  replace_na(list(reason = "Approved")) %>% 
+  count(reason, crackdown, issue, funding) %>% 
+  right_join(completed_skeleton, by = c("reason", "crackdown", "issue", "funding")) %>% 
+  replace_na(list(n = 0))
+
+saveRDS(completed_summary, file.path(here(), "data", "completion_summary.rds"))
+write_csv(completed_summary, file.path(here(), "data", "completion_summary.csv"))
 ```
