@@ -540,17 +540,22 @@ plot_amount_singles %T>%
 ```
 
 ```{r plot-all-amount-medians, fig.width=8, fig.height=6}
-((plot_amount_c + 
-   labs(title = "Median donation in control and crackdown groups,\nconditioned by other experimental groups",
-        subtitle = "90% credible intervals shown around each point")) / 
-   plot_amount_ci) | plot_amount_cif
+plot_amount_all <- 
+  (plot_amount_c / plot_amount_ci) | 
+  plot_amount_cif
 
-((plot_amount_c / plot_amount_ci) | 
-    plot_amount_cif + labs(caption = "90% credible intervals shown around each point")) %T>% 
+plot_amount_all +
+  plot_annotation(title = "Median donation in control and crackdown groups,\nconditioned by other experimental groups",
+                  subtitle = "90% credible intervals shown around each point",
+                  tag_levels = "A", theme = theme_ngos())
+
+(plot_amount_all + 
+    plot_annotation(caption = "90% credible intervals shown around each point",
+                    tag_levels = "A", theme = theme_ngos())) %T>% 
   ggsave(., filename = file.path(here(), "output", "figures", "amount-medians.pdf"),
-         width = 8, height = 4, units = "in", device = cairo_pdf) %>% 
+         width = 8, height = 4.25, units = "in", device = cairo_pdf) %>% 
   ggsave(., filename = file.path(here(), "output", "figures", "amount-medians.png"),
-         width = 8, height = 4, units = "in", type = "cairo", dpi = 300)
+         width = 8, height = 4.25, units = "in", type = "cairo", dpi = 300)
 ```
 
 
@@ -783,13 +788,18 @@ bind_rows(diffs_coef_pairs_detail_c,
 **Compare nested conditions (what we're really most concerned about):**
 
 ```{r plot-all-amount-diffs, fig.width=8, fig.height=6}
-((plot_diffs_c + 
-   labs(title = "Differences in median amount donated in control and crackdown groups,\nconditioned by other experimental groups",
-        subtitle = "90% credible intervals shown in black. Solid vertical line = median; dotted vertical line = 0")) / 
-   plot_diffs_ci) | plot_diffs_cif
+plot_diffs_all <- 
+  (plot_diffs_c / plot_diffs_ci) | 
+  plot_diffs_cif
 
-((plot_diffs_c / plot_diffs_ci) | 
-    plot_diffs_cif + labs(caption = "90% credible intervals shown in black. Solid vertical line = median; dotted vertical line = 0")) %T>% 
+plot_diffs_all +
+  plot_annotation(title = "Differences in median amount donated in control and crackdown groups,\nconditioned by other experimental groups",
+                  subtitle = "90% credible intervals shown in black. Solid vertical line = median; dotted vertical line = 0",
+                  tag_levels = "A", theme = theme_ngos())
+
+(plot_diffs_all +
+  plot_annotation(caption = "90% credible intervals shown in black. Solid vertical line = median; dotted vertical line = 0",
+                  tag_levels = "A", theme = theme_ngos())) %T>% 
   ggsave(., filename = file.path(here(), "output", "figures", "amount-diffs.pdf"),
          width = 8, height = 5, units = "in", device = cairo_pdf) %>% 
   ggsave(., filename = file.path(here(), "output", "figures", "amount-diffs.png"),
@@ -961,17 +971,22 @@ plot_likely_cif <- ggplot(coef_summary_likely_cif, aes(y = estimate, x = crackdo
 ```
 
 ```{r plot-all-likely-medians, fig.width=8, fig.height=6}
-((plot_likely_c + 
-   labs(title = "Median likelihood of donation in control and crackdown groups,\nconditioned by other experimental groups",
-        subtitle = "90% credible intervals shown around each point")) / 
-   plot_likely_ci) | plot_likely_cif
+plot_likely_all <- 
+  (plot_likely_c / plot_likely_ci) | 
+  plot_likely_cif
 
-((plot_likely_c / plot_likely_ci) | 
-    plot_likely_cif + labs(caption = "90% credible intervals shown around each point")) %T>% 
+plot_likely_all +
+  plot_annotation(title = "Median likelihood of donation in control and crackdown groups,\nconditioned by other experimental groups",
+                  subtitle = "90% credible intervals shown around each point",
+                  tag_levels = "A", theme = theme_ngos())
+
+(plot_likely_all +
+  plot_annotation(caption = "90% credible intervals shown around each point",
+                  tag_levels = "A", theme = theme_ngos())) %T>% 
   ggsave(., filename = file.path(here(), "output", "figures", "likelihood-medians.pdf"),
-         width = 8, height = 4, units = "in", device = cairo_pdf) %>% 
+         width = 8, height = 4.25, units = "in", device = cairo_pdf) %>% 
   ggsave(., filename = file.path(here(), "output", "figures", "likelihood-medians.png"),
-         width = 8, height = 4, units = "in", type = "cairo", dpi = 300)
+         width = 8, height = 4.25, units = "in", type = "cairo", dpi = 300)
 ```
 
 
@@ -1212,13 +1227,18 @@ bind_rows(diffs_coef_likely_pairs_detail_c,
 **Compare nested conditions (what we're really most concerned about):**
 
 ```{r plot-all-likely-diffs, fig.width=8, fig.height=6}
-((plot_diffs_likely_c + 
-   labs(title = "Differences in donation likelihood in control and crackdown groups,\nconditioned by other experimental groups",
-        subtitle = "90% credible intervals shown in black. Solid vertical line = median; dotted vertical line = 0")) / 
-   plot_diffs_likely_ci) | plot_diffs_likely_cif
+plot_diffs_likely_all <- 
+  (plot_diffs_likely_c / plot_diffs_likely_ci) | 
+  plot_diffs_likely_cif
 
-((plot_diffs_likely_c / plot_diffs_likely_ci) | 
-    plot_diffs_likely_cif + labs(caption = "90% credible intervals shown in black. Solid vertical line = median; dotted vertical line = 0")) %T>% 
+plot_diffs_likely_all +
+  plot_annotation(title = "Differences in donation likelihood in control and crackdown groups,\nconditioned by other experimental groups",
+                  subtitle = "90% credible intervals shown in black. Solid vertical line = median; dotted vertical line = 0",
+                  tag_levels = "A", theme = theme_ngos())
+
+(plot_diffs_likely_all +
+  plot_annotation(caption = "90% credible intervals shown in black. Solid vertical line = median; dotted vertical line = 0",
+                  tag_levels = "A", theme = theme_ngos())) %T>% 
   ggsave(., filename = file.path(here(), "output", "figures", "likelihood-diffs.pdf"),
          width = 8, height = 5, units = "in", device = cairo_pdf) %>% 
   ggsave(., filename = file.path(here(), "output", "figures", "likelihood-diffs.png"),
