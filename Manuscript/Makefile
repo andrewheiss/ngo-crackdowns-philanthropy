@@ -164,7 +164,7 @@ bib:	$(BIB)
 		$(CROSSREF) \
 		--default-image-extension=png \
 		--template=$(PREFIX)/templates/odt.template \
-		--reference-odt=$(PREFIX)/styles/reference.odt \
+		--reference-doc=$(PREFIX)/styles/reference.odt \
 		--filter pandoc-citeproc \
 		--csl=$(PREFIX)/csl/$(CSL).csl \
 		--bibliography=$(BIB_FILE) \
