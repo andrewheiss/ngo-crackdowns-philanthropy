@@ -6,9 +6,10 @@ data/*
 _site/*
 site_libs/*
 
-# knitr stuff
+# knitr and caching stuff
 *_files/*
 *_cache/*
+lib/*.rds
 
 # Manuscript output
 manuscript/*.docx

@@ -23,9 +23,9 @@ if (isTRUE(getOption('knitr.in.progress')) & !is.null(names(sessionInfo()$otherP
 # Load libraries again
 library(tidyverse)
 library(magrittr)
+library(rstan)
 library(rstanarm)
 library(broom)
-library(coda)
 library(glue)
 library(ggstance)
 library(ggridges)
@@ -38,6 +38,7 @@ library(scales)
 library(huxtable)
 library(lubridate)
 library(modelr)
+library(ipumsr)
 library(here)
 
 source(file.path(here(), "lib", "graphics.R"))
@@ -200,6 +201,145 @@ invisible(dev.off())
 # Show in knitted document
 grid.newpage()
 walk(full_chart, ~ print(.))
+```
+
+
+# Characteristics of experiment samples
+
+We compare our sample with demographic characteristics of the general population. Since there is no nationally representative sample for each of our demographic variables, we look at multiple data sources.
+
+- Age:
+- Volunteering
+- Donating to charity:
+
+
+Extract data from Current Population Survey, housed at the Minnesota Population Center’s Integrated Public Use Microdata Series
+
+```{r load-clean-cps, warning=FALSE, message=FALSE}
+cps_2015_ddi_file <- file.path(here(), "data", "ipums-cps", "cps_09_2015.xml")
+cps_2015_data_file <- file.path(here(), "data", "ipums-cps", "cps_09_2015.dat.gz")
+
+cps_2015_ddi <- read_ipums_ddi(cps_2015_ddi_file)
+cps_2015_data <- read_ipums_micro(cps_2015_ddi_file, data_file = cps_2015_data_file, verbose = FALSE)
+
+cps_2017_ddi_file <- file.path(here(), "data", "ipums-cps", "cps_2017.xml")
+cps_2017_data_file <- file.path(here(), "data", "ipums-cps", "cps_2017.dat.gz")
+
+cps_2017_ddi <- read_ipums_ddi(cps_2017_ddi_file)
+cps_2017_data <- read_ipums_micro(cps_2017_ddi_file, data_file = cps_2017_data_file, verbose = FALSE)
+
+# Volunteering data from September 2015 only
+df_volunteering <- cps_2015_data %>% 
+  # Remove values not in the universe
+  mutate_at(vars(VLSTATUS, VLDONATE), funs(ifelse(. == 99, NA, .)))
+
+# All other data from annual March 2017 survey
+df_demographics <- cps_2017_data %>% 
+  # Remove values not in the universe
+  mutate(SEX = ifelse(SEX == 9, NA, SEX),
+         EDUC = ifelse(EDUC <= 1 | EDUC == 999, NA, EDUC),
+         INCTOT = ifelse(INCTOT == 99999999, NA, INCTOT))
+```
+
+```{r population-values}
+global_demographics <- df_demographics %>% 
+  summarize(age = weighted.mean(AGE >= 35, ASECWT), 
+            female = weighted.mean(SEX == 2, ASECWT),
+            college = weighted.mean(EDUC >= 111, ASECWT, na.rm = TRUE),
+            income = weighted.mean(INCTOT >= 50000, ASECWT, na.rm = TRUE)) %>% 
+  c()
+
+global_vol <- df_volunteering %>% 
+  summarize(volunteering = weighted.mean(VLSTATUS == 2, VLSUPPWT, na.rm = TRUE),
+            donating = weighted.mean(VLDONATE == 2, VLSUPPWT, na.rm = TRUE)) %>% 
+  c()
+
+global_stats <- c(global_vol, global_demographics)
+```
+
+```{r sample-population-characteristics-freq, include=FALSE, eval=FALSE}
+# Demographic variables
+table(results$gender_bin) %>% prop.test(., p = global_stats$female)
+table(results$education_bin) %>% prop.test(., p = global_stats$college)
+table(results$income_bin) %>% prop.test(., p = global_stats$income)
+table(results$age_bin) %>% prop.test(., p = global_stats$age)
+
+# Volunteering
+table(results$volunteer) %>% prop.test(., p = global_stats$volunteering)
+table(results$give_charity_2) %>% prop.test(., p = global_stats$donating)
+```
+
+```{r compile-stan-model, warning=FALSE, message=FALSE, cache=TRUE}
+prop_test_bayes_saved <- file.path(here(), "lib", "bayes_prop_test.rds")
+
+if (file.exists(prop_test_bayes_saved)) {
+  prop_test_bayes <- readRDS(prop_test_bayes_saved)
+} else {
+  prop_test_bayes <- stan_model(file.path(here(), "lib", "bayes_prop_test.stan"))
+  saveRDS(prop_test_bayes, prop_test_bayes_saved)
+}
+```
+
+```{r sample-population-characteristics, cache=TRUE}
+compare_sample_to_pop_bayes <- function(sample_value, population_value) {
+  mcmc_samples <- sampling(prop_test_bayes, list(x = table(sample_value)[1],
+                                                 total_n = length(sample_value),
+                                                 pop_prop = population_value),
+                           chains = CHAINS, iter = ITER, warmup = WARMUP, seed = BAYES_SEED)
+  
+  tidied <- tidyMCMC(mcmc_samples, conf.int = TRUE, conf.level = 0.9, 
+                     estimate.method = "median", conf.method = "HPDinterval") %>%
+    mutate(in_hpdi = (population_value >= conf.low & population_value <= conf.high))
+  
+  thetas <- unlist(extract(mcmc_samples, "theta"))
+  pop_quantile_in_sample <- ecdf(thetas)(population_value)
+  
+  in_hpdi <- (population_value >= tidied[1,]$conf.low & 
+                population_value <= tidied[1,]$conf.high)
+  
+  return(list(mcmc_samples = mcmc_samples, tidied = tidied, theta_in_hpdi = in_hpdi,
+              pop_quantile_in_sample = pop_quantile_in_sample))
+}
+
+calc_sample_pop <- tribble(
+  ~Variable, ~sample_value, ~National,
+  "Female (%)", results$gender_bin, global_stats$female,
+  "Age (% 35+)", results$age_bin, global_stats$age,
+  "Income (% $50,000+)", results$income_bin, global_stats$income,
+  "Education (% BA+)", results$education_bin, global_stats$college,
+  "Donated in past year (%)", results$give_charity_2, global_stats$donating,
+  "Volunteered in past year (%)", results$volunteer, global_stats$volunteering
+) %>% 
+  mutate(Sample = sample_value %>% map_dbl(~ prop.table(table(.))[1]),
+         prop_test_bayes = map2(.x = sample_value, .y = National, 
+                                .f = ~ compare_sample_to_pop_bayes(.x, .y))) 
+```
+
+```{r tbl-sample-characteristics, results="asis"}
+format_hpdi <- function(post_lower, post_upper, star, digits = 1) {
+  glue("({lower}%, {upper}%){star}",
+       lower = round(100 * post_lower, digits),
+       upper = round(100 * post_upper, digits))
+}
+
+tbl_sample_pop <- calc_sample_pop %>% 
+  mutate(in_hpdi = prop_test_bayes %>% map_lgl(~ .$theta_in_hpdi),
+         not_hpdi_symbol = ifelse(in_hpdi, "", "†"),
+         diffs_tidy = prop_test_bayes %>% map(~ .$tidied[2,]),
+         diffs_median = diffs_tidy %>% map_dbl(~ .$estimate),
+         diffs_hpdi_fancy = diffs_tidy %>%
+           map2_chr(.x = diffs_tidy, .y = not_hpdi_symbol, 
+                    .f = ~ format_hpdi(.x$conf.low, .x$conf.high, .y))) %>% 
+  mutate_at(vars(National, Sample, diffs_median), funs(percent)) %>% 
+  select(Variable, Sample, National, 
+         `Sample − National~posterior\\ median~` = diffs_median,
+         `90% HPDI` = diffs_hpdi_fancy)
+
+tbl_sample_pop %>% 
+  pandoc.table.return(keep.line.breaks = TRUE, style = "multiline", justify = "lcccc", 
+                      caption = "Characteristics of experimental sample {#tbl:exp-sample}") %T>% 
+  cat(file = file.path(here(), "output", "tables", "tbl-exp-sample.md")) %>% 
+  cat()
 ```
 
 
@@ -370,7 +510,7 @@ chains_fitted_charity <- posterior_linpred(m_amount_c_full,
                                            newdata = newdata_conditions_charity)
 
 coef_summary_charity <- newdata_conditions_charity %>% 
-  bind_cols(tidyMCMC(as.mcmc(chains_fitted_charity), estimate.method = "median",
+  bind_cols(tidyMCMC(chains_fitted_charity, estimate.method = "median",
                      conf.int = TRUE, conf.level = 0.9, conf.method = "HPDinterval")) %>% 
   mutate_at(vars(crackdown, give_charity_3), funs(fct_inorder(., ordered = TRUE)))
 
@@ -399,7 +539,7 @@ chains_fitted_vol_relig <- posterior_linpred(m_amount_c_full,
                                              newdata = newdata_conditions_vol_relig)
 
 coef_summary_vol_relig <- newdata_conditions_vol_relig %>% 
-  bind_cols(tidyMCMC(as.mcmc(chains_fitted_vol_relig), estimate.method = "median",
+  bind_cols(tidyMCMC(chains_fitted_vol_relig, estimate.method = "median",
                      conf.int = TRUE, conf.level = 0.9, conf.method = "HPDinterval")) %>% 
   mutate_at(vars(crackdown, volunteer, religiosity_bin), funs(fct_inorder(., ordered = TRUE))) %>% 
   mutate(religiosity_bin = fct_recode(religiosity_bin,
@@ -453,11 +593,11 @@ m_likely_ci_full <- update(m_likely_ci, . ~ . +
                              ideology_bin + education_bin + religiosity_bin +
                              income_bin + age_bin)
 
-m_likely_cif_full <-update(m_likely_cif, . ~ . + 
-                             favor_humanitarian_bin +
-                             give_charity_3 + volunteer + political_knowledge_bin +
-                             ideology_bin + education_bin + religiosity_bin +
-                             income_bin + age_bin)
+m_likely_cif_full <- update(m_likely_cif, . ~ . + 
+                              favor_humanitarian_bin +
+                              give_charity_3 + volunteer + political_knowledge_bin +
+                              ideology_bin + education_bin + religiosity_bin +
+                              income_bin + age_bin)
 ```
 
 ```{r tbl-models-likely-full, warning=FALSE, results="asis"}
