@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Andrew Heiss and Suparna Chaudhry" />
+
+
+<title>Clean data</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<script src="site_libs/navigation-1.1/sourceembed.js"></script>
+<link href="site_libs/font-awesome-5.0.13/css/fa-svg-with-js.css" rel="stylesheet" />
+<script src="site_libs/font-awesome-5.0.13/js/fontawesome-all.min.js"></script>
+<script src="site_libs/font-awesome-5.0.13/js/fa-v4-shims.min.js"></script>
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; position: absolute; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; }
+pre.numberSource a.sourceLine:empty
+  { position: absolute; }
+pre.numberSource a.sourceLine::before
+  { content: attr(data-line-number);
+    position: absolute; left: -5em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+div.sourceCode {
+  overflow-x: visible;
+}
+</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+#rmd-source-code {
+  display: none;
+}
+</style>
+
+<link rel="stylesheet" href="html/fixes.css" type="text/css" />
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 52px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 57px;
+  margin-top: -57px;
+}
+
+.section h2 {
+  padding-top: 57px;
+  margin-top: -57px;
+}
+.section h3 {
+  padding-top: 57px;
+  margin-top: -57px;
+}
+.section h4 {
+  padding-top: 57px;
+  margin-top: -57px;
+}
+.section h5 {
+  padding-top: 57px;
+  margin-top: -57px;
+}
+.section h6 {
+  padding-top: 57px;
+  margin-top: -57px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+<script>
+$(document).ready(function () {
+  window.initializeSourceEmbed("01_clean-data.Rmd");
+  window.initializeCodeFolding("show" === "show");
+});
+</script>
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3,h4",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = false;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+.tocify-subheader {
+  display: inline;
+}
+.tocify-subheader .tocify-item {
+  font-size: 0.95em;
+}
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">NGO Crackdowns and Philanthropy</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="preregistration.html">
+    <span class="fa fa-pencil-square"></span>
+     
+    Preregistration, design, IRB
+  </a>
+</li>
+<li>
+  <a href="experiment.html">
+    <span class="fa fa-flask"></span>
+     
+    Experiment
+  </a>
+</li>
+<li>
+  <a href="01_clean-data.html">
+    <span class="fa fa-table"></span>
+     
+    Data cleaning
+  </a>
+</li>
+<li>
+  <a href="02_analysis.html">
+    <span class="fa fa-bar-chart"></span>
+     
+    Results
+  </a>
+</li>
+<li>
+  <a href="03_additional-analysis.html">
+    <span class="fa fa-bar-chart"></span>
+     
+    Additional analysis
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+<div class="btn-group pull-right">
+<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+<li role="separator" class="divider"></li>
+<li><a id="rmd-download-source" href="#">Download Rmd</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Clean data</h1>
+<h4 class="author"><em>Andrew Heiss and Suparna Chaudhry</em></h4>
+<h4 class="date"><em>Last run: July 14, 2018</em></h4>
+
+</div>
+
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw">library</span>(tidyverse)</a>
+<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="kw">library</span>(here)</a>
+<a class="sourceLine" id="cb1-3" data-line-number="3"><span class="kw">library</span>(csvy)</a>
+<a class="sourceLine" id="cb1-4" data-line-number="4"></a>
+<a class="sourceLine" id="cb1-5" data-line-number="5"><span class="co"># Calculate the quantile (and median) of an ordered factor</span></a>
+<a class="sourceLine" id="cb1-6" data-line-number="6"><span class="co"># Borrowed from @jrnold: https://gist.github.com/jrnold/6759254</span></a>
+<a class="sourceLine" id="cb1-7" data-line-number="7"><span class="co">#</span></a>
+<a class="sourceLine" id="cb1-8" data-line-number="8"><span class="co"># In the case of ties, the first in order will win. For instance, </span></a>
+<a class="sourceLine" id="cb1-9" data-line-number="9"><span class="co"># bloop &lt;- factor(c(&quot;A&quot;, &quot;A&quot;, &quot;B&quot;, &quot;B&quot;), ordered = TRUE)</span></a>
+<a class="sourceLine" id="cb1-10" data-line-number="10"><span class="co"># median(bloop)  # &quot;A&quot;</span></a>
+<a class="sourceLine" id="cb1-11" data-line-number="11">quantile.ordered &lt;-<span class="st"> </span><span class="cf">function</span>(x, <span class="dt">probs =</span> <span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="fl">0.25</span>)) {</a>
+<a class="sourceLine" id="cb1-12" data-line-number="12">  tab &lt;-<span class="st"> </span><span class="kw">table</span>(x)</a>
+<a class="sourceLine" id="cb1-13" data-line-number="13">  cdf &lt;-<span class="st"> </span><span class="kw">cumsum</span>(tab <span class="op">/</span><span class="st"> </span><span class="kw">sum</span>(tab))</a>
+<a class="sourceLine" id="cb1-14" data-line-number="14">  idx &lt;-<span class="st"> </span><span class="kw">sapply</span>(probs, <span class="cf">function</span>(p) <span class="kw">min</span>(<span class="kw">which</span>(cdf <span class="op">&gt;=</span><span class="st"> </span>p)))</a>
+<a class="sourceLine" id="cb1-15" data-line-number="15">  <span class="kw">levels</span>(x)[idx] </a>
+<a class="sourceLine" id="cb1-16" data-line-number="16">}</a>
+<a class="sourceLine" id="cb1-17" data-line-number="17"></a>
+<a class="sourceLine" id="cb1-18" data-line-number="18">quantile.factor &lt;-<span class="st"> </span>quantile.ordered</a>
+<a class="sourceLine" id="cb1-19" data-line-number="19">median.ordered &lt;-<span class="st"> </span><span class="cf">function</span>(x) <span class="kw">quantile</span>(x, <span class="fl">0.5</span>)</a>
+<a class="sourceLine" id="cb1-20" data-line-number="20">median.factor &lt;-<span class="st"> </span>median.ordered</a>
+<a class="sourceLine" id="cb1-21" data-line-number="21"></a>
+<a class="sourceLine" id="cb1-22" data-line-number="22"></a>
+<a class="sourceLine" id="cb1-23" data-line-number="23"><span class="co"># Load data</span></a>
+<a class="sourceLine" id="cb1-24" data-line-number="24"><span class="co"># results_file &lt;- file.path(here(), &quot;data&quot;, &quot;test_data.csv&quot;)</span></a>
+<a class="sourceLine" id="cb1-25" data-line-number="25">results_file &lt;-<span class="st"> </span><span class="kw">file.path</span>(<span class="kw">here</span>(), <span class="st">&quot;private&quot;</span>, </a>
+<a class="sourceLine" id="cb1-26" data-line-number="26">                          <span class="st">&quot;NGO Crackdowns and Philanthropy, March 2018 pilot_March 23, 2018_20.01.csv&quot;</span>)</a>
+<a class="sourceLine" id="cb1-27" data-line-number="27"></a>
+<a class="sourceLine" id="cb1-28" data-line-number="28"><span class="co"># Possible answers</span></a>
+<a class="sourceLine" id="cb1-29" data-line-number="29">favorability &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Very unfavorable&quot;</span>, <span class="st">&quot;Unfavorable&quot;</span>, <span class="st">&quot;Neutral&quot;</span>, </a>
+<a class="sourceLine" id="cb1-30" data-line-number="30">                  <span class="st">&quot;Favorable&quot;</span>, <span class="st">&quot;Very favorable&quot;</span>)</a>
+<a class="sourceLine" id="cb1-31" data-line-number="31"></a>
+<a class="sourceLine" id="cb1-32" data-line-number="32">likelihood &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Extremely unlikely&quot;</span>, <span class="st">&quot;Somewhat unlikely&quot;</span>, </a>
+<a class="sourceLine" id="cb1-33" data-line-number="33">                <span class="st">&quot;Neither likely nor unlikely&quot;</span>, </a>
+<a class="sourceLine" id="cb1-34" data-line-number="34">                <span class="st">&quot;Somewhat likely&quot;</span>, <span class="st">&quot;Extremely likely&quot;</span>)</a>
+<a class="sourceLine" id="cb1-35" data-line-number="35"></a>
+<a class="sourceLine" id="cb1-36" data-line-number="36">frequency_charity &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Once a week&quot;</span>, <span class="st">&quot;Once a month&quot;</span>, <span class="st">&quot;Once every three months&quot;</span>, </a>
+<a class="sourceLine" id="cb1-37" data-line-number="37">                       <span class="st">&quot;Once every six months&quot;</span>, <span class="st">&quot;Once a year&quot;</span>, <span class="st">&quot;Once every few years&quot;</span>, </a>
+<a class="sourceLine" id="cb1-38" data-line-number="38">                       <span class="st">&quot;Never&quot;</span>)</a>
+<a class="sourceLine" id="cb1-39" data-line-number="39"></a>
+<a class="sourceLine" id="cb1-40" data-line-number="40">frequency_public_affairs &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Most of the time&quot;</span>, <span class="st">&quot;Some of the time&quot;</span>, </a>
+<a class="sourceLine" id="cb1-41" data-line-number="41">                              <span class="st">&quot;Only now and then&quot;</span>, <span class="st">&quot;Hardly at all&quot;</span>)</a>
+<a class="sourceLine" id="cb1-42" data-line-number="42"></a>
+<a class="sourceLine" id="cb1-43" data-line-number="43">levels_ideology &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Strong liberal&quot;</span>, <span class="st">&quot;Liberal&quot;</span>, <span class="st">&quot;Independent, leaning liberal&quot;</span>, </a>
+<a class="sourceLine" id="cb1-44" data-line-number="44">                     <span class="st">&quot;Independent&quot;</span>, <span class="st">&quot;Independent, leaning conservative&quot;</span>, </a>
+<a class="sourceLine" id="cb1-45" data-line-number="45">                     <span class="st">&quot;Conservative&quot;</span>, <span class="st">&quot;Very conservative&quot;</span>)</a>
+<a class="sourceLine" id="cb1-46" data-line-number="46"></a>
+<a class="sourceLine" id="cb1-47" data-line-number="47">levels_education &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Less than high school&quot;</span>, <span class="st">&quot;High school graduate&quot;</span>, </a>
+<a class="sourceLine" id="cb1-48" data-line-number="48">                      <span class="st">&quot;Some college&quot;</span>, <span class="st">&quot;2 year degree&quot;</span>, <span class="st">&quot;4 year degree&quot;</span>, </a>
+<a class="sourceLine" id="cb1-49" data-line-number="49">                      <span class="st">&quot;Graduate or professional degree&quot;</span>, <span class="st">&quot;Doctorate&quot;</span>)</a>
+<a class="sourceLine" id="cb1-50" data-line-number="50"></a>
+<a class="sourceLine" id="cb1-51" data-line-number="51">frequency_religion &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;More than once a week&quot;</span>, <span class="st">&quot;Once a week&quot;</span>, <span class="st">&quot;Once or twice a month&quot;</span>, </a>
+<a class="sourceLine" id="cb1-52" data-line-number="52">                        <span class="st">&quot;A few times a year&quot;</span>, <span class="st">&quot;Seldom&quot;</span>, <span class="st">&quot;Never&quot;</span>, <span class="st">&quot;Don&#39;t know&quot;</span>)</a>
+<a class="sourceLine" id="cb1-53" data-line-number="53"></a>
+<a class="sourceLine" id="cb1-54" data-line-number="54">levels_gender &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Female&quot;</span>, <span class="st">&quot;Male&quot;</span>, <span class="st">&quot;Transgender&quot;</span>, <span class="st">&quot;Other&quot;</span>, <span class="st">&quot;Prefer not to say&quot;</span>)</a>
+<a class="sourceLine" id="cb1-55" data-line-number="55"></a>
+<a class="sourceLine" id="cb1-56" data-line-number="56">levels_income &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Less than $10,000&quot;</span>, <span class="st">&quot;$10,000 – $19,999&quot;</span>, <span class="st">&quot;$20,000 – $29,999&quot;</span>, </a>
+<a class="sourceLine" id="cb1-57" data-line-number="57">                   <span class="st">&quot;$30,000 – $39,999&quot;</span>, <span class="st">&quot;$40,000 – $49,999&quot;</span>, <span class="st">&quot;$50,000 – $59,999&quot;</span>, </a>
+<a class="sourceLine" id="cb1-58" data-line-number="58">                   <span class="st">&quot;$60,000 – $69,999&quot;</span>, <span class="st">&quot;$70,000 – $79,999&quot;</span>, <span class="st">&quot;$80,000 – $89,999&quot;</span>, </a>
+<a class="sourceLine" id="cb1-59" data-line-number="59">                   <span class="st">&quot;$90,000 – $99,999&quot;</span>, <span class="st">&quot;$100,000 – $149,999&quot;</span>, <span class="st">&quot;More than $150,000&quot;</span>, </a>
+<a class="sourceLine" id="cb1-60" data-line-number="60">                   <span class="st">&quot;Prefer not to say&quot;</span>)</a>
+<a class="sourceLine" id="cb1-61" data-line-number="61"></a>
+<a class="sourceLine" id="cb1-62" data-line-number="62">levels_age &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Under 18&quot;</span>, <span class="st">&quot;18 – 24&quot;</span>, <span class="st">&quot;25 – 34&quot;</span>, <span class="st">&quot;35 – 44&quot;</span>, <span class="st">&quot;45 – 54&quot;</span>, </a>
+<a class="sourceLine" id="cb1-63" data-line-number="63">                <span class="st">&quot;55 – 64&quot;</span>, <span class="st">&quot;65 – 74&quot;</span>, <span class="st">&quot;75 – 84&quot;</span>, <span class="st">&quot;85 or older&quot;</span>)</a>
+<a class="sourceLine" id="cb1-64" data-line-number="64"></a>
+<a class="sourceLine" id="cb1-65" data-line-number="65">attention1_answer &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Green&quot;</span>, <span class="st">&quot;Yellow&quot;</span>)</a>
+<a class="sourceLine" id="cb1-66" data-line-number="66">attention2_answer &lt;-<span class="st"> &quot;Blue&quot;</span></a>
+<a class="sourceLine" id="cb1-67" data-line-number="67">levels_attention &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Correct&quot;</span>, <span class="st">&quot;Incorrect&quot;</span>)</a>
+<a class="sourceLine" id="cb1-68" data-line-number="68"></a>
+<a class="sourceLine" id="cb1-69" data-line-number="69"><span class="co"># Qualtrics stores question information in the first 3 rows. All we care about</span></a>
+<a class="sourceLine" id="cb1-70" data-line-number="70"><span class="co"># are the column names in the first row.</span></a>
+<a class="sourceLine" id="cb1-71" data-line-number="71">results_meta &lt;-<span class="st"> </span><span class="kw">read_csv</span>(results_file, <span class="dt">n_max =</span> <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb1-72" data-line-number="72"></a>
+<a class="sourceLine" id="cb1-73" data-line-number="73"><span class="co"># The first 10 rows need to be skipped because the consent question has a bunch</span></a>
+<a class="sourceLine" id="cb1-74" data-line-number="74"><span class="co"># of line breaks and it messes with CSV line counting. The actual responses</span></a>
+<a class="sourceLine" id="cb1-75" data-line-number="75"><span class="co"># start on row 11. This doesn&#39;t entirely make sense, since read_csv can read the</span></a>
+<a class="sourceLine" id="cb1-76" data-line-number="76"><span class="co"># line break-filled row in just fine. Skipping said lines makes it choke. &lt;shrug&gt;</span></a>
+<a class="sourceLine" id="cb1-77" data-line-number="77">results_raw &lt;-<span class="st"> </span><span class="kw">read_csv</span>(results_file, <span class="dt">skip =</span> <span class="dv">16</span>,</a>
+<a class="sourceLine" id="cb1-78" data-line-number="78">                        <span class="dt">col_names =</span> <span class="kw">colnames</span>(results_meta))</a>
+<a class="sourceLine" id="cb1-79" data-line-number="79"></a>
+<a class="sourceLine" id="cb1-80" data-line-number="80"><span class="co"># Confirmation codes to exclude. These are people who failed the attention</span></a>
+<a class="sourceLine" id="cb1-81" data-line-number="81"><span class="co"># checks or who took the survey outside of MTurk.</span></a>
+<a class="sourceLine" id="cb1-82" data-line-number="82"><span class="co">#</span></a>
+<a class="sourceLine" id="cb1-83" data-line-number="83"><span class="co"># The code for determining these is in a script that is excluded from the main</span></a>
+<a class="sourceLine" id="cb1-84" data-line-number="84"><span class="co"># repository because of privacy issues (it deals directly with MTurk worker</span></a>
+<a class="sourceLine" id="cb1-85" data-line-number="85"><span class="co"># IDs), called &quot;private/approve_mturkers.R&quot;. It outputs this text list of codes.</span></a>
+<a class="sourceLine" id="cb1-86" data-line-number="86">codes_to_exclude &lt;-<span class="st"> </span><span class="kw">read_csv</span>(<span class="kw">file.path</span>(<span class="kw">here</span>(), <span class="st">&quot;data&quot;</span>, <span class="st">&quot;codes_to_exclude.csv&quot;</span>))</a>
+<a class="sourceLine" id="cb1-87" data-line-number="87"></a>
+<a class="sourceLine" id="cb1-88" data-line-number="88"><span class="co"># Clean everything</span></a>
+<a class="sourceLine" id="cb1-89" data-line-number="89">results_check_attention &lt;-<span class="st"> </span>results_raw <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb1-90" data-line-number="90"><span class="st">  </span><span class="co"># Only select necessary columns</span></a>
+<a class="sourceLine" id="cb1-91" data-line-number="91"><span class="st">  </span><span class="kw">select</span>(<span class="dt">id =</span> ResponseId, <span class="dt">confirmation_code =</span> mTurkCode, <span class="dt">duration =</span> <span class="st">`</span><span class="dt">Duration (in seconds)</span><span class="st">`</span>,</a>
+<a class="sourceLine" id="cb1-92" data-line-number="92">         <span class="dt">start_date =</span> StartDate, <span class="dt">end_date =</span> EndDate,</a>
+<a class="sourceLine" id="cb1-93" data-line-number="93">         crackdown, issue, funding, <span class="kw">starts_with</span>(<span class="st">&quot;Q&quot;</span>)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb1-94" data-line-number="94"><span class="st">  </span><span class="kw">rename</span>(<span class="dt">favor_humanitarian =</span> Q2<span class="fl">.1</span>_<span class="dv">1</span>, <span class="dt">favor_human_rights =</span> Q2<span class="fl">.1</span>_<span class="dv">2</span>, </a>
+<a class="sourceLine" id="cb1-95" data-line-number="95">         <span class="dt">favor_development =</span> Q2<span class="fl">.1</span>_<span class="dv">3</span>, <span class="dt">donate_likely =</span> Q2<span class="fl">.3</span>, </a>
+<a class="sourceLine" id="cb1-96" data-line-number="96">         <span class="dt">amount_donate =</span> Q2<span class="fl">.4</span>_<span class="dv">1</span>, <span class="dt">amount_keep =</span> Q2<span class="fl">.4</span>_<span class="dv">2</span>, <span class="dt">amount_why =</span> Q2<span class="fl">.5</span>,</a>
+<a class="sourceLine" id="cb1-97" data-line-number="97">         <span class="dt">give_charity =</span> Q3<span class="fl">.2</span>, <span class="dt">volunteer =</span> Q3<span class="fl">.3</span>, <span class="dt">political_knowledge =</span> Q3<span class="fl">.4</span>,</a>
+<a class="sourceLine" id="cb1-98" data-line-number="98">         <span class="dt">ideology =</span> Q3<span class="fl">.5</span>, <span class="dt">education =</span> Q3<span class="fl">.6</span>, <span class="dt">religiosity =</span> Q3<span class="fl">.7</span>,</a>
+<a class="sourceLine" id="cb1-99" data-line-number="99">         <span class="dt">gender =</span> Q3<span class="fl">.9</span>, <span class="dt">gender_other =</span> Q3<span class="fl">.9</span>_<span class="dv">4</span>_TEXT, <span class="dt">income =</span> Q3<span class="fl">.10</span>, <span class="dt">age =</span> Q3<span class="fl">.11</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb1-100" data-line-number="100"><span class="st">  </span><span class="co"># Clean up experimental condition columns</span></a>
+<a class="sourceLine" id="cb1-101" data-line-number="101"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">issue =</span> <span class="kw">recode</span>(issue, <span class="st">`</span><span class="dt">human rights for refugees</span><span class="st">`</span> =<span class="st"> &quot;Human rights&quot;</span>,</a>
+<a class="sourceLine" id="cb1-102" data-line-number="102">                        <span class="st">`</span><span class="dt">humanitarian assistance for refugees</span><span class="st">`</span> =<span class="st"> &quot;Humanitarian assistance&quot;</span>),</a>
+<a class="sourceLine" id="cb1-103" data-line-number="103">         <span class="dt">funding =</span> <span class="kw">recode</span>(funding, <span class="st">`</span><span class="dt">government donors</span><span class="st">`</span> =<span class="st"> &quot;Government&quot;</span>,</a>
+<a class="sourceLine" id="cb1-104" data-line-number="104">                          <span class="st">`</span><span class="dt">individual, private donors</span><span class="st">`</span> =<span class="st"> &quot;Private&quot;</span>)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb1-105" data-line-number="105"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">crackdown =</span> <span class="kw">ifelse</span>(<span class="kw">str_detect</span>(crackdown, <span class="st">&quot;harshly restrict&quot;</span>), </a>
+<a class="sourceLine" id="cb1-106" data-line-number="106">                            <span class="st">&quot;Crackdown&quot;</span>, <span class="st">&quot;No crackdown&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb1-107" data-line-number="107"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">crackdown =</span> <span class="kw">factor</span>(crackdown, <span class="dt">levels =</span> <span class="kw">c</span>(<span class="st">&quot;No crackdown&quot;</span>, <span class="st">&quot;Crackdown&quot;</span>), </a>
+<a class="sourceLine" id="cb1-108" data-line-number="108">                            <span class="dt">ordered =</span> <span class="ot">TRUE</span>),</a>
+<a class="sourceLine" id="cb1-109" data-line-number="109">         <span class="dt">issue =</span> <span class="kw">factor</span>(issue, <span class="dt">levels =</span> <span class="kw">c</span>(<span class="st">&quot;Human rights&quot;</span>, <span class="st">&quot;Humanitarian assistance&quot;</span>), </a>
+<a class="sourceLine" id="cb1-110" data-line-number="110">                        <span class="dt">ordered =</span> <span class="ot">TRUE</span>),</a>
+<a class="sourceLine" id="cb1-111" data-line-number="111">         <span class="dt">funding =</span> <span class="kw">factor</span>(funding, <span class="dt">levels =</span> <span class="kw">c</span>(<span class="st">&quot;Government&quot;</span>, <span class="st">&quot;Private&quot;</span>), </a>
+<a class="sourceLine" id="cb1-112" data-line-number="112">                          <span class="dt">ordered =</span> <span class="ot">TRUE</span>)) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb1-113" data-line-number="113"><span class="st">  </span><span class="co"># Attention checks</span></a>
+<a class="sourceLine" id="cb1-114" data-line-number="114"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">attention1_correct =</span> <span class="kw">str_split</span>(Q1<span class="fl">.3</span>, <span class="st">&quot;,&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb1-115" data-line-number="115"><span class="st">           </span><span class="kw">map_lgl</span>(<span class="op">~</span><span class="st"> </span><span class="kw">all</span>(attention1_answer <span class="op">%in%</span><span class="st"> </span>.) <span class="op">&amp;</span><span class="st"> </span><span class="kw">length</span>(.) <span class="op">==</span><span class="st"> </span><span class="kw">length</span>(attention1_answer)),</a>
+<a class="sourceLine" id="cb1-116" data-line-number="116">         <span class="dt">attention2_correct =</span> Q3<span class="fl">.8</span> <span class="op">==</span><span class="st"> </span>attention2_answer) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb1-117" data-line-number="117"><span class="st">  </span><span class="co"># This person contacted me separately to say that they accidentally did the first</span></a>
+<a class="sourceLine" id="cb1-118" data-line-number="118"><span class="st">  </span><span class="co"># attention check wrong, but that they did pay attention: 6518634</span></a>
+<a class="sourceLine" id="cb1-119" data-line-number="119"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">attention1_correct =</span> <span class="kw">ifelse</span>(confirmation_code <span class="op">==</span><span class="st"> </span><span class="dv">6518634</span>,</a>
+<a class="sourceLine" id="cb1-120" data-line-number="120">                                     <span class="ot">TRUE</span>, attention1_correct)) </a>
+<a class="sourceLine" id="cb1-121" data-line-number="121"></a>
+<a class="sourceLine" id="cb1-122" data-line-number="122">results &lt;-<span class="st"> </span>results_check_attention <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb1-123" data-line-number="123"><span class="st">  </span><span class="kw">filter</span>(<span class="op">!</span>(confirmation_code <span class="op">%in%</span><span class="st"> </span>codes_to_exclude<span class="op">$</span>confirmation_code)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb1-124" data-line-number="124"><span class="st">  </span><span class="co"># Factorize variables</span></a>
+<a class="sourceLine" id="cb1-125" data-line-number="125"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">donate_likely =</span> <span class="kw">factor</span>(donate_likely, <span class="dt">levels =</span> likelihood, <span class="dt">ordered =</span> <span class="ot">TRUE</span>)) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb1-126" data-line-number="126"><span class="st">  </span><span class="kw">mutate_at</span>(<span class="kw">vars</span>(favor_humanitarian, favor_human_rights, favor_development),</a>
+<a class="sourceLine" id="cb1-127" data-line-number="127">            <span class="kw">funs</span>(<span class="kw">factor</span>(., <span class="dt">levels =</span> favorability, <span class="dt">ordered =</span> <span class="ot">TRUE</span>))) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb1-128" data-line-number="128"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">give_charity =</span> <span class="kw">factor</span>(give_charity, </a>
+<a class="sourceLine" id="cb1-129" data-line-number="129">                               <span class="dt">levels =</span> frequency_charity, <span class="dt">ordered =</span> <span class="ot">TRUE</span>),</a>
+<a class="sourceLine" id="cb1-130" data-line-number="130">         <span class="dt">volunteer =</span> <span class="kw">factor</span>(volunteer, <span class="dt">levels =</span> <span class="kw">c</span>(<span class="st">&quot;No&quot;</span>, <span class="st">&quot;Yes&quot;</span>), <span class="dt">ordered =</span> <span class="ot">TRUE</span>),</a>
+<a class="sourceLine" id="cb1-131" data-line-number="131">         <span class="dt">political_knowledge =</span> <span class="kw">factor</span>(political_knowledge, </a>
+<a class="sourceLine" id="cb1-132" data-line-number="132">                                      <span class="dt">levels =</span> frequency_public_affairs, <span class="dt">ordered =</span> <span class="ot">TRUE</span>),</a>
+<a class="sourceLine" id="cb1-133" data-line-number="133">         <span class="dt">ideology =</span> <span class="kw">factor</span>(ideology, <span class="dt">levels =</span> levels_ideology, <span class="dt">ordered =</span> <span class="ot">TRUE</span>),</a>
+<a class="sourceLine" id="cb1-134" data-line-number="134">         <span class="dt">education =</span> <span class="kw">factor</span>(education, <span class="dt">levels =</span> levels_education, <span class="dt">ordered =</span> <span class="ot">TRUE</span>),</a>
+<a class="sourceLine" id="cb1-135" data-line-number="135">         <span class="dt">religiosity =</span> <span class="kw">factor</span>(religiosity, <span class="dt">levels =</span> frequency_religion, <span class="dt">ordered =</span> <span class="ot">TRUE</span>),</a>
+<a class="sourceLine" id="cb1-136" data-line-number="136">         <span class="dt">gender =</span> <span class="kw">recode</span>(gender, <span class="st">`</span><span class="dt">Other:</span><span class="st">`</span> =<span class="st"> &quot;Other&quot;</span>),</a>
+<a class="sourceLine" id="cb1-137" data-line-number="137">         <span class="dt">gender =</span> <span class="kw">factor</span>(gender, <span class="dt">levels =</span> levels_gender, <span class="dt">ordered =</span> <span class="ot">TRUE</span>),</a>
+<a class="sourceLine" id="cb1-138" data-line-number="138">         <span class="dt">income =</span> <span class="kw">factor</span>(income, <span class="dt">levels =</span> levels_income, <span class="dt">ordered =</span> <span class="ot">TRUE</span>),</a>
+<a class="sourceLine" id="cb1-139" data-line-number="139">         <span class="dt">age =</span> <span class="kw">factor</span>(age, <span class="dt">levels =</span> levels_age, <span class="dt">ordered =</span> <span class="ot">TRUE</span>),</a>
+<a class="sourceLine" id="cb1-140" data-line-number="140">         <span class="dt">check1 =</span> <span class="kw">factor</span>(attention1_correct, <span class="dt">levels =</span> <span class="kw">c</span>(<span class="ot">TRUE</span>, <span class="ot">FALSE</span>),</a>
+<a class="sourceLine" id="cb1-141" data-line-number="141">                         <span class="dt">labels =</span> levels_attention, <span class="dt">ordered =</span> <span class="ot">TRUE</span>),</a>
+<a class="sourceLine" id="cb1-142" data-line-number="142">         <span class="dt">check2 =</span> <span class="kw">factor</span>(attention2_correct, <span class="dt">levels =</span> <span class="kw">c</span>(<span class="ot">TRUE</span>, <span class="ot">FALSE</span>),</a>
+<a class="sourceLine" id="cb1-143" data-line-number="143">                         <span class="dt">labels =</span> levels_attention, <span class="dt">ordered =</span> <span class="ot">TRUE</span>)) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb1-144" data-line-number="144"><span class="st">  </span><span class="co"># Dichotomize variables</span></a>
+<a class="sourceLine" id="cb1-145" data-line-number="145"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">donate_likely_bin =</span> <span class="kw">fct_recode</span>(donate_likely,</a>
+<a class="sourceLine" id="cb1-146" data-line-number="146">                                        <span class="st">`</span><span class="dt">Not likely</span><span class="st">`</span> =<span class="st"> &quot;Extremely unlikely&quot;</span>,</a>
+<a class="sourceLine" id="cb1-147" data-line-number="147">                                        <span class="st">`</span><span class="dt">Not likely</span><span class="st">`</span> =<span class="st"> &quot;Somewhat unlikely&quot;</span>,</a>
+<a class="sourceLine" id="cb1-148" data-line-number="148">                                        <span class="st">`</span><span class="dt">Not likely</span><span class="st">`</span> =<span class="st"> &quot;Neither likely nor unlikely&quot;</span>,</a>
+<a class="sourceLine" id="cb1-149" data-line-number="149">                                        <span class="dt">Likely =</span> <span class="st">&quot;Somewhat likely&quot;</span>,</a>
+<a class="sourceLine" id="cb1-150" data-line-number="150">                                        <span class="dt">Likely =</span> <span class="st">&quot;Extremely likely&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb1-151" data-line-number="151"><span class="st">  </span><span class="kw">mutate_at</span>(<span class="kw">vars</span>(favor_humanitarian, favor_human_rights, favor_development),</a>
+<a class="sourceLine" id="cb1-152" data-line-number="152">            <span class="kw">funs</span>(<span class="dt">bin =</span> <span class="kw">fct_recode</span>(., </a>
+<a class="sourceLine" id="cb1-153" data-line-number="153">                                  <span class="st">`</span><span class="dt">Not favorable</span><span class="st">`</span> =<span class="st"> &quot;Very unfavorable&quot;</span>,</a>
+<a class="sourceLine" id="cb1-154" data-line-number="154">                                  <span class="st">`</span><span class="dt">Not favorable</span><span class="st">`</span> =<span class="st"> &quot;Unfavorable&quot;</span>,</a>
+<a class="sourceLine" id="cb1-155" data-line-number="155">                                  <span class="st">`</span><span class="dt">Not favorable</span><span class="st">`</span> =<span class="st"> &quot;Neutral&quot;</span>,</a>
+<a class="sourceLine" id="cb1-156" data-line-number="156">                                  <span class="dt">Favorable =</span> <span class="st">&quot;Favorable&quot;</span>,</a>
+<a class="sourceLine" id="cb1-157" data-line-number="157">                                  <span class="dt">Favorable =</span> <span class="st">&quot;Very favorable&quot;</span>))) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb1-158" data-line-number="158"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">give_charity_3 =</span> <span class="kw">fct_recode</span>(give_charity,</a>
+<a class="sourceLine" id="cb1-159" data-line-number="159">                                     <span class="st">`</span><span class="dt">At least once a month</span><span class="st">`</span> =<span class="st"> &quot;Once a week&quot;</span>,</a>
+<a class="sourceLine" id="cb1-160" data-line-number="160">                                     <span class="st">`</span><span class="dt">At least once a month</span><span class="st">`</span> =<span class="st"> &quot;Once a month&quot;</span>,</a>
+<a class="sourceLine" id="cb1-161" data-line-number="161">                                     <span class="st">`</span><span class="dt">Once a month-once a year</span><span class="st">`</span> =<span class="st"> &quot;Once every three months&quot;</span>,</a>
+<a class="sourceLine" id="cb1-162" data-line-number="162">                                     <span class="st">`</span><span class="dt">Once a month-once a year</span><span class="st">`</span> =<span class="st"> &quot;Once every six months&quot;</span>,</a>
+<a class="sourceLine" id="cb1-163" data-line-number="163">                                     <span class="st">`</span><span class="dt">Once a month-once a year</span><span class="st">`</span> =<span class="st"> &quot;Once a year&quot;</span>,</a>
+<a class="sourceLine" id="cb1-164" data-line-number="164">                                     <span class="dt">Rarely =</span> <span class="st">&quot;Once every few years&quot;</span>,</a>
+<a class="sourceLine" id="cb1-165" data-line-number="165">                                     <span class="dt">Rarely =</span> <span class="st">&quot;Never&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">fct_rev</span>(),</a>
+<a class="sourceLine" id="cb1-166" data-line-number="166">         <span class="dt">give_charity_2 =</span> <span class="kw">fct_recode</span>(give_charity,</a>
+<a class="sourceLine" id="cb1-167" data-line-number="167">                                     <span class="st">`</span><span class="dt">At least once a year</span><span class="st">`</span> =<span class="st"> &quot;Once a week&quot;</span>,</a>
+<a class="sourceLine" id="cb1-168" data-line-number="168">                                     <span class="st">`</span><span class="dt">At least once a year</span><span class="st">`</span> =<span class="st"> &quot;Once a month&quot;</span>,</a>
+<a class="sourceLine" id="cb1-169" data-line-number="169">                                     <span class="st">`</span><span class="dt">At least once a year</span><span class="st">`</span> =<span class="st"> &quot;Once every three months&quot;</span>,</a>
+<a class="sourceLine" id="cb1-170" data-line-number="170">                                     <span class="st">`</span><span class="dt">At least once a year</span><span class="st">`</span> =<span class="st"> &quot;Once every six months&quot;</span>,</a>
+<a class="sourceLine" id="cb1-171" data-line-number="171">                                     <span class="st">`</span><span class="dt">At least once a year</span><span class="st">`</span> =<span class="st"> &quot;Once a year&quot;</span>,</a>
+<a class="sourceLine" id="cb1-172" data-line-number="172">                                     <span class="dt">Rarely =</span> <span class="st">&quot;Once every few years&quot;</span>,</a>
+<a class="sourceLine" id="cb1-173" data-line-number="173">                                     <span class="dt">Rarely =</span> <span class="st">&quot;Never&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb1-174" data-line-number="174"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">political_knowledge_bin =</span> <span class="kw">fct_recode</span>(political_knowledge,</a>
+<a class="sourceLine" id="cb1-175" data-line-number="175">                                              <span class="st">`</span><span class="dt">Often</span><span class="st">`</span> =<span class="st"> &quot;Most of the time&quot;</span>,</a>
+<a class="sourceLine" id="cb1-176" data-line-number="176">                                              <span class="st">`</span><span class="dt">Often</span><span class="st">`</span> =<span class="st"> &quot;Some of the time&quot;</span>,</a>
+<a class="sourceLine" id="cb1-177" data-line-number="177">                                              <span class="st">`</span><span class="dt">Not often</span><span class="st">`</span> =<span class="st"> &quot;Only now and then&quot;</span>,</a>
+<a class="sourceLine" id="cb1-178" data-line-number="178">                                              <span class="st">`</span><span class="dt">Not often</span><span class="st">`</span> =<span class="st"> &quot;Hardly at all&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">fct_rev</span>()) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb1-179" data-line-number="179"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">ideology_3 =</span> <span class="kw">fct_recode</span>(ideology,</a>
+<a class="sourceLine" id="cb1-180" data-line-number="180">                                 <span class="st">`</span><span class="dt">Liberal</span><span class="st">`</span> =<span class="st"> &quot;Strong liberal&quot;</span>,</a>
+<a class="sourceLine" id="cb1-181" data-line-number="181">                                 <span class="st">`</span><span class="dt">Liberal</span><span class="st">`</span> =<span class="st"> &quot;Liberal&quot;</span>,</a>
+<a class="sourceLine" id="cb1-182" data-line-number="182">                                 <span class="st">`</span><span class="dt">Liberal</span><span class="st">`</span> =<span class="st"> &quot;Independent, leaning liberal&quot;</span>,</a>
+<a class="sourceLine" id="cb1-183" data-line-number="183">                                 <span class="st">`</span><span class="dt">Independent</span><span class="st">`</span> =<span class="st"> &quot;Independent&quot;</span>,</a>
+<a class="sourceLine" id="cb1-184" data-line-number="184">                                 <span class="st">`</span><span class="dt">Conservative</span><span class="st">`</span> =<span class="st"> &quot;Independent, leaning conservative&quot;</span>,</a>
+<a class="sourceLine" id="cb1-185" data-line-number="185">                                 <span class="st">`</span><span class="dt">Conservative</span><span class="st">`</span> =<span class="st"> &quot;Conservative&quot;</span>,</a>
+<a class="sourceLine" id="cb1-186" data-line-number="186">                                 <span class="st">`</span><span class="dt">Conservative</span><span class="st">`</span> =<span class="st"> &quot;Very conservative&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">fct_rev</span>()) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb1-187" data-line-number="187"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">ideology_bin =</span> <span class="kw">fct_recode</span>(ideology_<span class="dv">3</span>,</a>
+<a class="sourceLine" id="cb1-188" data-line-number="188">                                   <span class="st">`</span><span class="dt">Not liberal</span><span class="st">`</span> =<span class="st"> &quot;Independent&quot;</span>,</a>
+<a class="sourceLine" id="cb1-189" data-line-number="189">                                   <span class="st">`</span><span class="dt">Not liberal</span><span class="st">`</span> =<span class="st"> &quot;Conservative&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb1-190" data-line-number="190"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">education_bin =</span> <span class="kw">fct_recode</span>(education,</a>
+<a class="sourceLine" id="cb1-191" data-line-number="191">                                    <span class="st">`</span><span class="dt">No BA</span><span class="st">`</span> =<span class="st"> &quot;Less than high school&quot;</span>,</a>
+<a class="sourceLine" id="cb1-192" data-line-number="192">                                    <span class="st">`</span><span class="dt">No BA</span><span class="st">`</span> =<span class="st"> &quot;High school graduate&quot;</span>,</a>
+<a class="sourceLine" id="cb1-193" data-line-number="193">                                    <span class="st">`</span><span class="dt">No BA</span><span class="st">`</span> =<span class="st"> &quot;Some college&quot;</span>,</a>
+<a class="sourceLine" id="cb1-194" data-line-number="194">                                    <span class="st">`</span><span class="dt">No BA</span><span class="st">`</span> =<span class="st"> &quot;2 year degree&quot;</span>,</a>
+<a class="sourceLine" id="cb1-195" data-line-number="195">                                    <span class="st">`</span><span class="dt">BA and above</span><span class="st">`</span> =<span class="st"> &quot;4 year degree&quot;</span>,</a>
+<a class="sourceLine" id="cb1-196" data-line-number="196">                                    <span class="st">`</span><span class="dt">BA and above</span><span class="st">`</span> =<span class="st"> &quot;Graduate or professional degree&quot;</span>,</a>
+<a class="sourceLine" id="cb1-197" data-line-number="197">                                    <span class="st">`</span><span class="dt">BA and above</span><span class="st">`</span> =<span class="st"> &quot;Doctorate&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb1-198" data-line-number="198"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">religiosity_bin =</span> <span class="kw">fct_recode</span>(religiosity,</a>
+<a class="sourceLine" id="cb1-199" data-line-number="199">                                      <span class="st">`</span><span class="dt">At least once a month</span><span class="st">`</span> =<span class="st"> &quot;More than once a week&quot;</span>,</a>
+<a class="sourceLine" id="cb1-200" data-line-number="200">                                      <span class="st">`</span><span class="dt">At least once a month</span><span class="st">`</span> =<span class="st"> &quot;Once a week&quot;</span>,</a>
+<a class="sourceLine" id="cb1-201" data-line-number="201">                                      <span class="st">`</span><span class="dt">At least once a month</span><span class="st">`</span> =<span class="st"> &quot;Once or twice a month&quot;</span>,</a>
+<a class="sourceLine" id="cb1-202" data-line-number="202">                                      <span class="st">`</span><span class="dt">Rarely</span><span class="st">`</span> =<span class="st"> &quot;A few times a year&quot;</span>,</a>
+<a class="sourceLine" id="cb1-203" data-line-number="203">                                      <span class="st">`</span><span class="dt">Rarely</span><span class="st">`</span> =<span class="st"> &quot;Seldom&quot;</span>,</a>
+<a class="sourceLine" id="cb1-204" data-line-number="204">                                      <span class="st">`</span><span class="dt">Rarely</span><span class="st">`</span> =<span class="st"> &quot;Never&quot;</span>,</a>
+<a class="sourceLine" id="cb1-205" data-line-number="205">                                      <span class="dt">NULL =</span> <span class="st">&quot;Don&#39;t know&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">fct_rev</span>()) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb1-206" data-line-number="206"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">income_clean =</span> <span class="kw">fct_recode</span>(income, <span class="dt">NULL =</span> <span class="st">&quot;Prefer not to say&quot;</span>),</a>
+<a class="sourceLine" id="cb1-207" data-line-number="207">         <span class="dt">income_bin =</span> <span class="kw">factor</span>(income_clean <span class="op">&gt;=</span><span class="st"> </span><span class="kw">median</span>(.<span class="op">$</span>income), <span class="dt">levels =</span> <span class="kw">c</span>(<span class="ot">FALSE</span>, <span class="ot">TRUE</span>),</a>
+<a class="sourceLine" id="cb1-208" data-line-number="208">                             <span class="dt">labels =</span> <span class="kw">paste</span>(<span class="kw">c</span>(<span class="st">&quot;Less than&quot;</span>, <span class="st">&quot;At least&quot;</span>), <span class="kw">median</span>(.<span class="op">$</span>income)))) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb1-209" data-line-number="209"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">age_bin =</span> <span class="kw">factor</span>(age <span class="op">&gt;=</span><span class="st"> </span><span class="kw">median</span>(.<span class="op">$</span>age), <span class="dt">levels =</span> <span class="kw">c</span>(<span class="ot">FALSE</span>, <span class="ot">TRUE</span>),</a>
+<a class="sourceLine" id="cb1-210" data-line-number="210">                          <span class="dt">labels =</span> <span class="kw">paste</span>(<span class="kw">c</span>(<span class="st">&quot;Less than&quot;</span>, <span class="st">&quot;At least&quot;</span>), <span class="kw">median</span>(.<span class="op">$</span>age))),</a>
+<a class="sourceLine" id="cb1-211" data-line-number="211">         <span class="dt">gender_bin =</span> <span class="kw">fct_collapse</span>(gender,</a>
+<a class="sourceLine" id="cb1-212" data-line-number="212">                                   <span class="dt">Female =</span> <span class="st">&quot;Female&quot;</span>,</a>
+<a class="sourceLine" id="cb1-213" data-line-number="213">                                   <span class="st">`</span><span class="dt">Not Female</span><span class="st">`</span> =<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Male&quot;</span>, <span class="st">&quot;Transgender&quot;</span>, </a>
+<a class="sourceLine" id="cb1-214" data-line-number="214">                                                    <span class="st">&quot;Other&quot;</span>, <span class="st">&quot;Prefer not to say&quot;</span>)))</a>
+<a class="sourceLine" id="cb1-215" data-line-number="215"></a>
+<a class="sourceLine" id="cb1-216" data-line-number="216"><span class="co"># Save final clean data</span></a>
+<a class="sourceLine" id="cb1-217" data-line-number="217"><span class="kw">saveRDS</span>(results, <span class="kw">file.path</span>(<span class="kw">here</span>(), <span class="st">&quot;data&quot;</span>, <span class="st">&quot;results_clean.rds&quot;</span>))</a>
+<a class="sourceLine" id="cb1-218" data-line-number="218"><span class="kw">write_csvy</span>(results, <span class="dt">file =</span> <span class="kw">file.path</span>(<span class="kw">here</span>(), <span class="st">&quot;data&quot;</span>, <span class="st">&quot;results_clean.csv&quot;</span>),</a>
+<a class="sourceLine" id="cb1-219" data-line-number="219">           <span class="dt">metadata =</span> <span class="kw">file.path</span>(<span class="kw">here</span>(), <span class="st">&quot;data&quot;</span>, <span class="st">&quot;results_clean.yaml&quot;</span>), <span class="dt">na =</span> <span class="st">&quot;NA&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="co"># Save information about completion rates</span></a>
+<a class="sourceLine" id="cb2-2" data-line-number="2">completed_skeleton &lt;-<span class="st"> </span>results_check_attention <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb2-3" data-line-number="3"><span class="st">  </span><span class="kw">left_join</span>(codes_to_exclude, <span class="dt">by =</span> <span class="st">&quot;confirmation_code&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb2-4" data-line-number="4"><span class="st">  </span><span class="kw">replace_na</span>(<span class="kw">list</span>(<span class="dt">reason =</span> <span class="st">&quot;Approved&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb2-5" data-line-number="5"><span class="st">  </span><span class="kw">expand</span>(reason, crackdown, issue, funding)</a>
+<a class="sourceLine" id="cb2-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb2-7" data-line-number="7">completed_summary &lt;-<span class="st"> </span>results_check_attention <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb2-8" data-line-number="8"><span class="st">  </span><span class="kw">left_join</span>(codes_to_exclude, <span class="dt">by =</span> <span class="st">&quot;confirmation_code&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb2-9" data-line-number="9"><span class="st">  </span><span class="kw">replace_na</span>(<span class="kw">list</span>(<span class="dt">reason =</span> <span class="st">&quot;Approved&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb2-10" data-line-number="10"><span class="st">  </span><span class="kw">count</span>(reason, crackdown, issue, funding) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb2-11" data-line-number="11"><span class="st">  </span><span class="kw">right_join</span>(completed_skeleton, <span class="dt">by =</span> <span class="kw">c</span>(<span class="st">&quot;reason&quot;</span>, <span class="st">&quot;crackdown&quot;</span>, <span class="st">&quot;issue&quot;</span>, <span class="st">&quot;funding&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb2-12" data-line-number="12"><span class="st">  </span><span class="kw">replace_na</span>(<span class="kw">list</span>(<span class="dt">n =</span> <span class="dv">0</span>))</a>
+<a class="sourceLine" id="cb2-13" data-line-number="13"></a>
+<a class="sourceLine" id="cb2-14" data-line-number="14"><span class="kw">saveRDS</span>(completed_summary, <span class="kw">file.path</span>(<span class="kw">here</span>(), <span class="st">&quot;data&quot;</span>, <span class="st">&quot;completion_summary.rds&quot;</span>))</a>
+<a class="sourceLine" id="cb2-15" data-line-number="15"><span class="kw">write_csv</span>(completed_summary, <span class="kw">file.path</span>(<span class="kw">here</span>(), <span class="st">&quot;data&quot;</span>, <span class="st">&quot;completion_summary.csv&quot;</span>))</a></code></pre></div>
+
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiQ2xlYW4gZGF0YSIKYXV0aG9yOiAiQW5kcmV3IEhlaXNzIGFuZCBTdXBhcm5hIENoYXVkaHJ5IgpkYXRlOiAiTGFzdCBydW46IGByIGZvcm1hdChTeXMudGltZSgpLCAnJUIgJWUsICVZJylgIgpvdXRwdXQ6IAogIGh0bWxfZG9jdW1lbnQ6CiAgICBjb2RlX2ZvbGRpbmc6IHNob3cKZWRpdG9yX29wdGlvbnM6IAogIGNodW5rX291dHB1dF90eXBlOiBjb25zb2xlCi0tLQoKYGBge3IgY2xlYW4tZGF0YSwgd2FybmluZz1GQUxTRSwgbWVzc2FnZT1GQUxTRX0KbGlicmFyeSh0aWR5dmVyc2UpCmxpYnJhcnkoaGVyZSkKbGlicmFyeShjc3Z5KQoKIyBDYWxjdWxhdGUgdGhlIHF1YW50aWxlIChhbmQgbWVkaWFuKSBvZiBhbiBvcmRlcmVkIGZhY3RvcgojIEJvcnJvd2VkIGZyb20gQGpybm9sZDogaHR0cHM6Ly9naXN0LmdpdGh1Yi5jb20vanJub2xkLzY3NTkyNTQKIwojIEluIHRoZSBjYXNlIG9mIHRpZXMsIHRoZSBmaXJzdCBpbiBvcmRlciB3aWxsIHdpbi4gRm9yIGluc3RhbmNlLCAKIyBibG9vcCA8LSBmYWN0b3IoYygiQSIsICJBIiwgIkIiLCAiQiIpLCBvcmRlcmVkID0gVFJVRSkKIyBtZWRpYW4oYmxvb3ApICAjICJBIgpxdWFudGlsZS5vcmRlcmVkIDwtIGZ1bmN0aW9uKHgsIHByb2JzID0gc2VxKDAsIDEsIDAuMjUpKSB7CiAgdGFiIDwtIHRhYmxlKHgpCiAgY2RmIDwtIGN1bXN1bSh0YWIgLyBzdW0odGFiKSkKICBpZHggPC0gc2FwcGx5KHByb2JzLCBmdW5jdGlvbihwKSBtaW4od2hpY2goY2RmID49IHApKSkKICBsZXZlbHMoeClbaWR4XSAKfQoKcXVhbnRpbGUuZmFjdG9yIDwtIHF1YW50aWxlLm9yZGVyZWQKbWVkaWFuLm9yZGVyZWQgPC0gZnVuY3Rpb24oeCkgcXVhbnRpbGUoeCwgMC41KQptZWRpYW4uZmFjdG9yIDwtIG1lZGlhbi5vcmRlcmVkCgoKIyBMb2FkIGRhdGEKIyByZXN1bHRzX2ZpbGUgPC0gZmlsZS5wYXRoKGhlcmUoKSwgImRhdGEiLCAidGVzdF9kYXRhLmNzdiIpCnJlc3VsdHNfZmlsZSA8LSBmaWxlLnBhdGgoaGVyZSgpLCAicHJpdmF0ZSIsIAogICAgICAgICAgICAgICAgICAgICAgICAgICJOR08gQ3JhY2tkb3ducyBhbmQgUGhpbGFudGhyb3B5LCBNYXJjaCAyMDE4IHBpbG90X01hcmNoIDIzLCAyMDE4XzIwLjAxLmNzdiIpCgojIFBvc3NpYmxlIGFuc3dlcnMKZmF2b3JhYmlsaXR5IDwtIGMoIlZlcnkgdW5mYXZvcmFibGUiLCAiVW5mYXZvcmFibGUiLCAiTmV1dHJhbCIsIAogICAgICAgICAgICAgICAgICAiRmF2b3JhYmxlIiwgIlZlcnkgZmF2b3JhYmxlIikKCmxpa2VsaWhvb2QgPC0gYygiRXh0cmVtZWx5IHVubGlrZWx5IiwgIlNvbWV3aGF0IHVubGlrZWx5IiwgCiAgICAgICAgICAgICAgICAiTmVpdGhlciBsaWtlbHkgbm9yIHVubGlrZWx5IiwgCiAgICAgICAgICAgICAgICAiU29tZXdoYXQgbGlrZWx5IiwgIkV4dHJlbWVseSBsaWtlbHkiKQoKZnJlcXVlbmN5X2NoYXJpdHkgPC0gYygiT25jZSBhIHdlZWsiLCAiT25jZSBhIG1vbnRoIiwgIk9uY2UgZXZlcnkgdGhyZWUgbW9udGhzIiwgCiAgICAgICAgICAgICAgICAgICAgICAgIk9uY2UgZXZlcnkgc2l4IG1vbnRocyIsICJPbmNlIGEgeWVhciIsICJPbmNlIGV2ZXJ5IGZldyB5ZWFycyIsIAogICAgICAgICAgICAgICAgICAgICAgICJOZXZlciIpCgpmcmVxdWVuY3lfcHVibGljX2FmZmFpcnMgPC0gYygiTW9zdCBvZiB0aGUgdGltZSIsICJTb21lIG9mIHRoZSB0aW1lIiwgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICJPbmx5IG5vdyBhbmQgdGhlbiIsICJIYXJkbHkgYXQgYWxsIikKCmxldmVsc19pZGVvbG9neSA8LSBjKCJTdHJvbmcgbGliZXJhbCIsICJMaWJlcmFsIiwgIkluZGVwZW5kZW50LCBsZWFuaW5nIGxpYmVyYWwiLCAKICAgICAgICAgICAgICAgICAgICAgIkluZGVwZW5kZW50IiwgIkluZGVwZW5kZW50LCBsZWFuaW5nIGNvbnNlcnZhdGl2ZSIsIAogICAgICAgICAgICAgICAgICAgICAiQ29uc2VydmF0aXZlIiwgIlZlcnkgY29uc2VydmF0aXZlIikKCmxldmVsc19lZHVjYXRpb24gPC0gYygiTGVzcyB0aGFuIGhpZ2ggc2Nob29sIiwgIkhpZ2ggc2Nob29sIGdyYWR1YXRlIiwgCiAgICAgICAgICAgICAgICAgICAgICAiU29tZSBjb2xsZWdlIiwgIjIgeWVhciBkZWdyZWUiLCAiNCB5ZWFyIGRlZ3JlZSIsIAogICAgICAgICAgICAgICAgICAgICAgIkdyYWR1YXRlIG9yIHByb2Zlc3Npb25hbCBkZWdyZWUiLCAiRG9jdG9yYXRlIikKCmZyZXF1ZW5jeV9yZWxpZ2lvbiA8LSBjKCJNb3JlIHRoYW4gb25jZSBhIHdlZWsiLCAiT25jZSBhIHdlZWsiLCAiT25jZSBvciB0d2ljZSBhIG1vbnRoIiwgCiAgICAgICAgICAgICAgICAgICAgICAgICJBIGZldyB0aW1lcyBhIHllYXIiLCAiU2VsZG9tIiwgIk5ldmVyIiwgIkRvbid0IGtub3ciKQoKbGV2ZWxzX2dlbmRlciA8LSBjKCJGZW1hbGUiLCAiTWFsZSIsICJUcmFuc2dlbmRlciIsICJPdGhlciIsICJQcmVmZXIgbm90IHRvIHNheSIpCgpsZXZlbHNfaW5jb21lIDwtIGMoIkxlc3MgdGhhbiAkMTAsMDAwIiwgIiQxMCwwMDAg4oCTICQxOSw5OTkiLCAiJDIwLDAwMCDigJMgJDI5LDk5OSIsIAogICAgICAgICAgICAgICAgICAgIiQzMCwwMDAg4oCTICQzOSw5OTkiLCAiJDQwLDAwMCDigJMgJDQ5LDk5OSIsICIkNTAsMDAwIOKAkyAkNTksOTk5IiwgCiAgICAgICAgICAgICAgICAgICAiJDYwLDAwMCDigJMgJDY5LDk5OSIsICIkNzAsMDAwIOKAkyAkNzksOTk5IiwgIiQ4MCwwMDAg4oCTICQ4OSw5OTkiLCAKICAgICAgICAgICAgICAgICAgICIkOTAsMDAwIOKAkyAkOTksOTk5IiwgIiQxMDAsMDAwIOKAkyAkMTQ5LDk5OSIsICJNb3JlIHRoYW4gJDE1MCwwMDAiLCAKICAgICAgICAgICAgICAgICAgICJQcmVmZXIgbm90IHRvIHNheSIpCgpsZXZlbHNfYWdlIDwtIGMoIlVuZGVyIDE4IiwgIjE4IOKAkyAyNCIsICIyNSDigJMgMzQiLCAiMzUg4oCTIDQ0IiwgIjQ1IOKAkyA1NCIsIAogICAgICAgICAgICAgICAgIjU1IOKAkyA2NCIsICI2NSDigJMgNzQiLCAiNzUg4oCTIDg0IiwgIjg1IG9yIG9sZGVyIikKCmF0dGVudGlvbjFfYW5zd2VyIDwtIGMoIkdyZWVuIiwgIlllbGxvdyIpCmF0dGVudGlvbjJfYW5zd2VyIDwtICJCbHVlIgpsZXZlbHNfYXR0ZW50aW9uIDwtIGMoIkNvcnJlY3QiLCAiSW5jb3JyZWN0IikKCiMgUXVhbHRyaWNzIHN0b3JlcyBxdWVzdGlvbiBpbmZvcm1hdGlvbiBpbiB0aGUgZmlyc3QgMyByb3dzLiBBbGwgd2UgY2FyZSBhYm91dAojIGFyZSB0aGUgY29sdW1uIG5hbWVzIGluIHRoZSBmaXJzdCByb3cuCnJlc3VsdHNfbWV0YSA8LSByZWFkX2NzdihyZXN1bHRzX2ZpbGUsIG5fbWF4ID0gMikKCiMgVGhlIGZpcnN0IDEwIHJvd3MgbmVlZCB0byBiZSBza2lwcGVkIGJlY2F1c2UgdGhlIGNvbnNlbnQgcXVlc3Rpb24gaGFzIGEgYnVuY2gKIyBvZiBsaW5lIGJyZWFrcyBhbmQgaXQgbWVzc2VzIHdpdGggQ1NWIGxpbmUgY291bnRpbmcuIFRoZSBhY3R1YWwgcmVzcG9uc2VzCiMgc3RhcnQgb24gcm93IDExLiBUaGlzIGRvZXNuJ3QgZW50aXJlbHkgbWFrZSBzZW5zZSwgc2luY2UgcmVhZF9jc3YgY2FuIHJlYWQgdGhlCiMgbGluZSBicmVhay1maWxsZWQgcm93IGluIGp1c3QgZmluZS4gU2tpcHBpbmcgc2FpZCBsaW5lcyBtYWtlcyBpdCBjaG9rZS4gPHNocnVnPgpyZXN1bHRzX3JhdyA8LSByZWFkX2NzdihyZXN1bHRzX2ZpbGUsIHNraXAgPSAxNiwKICAgICAgICAgICAgICAgICAgICAgICAgY29sX25hbWVzID0gY29sbmFtZXMocmVzdWx0c19tZXRhKSkKCiMgQ29uZmlybWF0aW9uIGNvZGVzIHRvIGV4Y2x1ZGUuIFRoZXNlIGFyZSBwZW9wbGUgd2hvIGZhaWxlZCB0aGUgYXR0ZW50aW9uCiMgY2hlY2tzIG9yIHdobyB0b29rIHRoZSBzdXJ2ZXkgb3V0c2lkZSBvZiBNVHVyay4KIwojIFRoZSBjb2RlIGZvciBkZXRlcm1pbmluZyB0aGVzZSBpcyBpbiBhIHNjcmlwdCB0aGF0IGlzIGV4Y2x1ZGVkIGZyb20gdGhlIG1haW4KIyByZXBvc2l0b3J5IGJlY2F1c2Ugb2YgcHJpdmFjeSBpc3N1ZXMgKGl0IGRlYWxzIGRpcmVjdGx5IHdpdGggTVR1cmsgd29ya2VyCiMgSURzKSwgY2FsbGVkICJwcml2YXRlL2FwcHJvdmVfbXR1cmtlcnMuUiIuIEl0IG91dHB1dHMgdGhpcyB0ZXh0IGxpc3Qgb2YgY29kZXMuCmNvZGVzX3RvX2V4Y2x1ZGUgPC0gcmVhZF9jc3YoZmlsZS5wYXRoKGhlcmUoKSwgImRhdGEiLCAiY29kZXNfdG9fZXhjbHVkZS5jc3YiKSkKCiMgQ2xlYW4gZXZlcnl0aGluZwpyZXN1bHRzX2NoZWNrX2F0dGVudGlvbiA8LSByZXN1bHRzX3JhdyAlPiUKICAjIE9ubHkgc2VsZWN0IG5lY2Vzc2FyeSBjb2x1bW5zCiAgc2VsZWN0KGlkID0gUmVzcG9uc2VJZCwgY29uZmlybWF0aW9uX2NvZGUgPSBtVHVya0NvZGUsIGR1cmF0aW9uID0gYER1cmF0aW9uIChpbiBzZWNvbmRzKWAsCiAgICAgICAgIHN0YXJ0X2RhdGUgPSBTdGFydERhdGUsIGVuZF9kYXRlID0gRW5kRGF0ZSwKICAgICAgICAgY3JhY2tkb3duLCBpc3N1ZSwgZnVuZGluZywgc3RhcnRzX3dpdGgoIlEiKSkgJT4lCiAgcmVuYW1lKGZhdm9yX2h1bWFuaXRhcmlhbiA9IFEyLjFfMSwgZmF2b3JfaHVtYW5fcmlnaHRzID0gUTIuMV8yLCAKICAgICAgICAgZmF2b3JfZGV2ZWxvcG1lbnQgPSBRMi4xXzMsIGRvbmF0ZV9saWtlbHkgPSBRMi4zLCAKICAgICAgICAgYW1vdW50X2RvbmF0ZSA9IFEyLjRfMSwgYW1vdW50X2tlZXAgPSBRMi40XzIsIGFtb3VudF93aHkgPSBRMi41LAogICAgICAgICBnaXZlX2NoYXJpdHkgPSBRMy4yLCB2b2x1bnRlZXIgPSBRMy4zLCBwb2xpdGljYWxfa25vd2xlZGdlID0gUTMuNCwKICAgICAgICAgaWRlb2xvZ3kgPSBRMy41LCBlZHVjYXRpb24gPSBRMy42LCByZWxpZ2lvc2l0eSA9IFEzLjcsCiAgICAgICAgIGdlbmRlciA9IFEzLjksIGdlbmRlcl9vdGhlciA9IFEzLjlfNF9URVhULCBpbmNvbWUgPSBRMy4xMCwgYWdlID0gUTMuMTEpICU+JQogICMgQ2xlYW4gdXAgZXhwZXJpbWVudGFsIGNvbmRpdGlvbiBjb2x1bW5zCiAgbXV0YXRlKGlzc3VlID0gcmVjb2RlKGlzc3VlLCBgaHVtYW4gcmlnaHRzIGZvciByZWZ1Z2Vlc2AgPSAiSHVtYW4gcmlnaHRzIiwKICAgICAgICAgICAgICAgICAgICAgICAgYGh1bWFuaXRhcmlhbiBhc3Npc3RhbmNlIGZvciByZWZ1Z2Vlc2AgPSAiSHVtYW5pdGFyaWFuIGFzc2lzdGFuY2UiKSwKICAgICAgICAgZnVuZGluZyA9IHJlY29kZShmdW5kaW5nLCBgZ292ZXJubWVudCBkb25vcnNgID0gIkdvdmVybm1lbnQiLAogICAgICAgICAgICAgICAgICAgICAgICAgIGBpbmRpdmlkdWFsLCBwcml2YXRlIGRvbm9yc2AgPSAiUHJpdmF0ZSIpKSAlPiUKICBtdXRhdGUoY3JhY2tkb3duID0gaWZlbHNlKHN0cl9kZXRlY3QoY3JhY2tkb3duLCAiaGFyc2hseSByZXN0cmljdCIpLCAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICJDcmFja2Rvd24iLCAiTm8gY3JhY2tkb3duIikpICU+JSAKICBtdXRhdGUoY3JhY2tkb3duID0gZmFjdG9yKGNyYWNrZG93biwgbGV2ZWxzID0gYygiTm8gY3JhY2tkb3duIiwgIkNyYWNrZG93biIpLCAKICAgICAgICAgICAgICAgICAgICAgICAgICAgIG9yZGVyZWQgPSBUUlVFKSwKICAgICAgICAgaXNzdWUgPSBmYWN0b3IoaXNzdWUsIGxldmVscyA9IGMoIkh1bWFuIHJpZ2h0cyIsICJIdW1hbml0YXJpYW4gYXNzaXN0YW5jZSIpLCAKICAgICAgICAgICAgICAgICAgICAgICAgb3JkZXJlZCA9IFRSVUUpLAogICAgICAgICBmdW5kaW5nID0gZmFjdG9yKGZ1bmRpbmcsIGxldmVscyA9IGMoIkdvdmVybm1lbnQiLCAiUHJpdmF0ZSIpLCAKICAgICAgICAgICAgICAgICAgICAgICAgICBvcmRlcmVkID0gVFJVRSkpICU+JSAKICAjIEF0dGVudGlvbiBjaGVja3MKICBtdXRhdGUoYXR0ZW50aW9uMV9jb3JyZWN0ID0gc3RyX3NwbGl0KFExLjMsICIsIikgJT4lIAogICAgICAgICAgIG1hcF9sZ2wofiBhbGwoYXR0ZW50aW9uMV9hbnN3ZXIgJWluJSAuKSAmIGxlbmd0aCguKSA9PSBsZW5ndGgoYXR0ZW50aW9uMV9hbnN3ZXIpKSwKICAgICAgICAgYXR0ZW50aW9uMl9jb3JyZWN0ID0gUTMuOCA9PSBhdHRlbnRpb24yX2Fuc3dlcikgJT4lIAogICMgVGhpcyBwZXJzb24gY29udGFjdGVkIG1lIHNlcGFyYXRlbHkgdG8gc2F5IHRoYXQgdGhleSBhY2NpZGVudGFsbHkgZGlkIHRoZSBmaXJzdAogICMgYXR0ZW50aW9uIGNoZWNrIHdyb25nLCBidXQgdGhhdCB0aGV5IGRpZCBwYXkgYXR0ZW50aW9uOiA2NTE4NjM0CiAgbXV0YXRlKGF0dGVudGlvbjFfY29ycmVjdCA9IGlmZWxzZShjb25maXJtYXRpb25fY29kZSA9PSA2NTE4NjM0LAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgVFJVRSwgYXR0ZW50aW9uMV9jb3JyZWN0KSkgCgpyZXN1bHRzIDwtIHJlc3VsdHNfY2hlY2tfYXR0ZW50aW9uICU+JSAKICBmaWx0ZXIoIShjb25maXJtYXRpb25fY29kZSAlaW4lIGNvZGVzX3RvX2V4Y2x1ZGUkY29uZmlybWF0aW9uX2NvZGUpKSAlPiUKICAjIEZhY3Rvcml6ZSB2YXJpYWJsZXMKICBtdXRhdGUoZG9uYXRlX2xpa2VseSA9IGZhY3Rvcihkb25hdGVfbGlrZWx5LCBsZXZlbHMgPSBsaWtlbGlob29kLCBvcmRlcmVkID0gVFJVRSkpICU+JSAKICBtdXRhdGVfYXQodmFycyhmYXZvcl9odW1hbml0YXJpYW4sIGZhdm9yX2h1bWFuX3JpZ2h0cywgZmF2b3JfZGV2ZWxvcG1lbnQpLAogICAgICAgICAgICBmdW5zKGZhY3RvciguLCBsZXZlbHMgPSBmYXZvcmFiaWxpdHksIG9yZGVyZWQgPSBUUlVFKSkpICU+JSAKICBtdXRhdGUoZ2l2ZV9jaGFyaXR5ID0gZmFjdG9yKGdpdmVfY2hhcml0eSwgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBsZXZlbHMgPSBmcmVxdWVuY3lfY2hhcml0eSwgb3JkZXJlZCA9IFRSVUUpLAogICAgICAgICB2b2x1bnRlZXIgPSBmYWN0b3Iodm9sdW50ZWVyLCBsZXZlbHMgPSBjKCJObyIsICJZZXMiKSwgb3JkZXJlZCA9IFRSVUUpLAogICAgICAgICBwb2xpdGljYWxfa25vd2xlZGdlID0gZmFjdG9yKHBvbGl0aWNhbF9rbm93bGVkZ2UsIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGxldmVscyA9IGZyZXF1ZW5jeV9wdWJsaWNfYWZmYWlycywgb3JkZXJlZCA9IFRSVUUpLAogICAgICAgICBpZGVvbG9neSA9IGZhY3RvcihpZGVvbG9neSwgbGV2ZWxzID0gbGV2ZWxzX2lkZW9sb2d5LCBvcmRlcmVkID0gVFJVRSksCiAgICAgICAgIGVkdWNhdGlvbiA9IGZhY3RvcihlZHVjYXRpb24sIGxldmVscyA9IGxldmVsc19lZHVjYXRpb24sIG9yZGVyZWQgPSBUUlVFKSwKICAgICAgICAgcmVsaWdpb3NpdHkgPSBmYWN0b3IocmVsaWdpb3NpdHksIGxldmVscyA9IGZyZXF1ZW5jeV9yZWxpZ2lvbiwgb3JkZXJlZCA9IFRSVUUpLAogICAgICAgICBnZW5kZXIgPSByZWNvZGUoZ2VuZGVyLCBgT3RoZXI6YCA9ICJPdGhlciIpLAogICAgICAgICBnZW5kZXIgPSBmYWN0b3IoZ2VuZGVyLCBsZXZlbHMgPSBsZXZlbHNfZ2VuZGVyLCBvcmRlcmVkID0gVFJVRSksCiAgICAgICAgIGluY29tZSA9IGZhY3RvcihpbmNvbWUsIGxldmVscyA9IGxldmVsc19pbmNvbWUsIG9yZGVyZWQgPSBUUlVFKSwKICAgICAgICAgYWdlID0gZmFjdG9yKGFnZSwgbGV2ZWxzID0gbGV2ZWxzX2FnZSwgb3JkZXJlZCA9IFRSVUUpLAogICAgICAgICBjaGVjazEgPSBmYWN0b3IoYXR0ZW50aW9uMV9jb3JyZWN0LCBsZXZlbHMgPSBjKFRSVUUsIEZBTFNFKSwKICAgICAgICAgICAgICAgICAgICAgICAgIGxhYmVscyA9IGxldmVsc19hdHRlbnRpb24sIG9yZGVyZWQgPSBUUlVFKSwKICAgICAgICAgY2hlY2syID0gZmFjdG9yKGF0dGVudGlvbjJfY29ycmVjdCwgbGV2ZWxzID0gYyhUUlVFLCBGQUxTRSksCiAgICAgICAgICAgICAgICAgICAgICAgICBsYWJlbHMgPSBsZXZlbHNfYXR0ZW50aW9uLCBvcmRlcmVkID0gVFJVRSkpICU+JSAKICAjIERpY2hvdG9taXplIHZhcmlhYmxlcwogIG11dGF0ZShkb25hdGVfbGlrZWx5X2JpbiA9IGZjdF9yZWNvZGUoZG9uYXRlX2xpa2VseSwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGBOb3QgbGlrZWx5YCA9ICJFeHRyZW1lbHkgdW5saWtlbHkiLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgYE5vdCBsaWtlbHlgID0gIlNvbWV3aGF0IHVubGlrZWx5IiwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGBOb3QgbGlrZWx5YCA9ICJOZWl0aGVyIGxpa2VseSBub3IgdW5saWtlbHkiLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgTGlrZWx5ID0gIlNvbWV3aGF0IGxpa2VseSIsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBMaWtlbHkgPSAiRXh0cmVtZWx5IGxpa2VseSIpKSAlPiUgCiAgbXV0YXRlX2F0KHZhcnMoZmF2b3JfaHVtYW5pdGFyaWFuLCBmYXZvcl9odW1hbl9yaWdodHMsIGZhdm9yX2RldmVsb3BtZW50KSwKICAgICAgICAgICAgZnVucyhiaW4gPSBmY3RfcmVjb2RlKC4sIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgYE5vdCBmYXZvcmFibGVgID0gIlZlcnkgdW5mYXZvcmFibGUiLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgYE5vdCBmYXZvcmFibGVgID0gIlVuZmF2b3JhYmxlIiwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGBOb3QgZmF2b3JhYmxlYCA9ICJOZXV0cmFsIiwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIEZhdm9yYWJsZSA9ICJGYXZvcmFibGUiLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgRmF2b3JhYmxlID0gIlZlcnkgZmF2b3JhYmxlIikpKSAlPiUgCiAgbXV0YXRlKGdpdmVfY2hhcml0eV8zID0gZmN0X3JlY29kZShnaXZlX2NoYXJpdHksCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBgQXQgbGVhc3Qgb25jZSBhIG1vbnRoYCA9ICJPbmNlIGEgd2VlayIsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBgQXQgbGVhc3Qgb25jZSBhIG1vbnRoYCA9ICJPbmNlIGEgbW9udGgiLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgYE9uY2UgYSBtb250aC1vbmNlIGEgeWVhcmAgPSAiT25jZSBldmVyeSB0aHJlZSBtb250aHMiLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgYE9uY2UgYSBtb250aC1vbmNlIGEgeWVhcmAgPSAiT25jZSBldmVyeSBzaXggbW9udGhzIiwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGBPbmNlIGEgbW9udGgtb25jZSBhIHllYXJgID0gIk9uY2UgYSB5ZWFyIiwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFJhcmVseSA9ICJPbmNlIGV2ZXJ5IGZldyB5ZWFycyIsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBSYXJlbHkgPSAiTmV2ZXIiKSAlPiUgZmN0X3JldigpLAogICAgICAgICBnaXZlX2NoYXJpdHlfMiA9IGZjdF9yZWNvZGUoZ2l2ZV9jaGFyaXR5LAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgYEF0IGxlYXN0IG9uY2UgYSB5ZWFyYCA9ICJPbmNlIGEgd2VlayIsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBgQXQgbGVhc3Qgb25jZSBhIHllYXJgID0gIk9uY2UgYSBtb250aCIsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBgQXQgbGVhc3Qgb25jZSBhIHllYXJgID0gIk9uY2UgZXZlcnkgdGhyZWUgbW9udGhzIiwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGBBdCBsZWFzdCBvbmNlIGEgeWVhcmAgPSAiT25jZSBldmVyeSBzaXggbW9udGhzIiwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGBBdCBsZWFzdCBvbmNlIGEgeWVhcmAgPSAiT25jZSBhIHllYXIiLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgUmFyZWx5ID0gIk9uY2UgZXZlcnkgZmV3IHllYXJzIiwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFJhcmVseSA9ICJOZXZlciIpKSAlPiUgCiAgbXV0YXRlKHBvbGl0aWNhbF9rbm93bGVkZ2VfYmluID0gZmN0X3JlY29kZShwb2xpdGljYWxfa25vd2xlZGdlLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgYE9mdGVuYCA9ICJNb3N0IG9mIHRoZSB0aW1lIiwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGBPZnRlbmAgPSAiU29tZSBvZiB0aGUgdGltZSIsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBgTm90IG9mdGVuYCA9ICJPbmx5IG5vdyBhbmQgdGhlbiIsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBgTm90IG9mdGVuYCA9ICJIYXJkbHkgYXQgYWxsIikgJT4lIGZjdF9yZXYoKSkgJT4lIAogIG11dGF0ZShpZGVvbG9neV8zID0gZmN0X3JlY29kZShpZGVvbG9neSwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgYExpYmVyYWxgID0gIlN0cm9uZyBsaWJlcmFsIiwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgYExpYmVyYWxgID0gIkxpYmVyYWwiLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBgTGliZXJhbGAgPSAiSW5kZXBlbmRlbnQsIGxlYW5pbmcgbGliZXJhbCIsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGBJbmRlcGVuZGVudGAgPSAiSW5kZXBlbmRlbnQiLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBgQ29uc2VydmF0aXZlYCA9ICJJbmRlcGVuZGVudCwgbGVhbmluZyBjb25zZXJ2YXRpdmUiLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBgQ29uc2VydmF0aXZlYCA9ICJDb25zZXJ2YXRpdmUiLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBgQ29uc2VydmF0aXZlYCA9ICJWZXJ5IGNvbnNlcnZhdGl2ZSIpICU+JSBmY3RfcmV2KCkpICU+JSAKICBtdXRhdGUoaWRlb2xvZ3lfYmluID0gZmN0X3JlY29kZShpZGVvbG9neV8zLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGBOb3QgbGliZXJhbGAgPSAiSW5kZXBlbmRlbnQiLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGBOb3QgbGliZXJhbGAgPSAiQ29uc2VydmF0aXZlIikpICU+JSAKICBtdXRhdGUoZWR1Y2F0aW9uX2JpbiA9IGZjdF9yZWNvZGUoZWR1Y2F0aW9uLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBgTm8gQkFgID0gIkxlc3MgdGhhbiBoaWdoIHNjaG9vbCIsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGBObyBCQWAgPSAiSGlnaCBzY2hvb2wgZ3JhZHVhdGUiLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBgTm8gQkFgID0gIlNvbWUgY29sbGVnZSIsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGBObyBCQWAgPSAiMiB5ZWFyIGRlZ3JlZSIsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGBCQSBhbmQgYWJvdmVgID0gIjQgeWVhciBkZWdyZWUiLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBgQkEgYW5kIGFib3ZlYCA9ICJHcmFkdWF0ZSBvciBwcm9mZXNzaW9uYWwgZGVncmVlIiwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgYEJBIGFuZCBhYm92ZWAgPSAiRG9jdG9yYXRlIikpICU+JSAKICBtdXRhdGUocmVsaWdpb3NpdHlfYmluID0gZmN0X3JlY29kZShyZWxpZ2lvc2l0eSwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBgQXQgbGVhc3Qgb25jZSBhIG1vbnRoYCA9ICJNb3JlIHRoYW4gb25jZSBhIHdlZWsiLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGBBdCBsZWFzdCBvbmNlIGEgbW9udGhgID0gIk9uY2UgYSB3ZWVrIiwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBgQXQgbGVhc3Qgb25jZSBhIG1vbnRoYCA9ICJPbmNlIG9yIHR3aWNlIGEgbW9udGgiLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGBSYXJlbHlgID0gIkEgZmV3IHRpbWVzIGEgeWVhciIsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgYFJhcmVseWAgPSAiU2VsZG9tIiwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBgUmFyZWx5YCA9ICJOZXZlciIsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgTlVMTCA9ICJEb24ndCBrbm93IikgJT4lIGZjdF9yZXYoKSkgJT4lIAogIG11dGF0ZShpbmNvbWVfY2xlYW4gPSBmY3RfcmVjb2RlKGluY29tZSwgTlVMTCA9ICJQcmVmZXIgbm90IHRvIHNheSIpLAogICAgICAgICBpbmNvbWVfYmluID0gZmFjdG9yKGluY29tZV9jbGVhbiA+PSBtZWRpYW4oLiRpbmNvbWUpLCBsZXZlbHMgPSBjKEZBTFNFLCBUUlVFKSwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICBsYWJlbHMgPSBwYXN0ZShjKCJMZXNzIHRoYW4iLCAiQXQgbGVhc3QiKSwgbWVkaWFuKC4kaW5jb21lKSkpKSAlPiUgCiAgbXV0YXRlKGFnZV9iaW4gPSBmYWN0b3IoYWdlID49IG1lZGlhbiguJGFnZSksIGxldmVscyA9IGMoRkFMU0UsIFRSVUUpLAogICAgICAgICAgICAgICAgICAgICAgICAgIGxhYmVscyA9IHBhc3RlKGMoIkxlc3MgdGhhbiIsICJBdCBsZWFzdCIpLCBtZWRpYW4oLiRhZ2UpKSksCiAgICAgICAgIGdlbmRlcl9iaW4gPSBmY3RfY29sbGFwc2UoZ2VuZGVyLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIEZlbWFsZSA9ICJGZW1hbGUiLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGBOb3QgRmVtYWxlYCA9IGMoIk1hbGUiLCAiVHJhbnNnZW5kZXIiLCAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICJPdGhlciIsICJQcmVmZXIgbm90IHRvIHNheSIpKSkKCiMgU2F2ZSBmaW5hbCBjbGVhbiBkYXRhCnNhdmVSRFMocmVzdWx0cywgZmlsZS5wYXRoKGhlcmUoKSwgImRhdGEiLCAicmVzdWx0c19jbGVhbi5yZHMiKSkKd3JpdGVfY3N2eShyZXN1bHRzLCBmaWxlID0gZmlsZS5wYXRoKGhlcmUoKSwgImRhdGEiLCAicmVzdWx0c19jbGVhbi5jc3YiKSwKICAgICAgICAgICBtZXRhZGF0YSA9IGZpbGUucGF0aChoZXJlKCksICJkYXRhIiwgInJlc3VsdHNfY2xlYW4ueWFtbCIpLCBuYSA9ICJOQSIpCmBgYAoKYGBge3IgY29tcGxldGVkLXN1bW1hcnl9CiMgU2F2ZSBpbmZvcm1hdGlvbiBhYm91dCBjb21wbGV0aW9uIHJhdGVzCmNvbXBsZXRlZF9za2VsZXRvbiA8LSByZXN1bHRzX2NoZWNrX2F0dGVudGlvbiAlPiUgCiAgbGVmdF9qb2luKGNvZGVzX3RvX2V4Y2x1ZGUsIGJ5ID0gImNvbmZpcm1hdGlvbl9jb2RlIikgJT4lIAogIHJlcGxhY2VfbmEobGlzdChyZWFzb24gPSAiQXBwcm92ZWQiKSkgJT4lIAogIGV4cGFuZChyZWFzb24sIGNyYWNrZG93biwgaXNzdWUsIGZ1bmRpbmcpCgpjb21wbGV0ZWRfc3VtbWFyeSA8LSByZXN1bHRzX2NoZWNrX2F0dGVudGlvbiAlPiUgCiAgbGVmdF9qb2luKGNvZGVzX3RvX2V4Y2x1ZGUsIGJ5ID0gImNvbmZpcm1hdGlvbl9jb2RlIikgJT4lIAogIHJlcGxhY2VfbmEobGlzdChyZWFzb24gPSAiQXBwcm92ZWQiKSkgJT4lIAogIGNvdW50KHJlYXNvbiwgY3JhY2tkb3duLCBpc3N1ZSwgZnVuZGluZykgJT4lIAogIHJpZ2h0X2pvaW4oY29tcGxldGVkX3NrZWxldG9uLCBieSA9IGMoInJlYXNvbiIsICJjcmFja2Rvd24iLCAiaXNzdWUiLCAiZnVuZGluZyIpKSAlPiUgCiAgcmVwbGFjZV9uYShsaXN0KG4gPSAwKSkKCnNhdmVSRFMoY29tcGxldGVkX3N1bW1hcnksIGZpbGUucGF0aChoZXJlKCksICJkYXRhIiwgImNvbXBsZXRpb25fc3VtbWFyeS5yZHMiKSkKd3JpdGVfY3N2KGNvbXBsZXRlZF9zdW1tYXJ5LCBmaWxlLnBhdGgoaGVyZSgpLCAiZGF0YSIsICJjb21wbGV0aW9uX3N1bW1hcnkuY3N2IikpCmBgYAo=</div>
+<p class="footer">Copyright &copy; 2017&ndash;2018 <a href="http://www.suparnachaudhry.com/">Suparna Chaudhry</a> and <a href="https://www.andrewheiss.com/">Andrew Heiss</a>. Licensed under the <a href="https://github.com/andrewheiss/ngo-crackdowns-philanthropy-pilot/blob/master/LICENSE.md">MIT License</a>. Code available on <a href="https://github.com/andrewheiss/ngo-crackdowns-philanthropy-pilot">GitHub</a>.</p>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

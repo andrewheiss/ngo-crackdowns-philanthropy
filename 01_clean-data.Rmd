@@ -174,7 +174,15 @@ results <- results_check_attention %>%
                                      `Once a month-once a year` = "Once every six months",
                                      `Once a month-once a year` = "Once a year",
                                      Rarely = "Once every few years",
-                                     Rarely = "Never") %>% fct_rev()) %>% 
+                                     Rarely = "Never") %>% fct_rev(),
+         give_charity_2 = fct_recode(give_charity,
+                                     `At least once a year` = "Once a week",
+                                     `At least once a year` = "Once a month",
+                                     `At least once a year` = "Once every three months",
+                                     `At least once a year` = "Once every six months",
+                                     `At least once a year` = "Once a year",
+                                     Rarely = "Once every few years",
+                                     Rarely = "Never")) %>% 
   mutate(political_knowledge_bin = fct_recode(political_knowledge,
                                               `Often` = "Most of the time",
                                               `Often` = "Some of the time",
@@ -211,7 +219,11 @@ results <- results_check_attention %>%
          income_bin = factor(income_clean >= median(.$income), levels = c(FALSE, TRUE),
                              labels = paste(c("Less than", "At least"), median(.$income)))) %>% 
   mutate(age_bin = factor(age >= median(.$age), levels = c(FALSE, TRUE),
-                          labels = paste(c("Less than", "At least"), median(.$age))))
+                          labels = paste(c("Less than", "At least"), median(.$age))),
+         gender_bin = fct_collapse(gender,
+                                   Female = "Female",
+                                   `Not Female` = c("Male", "Transgender", 
+                                                    "Other", "Prefer not to say")))
 
 # Save final clean data
 saveRDS(results, file.path(here(), "data", "results_clean.rds"))
