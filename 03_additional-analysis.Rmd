@@ -15,9 +15,19 @@ editor_options:
 #
 # This means that here::here() and lubridate::here() will conflict becuase **here**
 # has already been loaded in previous scripts
+# 
+# Stupid bleeding environments
+# https://github.com/andrewheiss/rmarkdown-website-envs-orig
 if (isTRUE(getOption('knitr.in.progress')) & !is.null(names(sessionInfo()$otherPkgs))) {
   invisible(suppressWarnings(sapply(paste0("package:", names(sessionInfo()$otherPkgs)),
                                     detach, character.only = TRUE)))
+  
+  # THIS IS SO EVIL AND AWFUL BUT NECESSARY BECAUSE STUFF HAPPENS IN PREVIOUS
+  # FILES THAT BREAK THIS FILE WHEN IT IS KNIT AS PART OF AN RMARKDOWN WEBSITE
+  #
+  # DON'T TELL JENNY BRYAN
+  rm(list = ls())
+  # AHHH THE HORROR
 }
 
 # Load libraries again
