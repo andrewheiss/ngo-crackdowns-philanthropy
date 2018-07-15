@@ -102,6 +102,7 @@ We obtain the posterior distribution of each dependent variable with Markov Chai
 
 \newpage
 
+
 # Full results
 
 ## Model coefficients: likelihood of donation
@@ -185,6 +186,7 @@ Payment
 !INCLUDE "../text/experiment.md"
 
 \newpage
+
 
 # IRB
 
