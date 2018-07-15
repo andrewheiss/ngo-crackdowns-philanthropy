@@ -248,3 +248,16 @@ completed_summary <- results_check_attention %>%
 saveRDS(completed_summary, file.path(here(), "data", "completion_summary.rds"))
 write_csv(completed_summary, file.path(here(), "data", "completion_summary.csv"))
 ```
+
+
+# Session info
+
+<button data-toggle="collapse" data-target="#sessioninfo" class="btn btn-primary btn-md btn-info">Here's what we used the last time we built this page</button>
+
+<div id="sessioninfo" class="collapse">
+
+```{r show-session-info}
+sessionInfo()
+```
+
+</div> 

@@ -1257,3 +1257,16 @@ bind_rows(diffs_coef_likely_pairs_detail_c,
   cat() %>% 
   cat(file = file.path(here(), "output", "tables", "tbl-likelihood-diffs.md"))
 ```
+
+
+# Session info
+
+<button data-toggle="collapse" data-target="#sessioninfo" class="btn btn-primary btn-md btn-info">Here's what we used the last time we built this page</button>
+
+<div id="sessioninfo" class="collapse">
+
+```{r show-session-info}
+sessionInfo()
+```
+
+</div> 

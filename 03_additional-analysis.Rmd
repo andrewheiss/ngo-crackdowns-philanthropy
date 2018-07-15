@@ -673,3 +673,16 @@ ggplot(coefs_posterior_likely, aes(x = value, y = fct_rev(term_clean_fct))) +
   theme(legend.position = "bottom",
         strip.text = element_blank())
 ```
+
+
+# Session info
+
+<button data-toggle="collapse" data-target="#sessioninfo" class="btn btn-primary btn-md btn-info">Here's what we used the last time we built this page</button>
+
+<div id="sessioninfo" class="collapse">
+
+```{r show-session-info}
+sessionInfo()
+```
+
+</div> 
