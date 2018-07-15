@@ -778,7 +778,7 @@ bind_rows(diffs_coef_pairs_detail_c,
   select(`Frame` = pair, `∆~median~` = median, 
          `p(∆ > 0)` = p.greater0, `p(∆ < 0)` = p.less0, `p(∆ ≠ 0)` = p.diff.not0) %>% 
   pandoc.table.return(missing = "—", 
-                      caption = "Median difference between likelihood to donate across single conditions") %T>%
+                      caption = "Median difference between likelihood to donate across single conditions {#tbl:amount-single-diffs}") %T>%
   cat() %>% 
   cat(file = file.path(here(), "output", "tables", "tbl-amount-single-diffs.md"))
 ```
@@ -814,7 +814,7 @@ bind_rows(diffs_coef_pairs_detail_c,
          `No crackdown − crackdown~median~` = median, 
          `p(∆ > 0)` = p.greater0, `p(∆ < 0)` = p.less0, `p(∆ ≠ 0)` = p.diff.not0) %>% 
   pandoc.table.return(missing = "—", 
-                      caption = 'Median difference between amounts donated in "no crackdown" (control) and "crackdown" conditions') %T>%
+                      caption = 'Median difference between amounts donated in "no crackdown" (control) and "crackdown" conditions {#tbl:amount-diffs}') %T>%
   cat() %>% 
   cat(file = file.path(here(), "output", "tables", "tbl-amount-diffs.md"))
 ```
@@ -1217,7 +1217,7 @@ bind_rows(diffs_coef_likely_pairs_detail_c,
   select(`Frame` = pair, `∆~median~` = median, 
          `p(∆ > 0)` = p.greater0, `p(∆ < 0)` = p.less0, `p(∆ ≠ 0)` = p.diff.not0) %>% 
   pandoc.table.return(missing = "—", 
-                      caption = "Median difference between likelihood to donate across single conditions") %T>%
+                      caption = "Median difference between likelihood to donate across single conditions {#tbl:likelihood-single-diffs}") %T>%
   cat() %>% 
   cat(file = file.path(here(), "output", "tables", "tbl-likelihood-single-diffs.md"))
 ```
@@ -1253,7 +1253,7 @@ bind_rows(diffs_coef_likely_pairs_detail_c,
          `No crackdown − crackdown~median~` = median, 
          `p(∆ > 0)` = p.greater0, `p(∆ < 0)` = p.less0, `p(∆ ≠ 0)` = p.diff.not0) %>% 
   pandoc.table.return(missing = "—", 
-                      caption = 'Median difference between likelihood to donate in "no crackdown" (control) and "crackdown" conditions') %T>%
+                      caption = 'Median difference between likelihood to donate in "no crackdown" (control) and "crackdown" conditions {#tbl:likelihood-diffs}') %T>%
   cat() %>% 
   cat(file = file.path(here(), "output", "tables", "tbl-likelihood-diffs.md"))
 ```
