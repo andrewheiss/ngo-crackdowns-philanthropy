@@ -206,14 +206,22 @@ walk(full_chart, ~ print(.))
 
 # Characteristics of experiment samples
 
-We compare our sample with demographic characteristics of the general population. Since there is no nationally representative sample for each of our demographic variables, we look at multiple data sources.
+We compare our sample with demographic characteristics of the general population. Since there is no nationally representative sample for each of our demographic variables, we use two waves of the US Census's Current Population Survey (CPS), with data from the [Minnesota Population Center's Integrated Public Use Microdata Series (IPUMS)](https://cps.ipums.org/cps/).
 
-- Age:
-- Volunteering
-- Donating to charity:
+For general demographic information, we use data from the 2017 [Annual Social and Economic Supplement (ASEC)](https://cps.ipums.org/cps/asec_sample_notes.shtml) for the CPS. From 2002–2015, the CPS included a [Volunteer Supplement](https://cps.ipums.org/cps/volunteer_sample_notes.shtml) every September, so we use 2015 data for data on volunteering and donating to charity.
 
+IPUMS requires that you manually generate a data extract through their website, so downloading data from them is not entirely automated or reproducible. We created two extracts (though this could have been combined into one), with the following variables
 
-Extract data from Current Population Survey, housed at the Minnesota Population Center’s Integrated Public Use Microdata Series
+-  `"data/ipums-cps/cps_2017.dat.gz"`: 2017 ASEC, with the following variables selected (in addition to whatever IPUMS preselects by default) (and weighted by `ASECWT`):
+    - `AGE`
+    - `SEX`
+    - `EDUC`
+    - `INCTOT`
+-  `"data/ipums-cps/cps_09_2015.dat.gz"`: September 2015 basic monthly CPS (which includes the Volunteer Supplement), with the following variables selected (and weighted by `VLSUPPWT`):
+    - `VLSTATUS`
+    - `VLDONATE`
+
+We do not show other respondent demographic details because we don't have good population-level data to compare our sample with. We could theoretically use Pew data for political preferences, but they collect data on party affiliation, while we collected data about respondent positions along a conservative–liberal spectrum, so the two variables aren't comparable.
 
 ```{r load-clean-cps, warning=FALSE, message=FALSE}
 cps_2015_ddi_file <- here("data", "ipums-cps", "cps_09_2015.xml")
@@ -303,12 +311,12 @@ compare_sample_to_pop_bayes <- function(sample_value, population_value) {
 
 calc_sample_pop <- tribble(
   ~Variable, ~sample_value, ~National,
-  "Female (%)", results$gender_bin, global_stats$female,
-  "Age (% 35+)", results$age_bin, global_stats$age,
-  "Income (% $50,000+)", results$income_bin, global_stats$income,
-  "Education (% BA+)", results$education_bin, global_stats$college,
-  "Donated in past year (%)", results$give_charity_2, global_stats$donating,
-  "Volunteered in past year (%)", results$volunteer, global_stats$volunteering
+  "Female (%)^a^", results$gender_bin, global_stats$female,
+  "Age (% 35+)^a^", results$age_bin, global_stats$age,
+  "Income (% $50,000+)^a^", results$income_bin, global_stats$income,
+  "Education (% BA+)^a^", results$education_bin, global_stats$college,
+  "Donated in past year (%)^b^", results$give_charity_2, global_stats$donating,
+  "Volunteered in past year (%)^b^", results$volunteer, global_stats$volunteering
 ) %>% 
   mutate(Sample = sample_value %>% map_dbl(~ prop.table(table(.))[1]),
          prop_test_bayes = map2(.x = sample_value, .y = National, 
@@ -324,7 +332,7 @@ format_hpdi <- function(post_lower, post_upper, star, digits = 1) {
 
 tbl_sample_pop <- calc_sample_pop %>% 
   mutate(in_hpdi = prop_test_bayes %>% map_lgl(~ .$theta_in_hpdi),
-         not_hpdi_symbol = ifelse(in_hpdi, "", "†"),
+         not_hpdi_symbol = ifelse(in_hpdi, "", "^†^"),
          diffs_tidy = prop_test_bayes %>% map(~ .$tidied[2,]),
          diffs_median = diffs_tidy %>% map_dbl(~ .$estimate),
          diffs_hpdi_fancy = diffs_tidy %>%
@@ -335,7 +343,11 @@ tbl_sample_pop <- calc_sample_pop %>%
          `Sample − National~posterior\\ median~` = diffs_median,
          `90% HPDI` = diffs_hpdi_fancy)
 
-tbl_sample_pop %>% 
+note_row <- data_frame(Variable = c("*^a^Annual CPS, March 2017*",
+                                    "*^b^Monthly CPS, September 2015*",
+                                    "*^†^National value is outside the sample highest posterior density interval (HPDI)*"))
+
+bind_rows(tbl_sample_pop, note_row) %>% 
   pandoc.table.return(keep.line.breaks = TRUE, style = "multiline", justify = "lcccc", 
                       caption = "Characteristics of experimental sample {#tbl:exp-sample}") %T>% 
   cat(file = here("output", "tables", "tbl-exp-sample.md")) %>% 
