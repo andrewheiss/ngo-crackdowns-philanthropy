@@ -102,8 +102,6 @@ We obtain the posterior distribution of each dependent variable with Markov Chai
 
 \newpage
 
-\blandscape
-
 # Full results
 
 ## Model coefficients: likelihood of donation
@@ -111,8 +109,6 @@ We obtain the posterior distribution of each dependent variable with Markov Chai
 !INCLUDE "output/tables/tbl-models-amount.md"
 
 Table: Results for models predicting proportion of respondents who are likely to donate {#tbl:models-likelihood}
-
-\elandscape
 
 \newpage
 
@@ -122,15 +118,11 @@ Table: Results for models predicting proportion of respondents who are likely to
 
 \clearpage
 
-\blandscape
-
 ## Model coefficients: amount donated
 
 !INCLUDE "output/tables/tbl-models-amount.md"
 
 Table: Results for models predicting amount respondents are willing to donate {#tbl:models-amount}
-
-\elandscape
 
 \clearpage
 
@@ -138,17 +130,41 @@ Table: Results for models predicting amount respondents are willing to donate {#
 
 !INCLUDE "output/tables/tbl-amount-diffs.md"
 
-\clearpage
 
+\newpage
+
+\blandscape
 
 # Additional analyses
 
-- Effect of post-treatment demographic variables
+To control for the effects of individual attitudes toward philanthropy, political ideology, education, and other post-treatment demographic attributes, we rerun each model with a set of additional independent variables as robustness checks. The coefficient estimates for crackdown, issue, and funding remain stable throughout.
 
+## Full models: likelihood of donation
 
-Finally, to control for the effects of individual attitudes toward philanthropy, political ideology, education, and other demographic attributes, we rerun each model with a set of additional independent variables as robustness checks.
+!INCLUDE "output/tables/tbl-models-likelihood-full.md"
+
+Table: Results for models predicting proportion of respondents who are likely to donate, demographic controls included {#tbl:models-likelihood-full}
+
+\elandscape
+
+![Comparison of posterior distributions of coefficients from Model 3 and Model 3 + demographics](output/figures/likely-coefs-full.pdf){#fig:likely-coefs-full}
 
 \newpage
+
+\blandscape
+
+## Full models: amount donated
+
+!INCLUDE "output/tables/tbl-models-amount-full.md"
+
+Table: Results for models predicting amount respondents are willing to donate, demographic controls included {#tbl:models-amount-full}
+
+\elandscape
+
+![Comparison of posterior distributions of coefficients from Model 3 and Model 3 + demographics](output/figures/amount-coefs-full.pdf){#fig:amount-coefs-full}
+
+\clearpage
+
 
 # Survey experiment
 

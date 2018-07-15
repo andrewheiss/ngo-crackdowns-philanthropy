@@ -452,7 +452,7 @@ m_amount_ci_full <- update(m_amount_ci, . ~ . +
                              ideology_bin + education_bin + religiosity_bin +
                              income_bin + age_bin)
 
-m_amount_cif_full <-update(m_amount_cif, . ~ . + 
+m_amount_cif_full <- update(m_amount_cif, . ~ . + 
                              favor_humanitarian_bin +
                              give_charity_3 + volunteer + political_knowledge_bin +
                              ideology_bin + education_bin + religiosity_bin +
@@ -493,7 +493,7 @@ coefs_summary <- posterior_details %>%
   filter(term_clean != "Intercept") %>% 
   mutate(full_model = !simple_model)
 
-ggplot(coefs_posterior, aes(x = value, y = fct_rev(term_clean_fct))) +
+amount_coefs_full <- ggplot(coefs_posterior, aes(x = value, y = fct_rev(term_clean_fct))) +
   stat_density_ridges(aes(fill = model_name), alpha = 0.6, color = "black",
                       rel_min_height = 0.01, scale = 1.5, 
                       quantile_lines = TRUE, quantiles = 2) +
@@ -509,6 +509,13 @@ ggplot(coefs_posterior, aes(x = value, y = fct_rev(term_clean_fct))) +
   theme_ngos() +
   theme(legend.position = "bottom",
         strip.text = element_blank())
+
+amount_coefs_full %T>%
+  print() %T>% 
+  ggsave(., filename = here("output", "figures", "amount-coefs-full.pdf"),
+         width = 8, height = 5, units = "in", device = cairo_pdf) %>% 
+  ggsave(., filename = here("output", "figures", "amount-coefs-full.png"),
+         width = 8, height = 5, units = "in", type = "cairo", dpi = 300)
 ```
 
 ## Predicted medians across different variables
@@ -656,7 +663,7 @@ coefs_summary_likely <- posterior_details_likely %>%
   filter(term_clean != "Intercept") %>% 
   mutate(full_model = !simple_model)
 
-ggplot(coefs_posterior_likely, aes(x = value, y = fct_rev(term_clean_fct))) +
+likely_coefs_full <- ggplot(coefs_posterior_likely, aes(x = value, y = fct_rev(term_clean_fct))) +
   stat_density_ridges(aes(fill = model_name), alpha = 0.6, color = "black",
                       rel_min_height = 0.01, scale = 1.5, 
                       quantile_lines = TRUE, quantiles = 2) +
@@ -672,6 +679,13 @@ ggplot(coefs_posterior_likely, aes(x = value, y = fct_rev(term_clean_fct))) +
   theme_ngos() +
   theme(legend.position = "bottom",
         strip.text = element_blank())
+
+likely_coefs_full %T>%
+  print() %T>% 
+  ggsave(., filename = here("output", "figures", "likely-coefs-full.pdf"),
+         width = 8, height = 5, units = "in", device = cairo_pdf) %>% 
+  ggsave(., filename = here("output", "figures", "likely-coefs-full.png"),
+         width = 8, height = 5, units = "in", type = "cairo", dpi = 300)
 ```
 
 
