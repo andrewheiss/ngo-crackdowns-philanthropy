@@ -410,15 +410,15 @@ plot_avg_time <- ggplot(results, aes(x = duration)) +
   scale_x_time(labels = fmt_ms) +
   annotation_custom(summary_stats, xmin = 700, xmax = 900, ymin = 30, ymax = 60) +
   labs(x = "Minutes spent on experiment", y = "Count") +
-  theme_ngos() +
+  theme_ngos(base_size = 9.5) +
   theme(panel.grid.minor = element_blank())
 
 plot_avg_time %T>% 
   print() %T>%
   ggsave(., filename = here("output", "figures", "avg-time.pdf"),
-         width = 4, height = 2.5, units = "in", device = cairo_pdf) %>% 
+         width = 4, height = 2.25, units = "in", device = cairo_pdf) %>% 
   ggsave(., filename = here("output", "figures", "avg-time.png"),
-         width = 4, height = 2.5, units = "in", type = "cairo", dpi = 300)
+         width = 4, height = 2.25, units = "in", type = "cairo", dpi = 300)
 ```
 
 # Amount donated (full)
