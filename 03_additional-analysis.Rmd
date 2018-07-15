@@ -41,18 +41,18 @@ library(modelr)
 library(ipumsr)
 library(here)
 
-source(file.path(here(), "lib", "graphics.R"))
-source(file.path(here(), "lib", "pander_options.R"))
-source(file.path(here(), "lib", "modeling.R"))
+source(here("lib", "graphics.R"))
+source(here("lib", "pander_options.R"))
+source(here("lib", "modeling.R"))
 
 # Load data
-results <- readRDS(file.path(here(), "data", "results_clean.rds"))
+results <- readRDS(here("data", "results_clean.rds"))
 ```
 
 # CONSORT flow
 
 ```{r build-consort}
-consort <- readRDS(file.path(here(), "data", "completion_summary.rds")) %>% 
+consort <- readRDS(here("data", "completion_summary.rds")) %>% 
   spread(reason, n) %>% 
   mutate(group = 1:n(),
          assigned = Approved + `Failed first attention check`,
@@ -184,14 +184,14 @@ full_chart <- list(total, randomized, ineligible, total_random_connect, total_in
 # See https://stackoverflow.com/a/17509770/120898 for a similar issue
 
 # Save as PDF
-cairo_pdf(filename = file.path(here(), "output", "figures", "consort.pdf"),
+cairo_pdf(filename = here("output", "figures", "consort.pdf"),
           width = 10, height = 6)
 grid.newpage()
 walk(full_chart, ~ print(.))
 invisible(dev.off())
 
 # Save as PNG
-png(filename = file.path(here(), "output", "figures", "consort.png"), 
+png(filename = here("output", "figures", "consort.png"), 
     width = 10, height = 6, units = "in",
     bg = "white", res = 300, type = "cairo")
 grid.newpage()
@@ -216,14 +216,14 @@ We compare our sample with demographic characteristics of the general population
 Extract data from Current Population Survey, housed at the Minnesota Population Center’s Integrated Public Use Microdata Series
 
 ```{r load-clean-cps, warning=FALSE, message=FALSE}
-cps_2015_ddi_file <- file.path(here(), "data", "ipums-cps", "cps_09_2015.xml")
-cps_2015_data_file <- file.path(here(), "data", "ipums-cps", "cps_09_2015.dat.gz")
+cps_2015_ddi_file <- here("data", "ipums-cps", "cps_09_2015.xml")
+cps_2015_data_file <- here("data", "ipums-cps", "cps_09_2015.dat.gz")
 
 cps_2015_ddi <- read_ipums_ddi(cps_2015_ddi_file)
 cps_2015_data <- read_ipums_micro(cps_2015_ddi_file, data_file = cps_2015_data_file, verbose = FALSE)
 
-cps_2017_ddi_file <- file.path(here(), "data", "ipums-cps", "cps_2017.xml")
-cps_2017_data_file <- file.path(here(), "data", "ipums-cps", "cps_2017.dat.gz")
+cps_2017_ddi_file <- here("data", "ipums-cps", "cps_2017.xml")
+cps_2017_data_file <- here("data", "ipums-cps", "cps_2017.dat.gz")
 
 cps_2017_ddi <- read_ipums_ddi(cps_2017_ddi_file)
 cps_2017_data <- read_ipums_micro(cps_2017_ddi_file, data_file = cps_2017_data_file, verbose = FALSE)
@@ -270,12 +270,12 @@ table(results$give_charity_2) %>% prop.test(., p = global_stats$donating)
 ```
 
 ```{r compile-stan-model, warning=FALSE, message=FALSE, cache=TRUE}
-prop_test_bayes_saved <- file.path(here(), "lib", "bayes_prop_test.rds")
+prop_test_bayes_saved <- here("lib", "bayes_prop_test.rds")
 
 if (file.exists(prop_test_bayes_saved)) {
   prop_test_bayes <- readRDS(prop_test_bayes_saved)
 } else {
-  prop_test_bayes <- stan_model(file.path(here(), "lib", "bayes_prop_test.stan"))
+  prop_test_bayes <- stan_model(here("lib", "bayes_prop_test.stan"))
   saveRDS(prop_test_bayes, prop_test_bayes_saved)
 }
 ```
@@ -338,7 +338,7 @@ tbl_sample_pop <- calc_sample_pop %>%
 tbl_sample_pop %>% 
   pandoc.table.return(keep.line.breaks = TRUE, style = "multiline", justify = "lcccc", 
                       caption = "Characteristics of experimental sample {#tbl:exp-sample}") %T>% 
-  cat(file = file.path(here(), "output", "tables", "tbl-exp-sample.md")) %>% 
+  cat(file = here("output", "tables", "tbl-exp-sample.md")) %>% 
   cat()
 ```
 
@@ -393,9 +393,9 @@ plot_avg_time <- ggplot(results, aes(x = duration)) +
 
 plot_avg_time %T>% 
   print() %T>%
-  ggsave(., filename = file.path(here(), "output", "figures", "avg-time.pdf"),
+  ggsave(., filename = here("output", "figures", "avg-time.pdf"),
          width = 4, height = 2.5, units = "in", device = cairo_pdf) %>% 
-  ggsave(., filename = file.path(here(), "output", "figures", "avg-time.png"),
+  ggsave(., filename = here("output", "figures", "avg-time.png"),
          width = 4, height = 2.5, units = "in", type = "cairo", dpi = 300)
 ```
 
@@ -445,7 +445,7 @@ huxreg(m_amount_c, m_amount_ci, m_amount_cif,
        stars = NULL) %T>% 
   print_hux() %>% 
   to_md(max_width = 100) %>% 
-  cat(file = file.path(here(), "output", "tables", "tbl-models-amount-full.md"))
+  cat(file = here("output", "tables", "tbl-models-amount-full.md"))
 ```
 
 ## Coefficient plot
@@ -608,7 +608,7 @@ huxreg(m_likely_c, m_likely_ci, m_likely_cif,
        stars = NULL) %T>% 
   print_hux() %>% 
   to_md(max_width = 100) %>% 
-  cat(file = file.path(here(), "output", "tables", "tbl-models-likelihood-full.md"))
+  cat(file = here("output", "tables", "tbl-models-likelihood-full.md"))
 ```
 
 ## Coefficient plot
