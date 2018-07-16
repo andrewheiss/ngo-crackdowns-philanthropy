@@ -14,7 +14,7 @@ options(mc.cores = parallel::detectCores())
 mcmc_pairwise_diffs <- function(chains) {
   pair_names <- outer(colnames(chains), colnames(chains),
                       paste, sep = " − ")
-  pairs_to_omit <- which(lower.tri(pair_names, diag = TRUE))
+  pairs_to_omit <- which(upper.tri(pair_names, diag = TRUE))
   
   mcmc_diffs <- outer(1:ncol(chains), 1:ncol(chains),
                       function(x, y) chains[,x] - chains[,y]) %>% 
