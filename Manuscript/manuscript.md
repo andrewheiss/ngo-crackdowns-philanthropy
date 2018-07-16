@@ -57,11 +57,11 @@ Third, *the source of NGO funding* could influence donor behavior. The distincti
 
 ## Sample
 
-We test each of these hypotheses with a between-subjects vignette-based survey experiment with participants recruited from Amazon's Mechanical Turk. Our target population is the portion of Americans hypothetically willing to donate money for human rights and humanitarian work abroad. Our convenience sample (March 2017, N = 546) generally approximates the characteristics of our target population, since it is younger, more educated, wealthier, and more likely to donate to charities than nationally representative samples (see Tables S1 and S2 in the supplement).[^supp] 
+We test each of these hypotheses with a between-subjects vignette-based survey experiment with participants recruited from Amazon's Mechanical Turk. Our target population is the portion of Americans hypothetically willing to donate money for human rights and humanitarian work abroad. Our convenience sample (March 2017, N = 546[^power]) generally approximates the characteristics of our target population, since it is younger, more educated, wealthier, and more likely to donate to charities than nationally representative samples (see Tables S1 and S2 in the supplement).[^supp] 
 
 ## Experimental treatments and outcomes
 
-We presented participants with a short paragraph with three manipulated frames, each highlighting different factors that might influence patterns of private philanthropy. The vignette thus results in three manipulated variables: (1) crackdown vs. no crackdown, (2) humanitarian assistance vs. human rights, and (3) government funding vs. private funding. We used the International Rescue Committee (IRC) as our example international NGO because its work easily applies to each possible frame. IRC provides humanitarian assistance and engages in human rights advocacy for refugees, more than a quarter of IRC's income comes from both government grants and private donation, and IRC works in some countries that have passed anti-NGO laws, such as Egypt and Turkey, as well as countries with no such laws. We use a 2 × 2 × 2 between-subject factorial design, with participants randomly assigned to one of eight versions of the following vignette (see the CONSORT diagram in Figure S2).[^power]
+We presented participants with a short paragraph with three manipulated frames, each highlighting different factors that might influence patterns of private philanthropy. The vignette thus results in three manipulated variables: (1) crackdown vs. no crackdown, (2) humanitarian assistance vs. human rights, and (3) government funding vs. private funding. We used the International Rescue Committee (IRC) as our example international NGO because its work easily applies to each possible frame. IRC provides humanitarian assistance and engages in human rights advocacy for refugees, more than a quarter of IRC's income comes from both government grants and private donation, and IRC works in some countries that have passed anti-NGO laws, such as Egypt and Turkey, as well as countries with no such laws. We use a 2 × 2 × 2 between-subject factorial design, with participants randomly assigned to one of eight versions of the following vignette (see the CONSORT diagram in Figure S2).
 
 > The International Rescue Committee (IRC) focuses on *{humanitarian assistance for refugees | human rights for refugees}* *{and works in countries that have recently passed laws that harshly restrict nonprofit organizations | NOTHING}*. A substantial proportion of IRC's funding comes from *{government | private}* donors.
 
@@ -127,7 +127,7 @@ In contrast, though, crackdowns had no substantial effect on the amount donated 
 
 # Conclusion
 
-While the number of NGOs proliferated across the globe with the end of the Cold War, numerous countries have cracked down on funding for domestic NGOs over the last three decades. Between the lack of a local philanthropic culture and an increasingly authoritarian approach that restricts space for domestic philanthropy, many NGOs are forced to rely on foreign private donors. But how do such donors react to NGOs facing legal restrictions abroad? We summarize our findings in @tbl:hypotheses.
+Dozens of countries have cracked down on foreign funding for NGOs over the last three decades. Between the lack of a local philanthropic culture and an increasingly authoritarian approach that restricts space for domestic philanthropy, many NGOs are forced to rely on foreign private donors. But how do such donors react to NGOs facing legal restrictions abroad? We summarize our findings in @tbl:hypotheses.
 
 \stgroup
 \renewcommand*{\arraystretch}{1.75}
@@ -141,16 +141,15 @@ Our results have several implications for policy and future research. First, NGO
 With increasing government repression of NGOs, these groups can no longer rely on a single funding source. However, these new and challenging scenarios create an opportunity for NGOs to rethink how to address different audiences and create a robust market for philanthropy towards besieged NGOs abroad. 
 
 
+[^power]: We used power analysis to determine our sample size (see section "Sample size" in the supplement for full details).
 
 [^supp]: Figures and tables in the supplement are prefixed with "S"
 
-[^power]: We used power analysis to determine our sample size: with the anticipation of finding a small effect size ($f^2 = 0.02$) at a 0.05 significance level with a power of 0.9, our target sample size was 527, which we then rounded up to 540 in case of error or noncompliance with the survey.
-
 [^anova-regression]: Typically, between-subjects factorial designs are analyzed with ANOVA. Using regression instead of ANOVA allows us to estimate differences in means and medians more easily and provides more flexibility when controlling for demographics or attitudes towards philanthropy. Table S3 demonstrates how to add each of the terms to estimate the average for each condition.
 
-[^priors]: In both families of models, we use weakly informative prior distributions for both the coefficients and the intercepts (see section "Priors" in the supplement for full details). We use Stan [@stan] through R [@rstan; @r-project] to obtain the posterior distribution of each dependent variable with and we use the medians of the simulated values from the Monte Carlo Markov Chain (MCMC) samples as coefficient estimates and calculate the 90% highest posterior density as credible intervals.
+[^priors]: We use weakly informative prior distributions for both the coefficients and the intercepts (see section "Priors" in the supplement for full details). We use Stan [@stan] through R [@rstan; @r-project] to obtain the posterior distribution of each dependent variable. We use the medians of the simulated values from the Monte Carlo Markov Chain (MCMC) samples as coefficient estimates and use the 90% highest posterior density as credible intervals. We declare an effect statistically significant if the posterior probability of being different from zero is larger than 0.90.
 
-[^delta-explanation]: Throughout this paper, ∆ represents the median difference in the value of interest between the "no crackdown" and "crackdown" conditions in 4,000 MCMC simulations (i.e. $\text{Value}_{\text{No crackdown}} - \text{Value}_{\text{Crackdown}}$).
+[^delta-explanation]: Throughout this paper, ∆ represents the median difference in the value of interest between the "no crackdown" and "crackdown" conditions in 4,000 MCMC simulations (i.e. $\text{Value}_{\text{Crackdown}} - \text{Value}_{\text{No crackdown}}$).
 
 [^3154467]: Response 3154467.
 

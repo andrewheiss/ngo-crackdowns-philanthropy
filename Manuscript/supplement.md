@@ -22,6 +22,10 @@ Experiment participants were recruited via Amazon Mechanical Turk (MTurk), an on
 
 ![Time spent on experiment](output/figures/avg-time.pdf){#fig:avg-time}
 
+## Sample size
+
+We used power analysis to determine our sample size: with the anticipation of finding a small effect size ($f^2 = 0.02$) at a 0.05 significance level with a power of 0.9, our target sample size was 527, which we then rounded up to 540 in case of error or noncompliance with the survey.
+
 ## Demographics and representativeness
 
 MTurk has become an increasingly popular method for fielding survey experiments on cheap semi-representative national samples, though drawing definitive causal inference from convenience samples is not without issues. Previous research has found that MTurk workers tend to be more liberal, younger, and less racially diverse than the general US population [@CliffordJewellWaggoner:2015; @BerniskyHuberLenz:2012]. The results from our experiment generally mirror these findings. @tbl:exp-sample compares demographic characteristics of our sample with national averages from the US Census's Current Population Survey (CPS) [@IPUMS-CPS:2017]. For general demographic information, we use the 2017 Annual Social and Economic Supplement (ASEC) to the CPS. From 2002–2015, the CPS included a Volunteer Supplement every September, so we use 2015 data for data on volunteering and donating to charity. We do not show other respondent demographic details because we do not have good population-level data to compare our sample with. We could theoretically use Pew data to compare political preferences, but Pew collects data on party affiliation, while we collected data about respondents' ideological positions along a conservative–liberal spectrum, which makes the two variables incomparable.
