@@ -1,0 +1,11 @@
+Hypothesis,Findings
+**H~1a~**: Donors more likely to give to NGOs facing crackdown,- No substantial difference in likelihood of donation ($p(\Delta \neq 0) = 0.79$)
+**H~1b~**: Donors give more to NGOs facing crackdown,- Donors give an average of \$4 more when in crackdown condition ($p(\Delta \neq 0) = 0.96$)
+**H~2a~**: Donors more likely to give to humanitarian NGOs facing crackdown,- No substantial difference in likelihood to donate to human rights NGOs ($p(\Delta \neq 0) = 0.54$) or humanitarian NGOS ($p(\Delta \neq 0) = 0.86$) across crackdown conditions
+**H~2b~**: Donors give more to humanitarian NGOs facing crackdown,"- No substantial difference in amount donated across crackdown conditions to human rights NGOs ($p(\Delta \neq 0) = 0.8$)
+- Donors give an average of \$5 more to humanitarian NGOs in crackdown condition ($p(\Delta \neq 0) = 0.945$)."
+**H~3a~**: Donors more likely to give to privately funded NGOs facing crackdown,"- Donors are more likely to give to privately-funded human rights NGOs facing crackdown ($p(\Delta \neq 0) = 0.98$)
+- Donors are less likely to give to government-funded human rights NGOS facing crackdown ($p(\Delta \neq 0) = 0.975$)
+- No substantial differences across crackdown conditions for privately-funded ($p(\Delta \neq 0) = 0.77$) or government-funded ($p(\Delta \neq 0) = 0.74$) humanitarian NGOs"
+**H~3b~**: Donors give more to privately funded NGOs facing crackdown,"- Donors give an average of \$12 more to government-funded humanitarian NGOs ($p(\Delta \neq 0) = 0.99$) and \$8 more to privately-funded human rights NGOs ($p(\Delta \neq 0) = 0.975$) facing crackdown
+- No substantial differences in amount donated to government-funded human rights NGOs ($p(\Delta \neq 0) = 0.74$) or privately-funded humanitarian NGOs ($p(\Delta \neq 0) = 0.71$) across crackdown conditions"

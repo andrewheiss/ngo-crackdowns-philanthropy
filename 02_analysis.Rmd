@@ -1260,6 +1260,18 @@ bind_rows(diffs_coef_likely_pairs_detail_c,
 
 
 # Session info
+# Summary of hypotheses
+
+```{r hypotheses-summary, warning=FALSE, message=FALSE, results="asis"}
+# TODO: Make this more dynamic so I don't have to type all the values manually
+hypotheses <- read_csv(here("text", "hypotheses-summary.csv"))
+
+hypotheses %>% 
+  pandoc.table.return(justify = "ll", style = "grid", keep.line.breaks = TRUE,
+                      caption = "Summary of all hypotheses {#tbl:hypotheses}") %T>%
+  cat() %>% 
+  cat(file = file.path(here(), "output", "tables", "tbl-hypotheses.md"))
+```
 
 <button data-toggle="collapse" data-target="#sessioninfo" class="btn btn-primary btn-md btn-info">Here's what we used the last time we built this page</button>
 
