@@ -669,14 +669,16 @@ likely_coefs_full %T>%
 ```
 
 
-# Session info
+# Original computing environment
 
 <button data-toggle="collapse" data-target="#sessioninfo" class="btn btn-primary btn-md btn-info">Here's what we used the last time we built this page</button>
 
 <div id="sessioninfo" class="collapse">
 
-```{r show-session-info}
-sessionInfo()
+```{r show-session-info, echo=TRUE}
+writeLines(readLines(file.path(Sys.getenv("HOME"), ".R/Makevars")))
+
+devtools::session_info()
 ```
 
 </div> 
