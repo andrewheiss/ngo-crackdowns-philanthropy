@@ -5,3 +5,6 @@
 
 ---
 
+Requires **safesite** package to build the complete site, due to [environment bleeding](https://github.com/andrewheiss/rmarkdown-website-envs):
+
+    devtools::install_github("andrewheiss/rmarkdown-website-envs", subdir = "safesite")

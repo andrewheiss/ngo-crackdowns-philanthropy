@@ -10,27 +10,7 @@ editor_options:
 ---
 
 ```{r load-libraries-data, warning=FALSE, message=FALSE}
-# Unload all the already-loaded packages because R Markdown websites *don't* knit 
-# each Rmd in a separate environment: https://github.com/rstudio/rmarkdown/issues/1326
-#
-# This means that here::here() and lubridate::here() will conflict becuase **here**
-# has already been loaded in previous scripts
-# 
-# Stupid bleeding environments
-# https://github.com/andrewheiss/rmarkdown-website-envs-orig
-if (isTRUE(getOption('knitr.in.progress')) & !is.null(names(sessionInfo()$otherPkgs))) {
-  invisible(suppressWarnings(sapply(paste0("package:", names(sessionInfo()$otherPkgs)),
-                                    detach, character.only = TRUE)))
-  
-  # THIS IS SO EVIL AND AWFUL BUT NECESSARY BECAUSE STUFF HAPPENS IN PREVIOUS
-  # FILES THAT BREAK THIS FILE WHEN IT IS KNIT AS PART OF AN RMARKDOWN WEBSITE
-  #
-  # DON'T TELL JENNY BRYAN
-  rm(list = ls())
-  # AHHH THE HORROR
-}
-
-# Load libraries again
+# Load libraries
 library(tidyverse)
 library(magrittr)
 library(rstan)
