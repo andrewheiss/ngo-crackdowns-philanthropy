@@ -30,6 +30,7 @@ source(file.path(here(), "lib", "modeling.R"))
 
 # Load data
 results <- readRDS(file.path(here(), "data", "results_clean.rds"))
+# qwraps2::lazyload_cache_dir("02_analysis_cache/html")
 
 
 # Helpful functions
@@ -277,8 +278,6 @@ plot_donate_summary <- ggplot(donate_summary, aes(x = n, y = donate_likely,
   labs(x = NULL, y = NULL) +
   theme_ngos() +
   theme(panel.grid.major.y = element_blank())
-
-plot_donate_summary
 
 plot_donate_summary %T>% 
   print() %T>%
@@ -568,12 +567,12 @@ diffs_coef_pairs_c <- chains_fitted_c %>%
 
 diffs_coef_pairs_detail_c <- tidy_diffs(diffs_coef_pairs_c)
 
-pairs_plot_data_c <- diffs_coef_pairs_c %>%
+pairs_plot_data_c <- diffs_coef_pairs_c$mcmc_diffs %>%
   gather(pair, value) %>%
   mutate(pair1 = pair) %>%
-  separate(pair1, into = c("group1", "group2"), sep = " − ") %>%
+  separate(pair1, into = c("group1", "group2"), sep = " - ") %>%
   mutate(pair = ifelse(nchar(pair) > 25,
-                       str_replace(pair, "−", "−\n"),
+                       str_replace(pair, "-", "-\n"),
                        pair))
   
 plot_diffs_c <- ggplot() + 
@@ -598,12 +597,12 @@ diffs_coef_pairs_i <- chains_fitted_i %>%
 
 diffs_coef_pairs_detail_i <- tidy_diffs(diffs_coef_pairs_i)
 
-pairs_plot_data_i <- diffs_coef_pairs_i %>%
+pairs_plot_data_i <- diffs_coef_pairs_i$mcmc_diffs %>%
   gather(pair, value) %>%
   mutate(pair1 = pair) %>%
-  separate(pair1, into = c("group1", "group2"), sep = " − ") %>%
+  separate(pair1, into = c("group1", "group2"), sep = " - ") %>%
   mutate(pair = ifelse(nchar(pair) > 25,
-                       str_replace(pair, "−", "−\n"),
+                       str_replace(pair, "-", "-\n"),
                        pair))
 ```
 
@@ -615,12 +614,12 @@ diffs_coef_pairs_f <- chains_fitted_f %>%
 
 diffs_coef_pairs_detail_f <- tidy_diffs(diffs_coef_pairs_f)
 
-pairs_plot_data_f <- diffs_coef_pairs_f %>%
+pairs_plot_data_f <- diffs_coef_pairs_f$mcmc_diffs %>%
   gather(pair, value) %>%
   mutate(pair1 = pair) %>%
-  separate(pair1, into = c("group1", "group2"), sep = " − ") %>%
+  separate(pair1, into = c("group1", "group2"), sep = " - ") %>%
   mutate(pair = ifelse(nchar(pair) > 25,
-                       str_replace(pair, "−", "−\n"),
+                       str_replace(pair, "-", "-\n"),
                        pair))
 ```
 
@@ -646,27 +645,29 @@ all_chains_ci <- bind_cols(newdata_conditions_ci, chains_nested_ci) %>%
 # All the pairwise differences in a single data frame, grouped by issue
 pairs_conditions_ci <- all_chains_ci %>% 
   mutate(diffs_coef_pairs = data %>% map(~ mcmc_pairwise_diffs(.)),
-         diffs_coef_pairs_detail = diffs_coef_pairs %>% map(~ tidy_diffs(.)))
+         diffs_coef_pairs_detail = diffs_coef_pairs %>% map(~ tidy_diffs(.)),
+         diffs_coefs = diffs_coef_pairs %>% map(~ .$mcmc_diffs))
 
 # Extract coefficient details and plot data
 diffs_coef_pairs_detail_ci <- pairs_conditions_ci %>% 
   unnest(diffs_coef_pairs_detail) %>% 
-  select(-data, -diffs_coef_pairs)
+  select(-data, -diffs_coef_pairs, -diffs_coefs) #%>% 
+  #mutate(pair = "Hey")
 
 pairs_plot_data_ci <- pairs_conditions_ci %>% 
-  select(issue, diffs_coef_pairs) %>% 
-  unnest(diffs_coef_pairs) %>%
+  select(issue, diffs_coefs) %>% 
+  unnest(diffs_coefs) %>%
   gather(pair, value, -issue) %>%
   mutate(pair1 = pair) %>%
-  separate(pair1, into = c("group1", "group2"), sep = " − ") %>%
+  separate(pair1, into = c("group1", "group2"), sep = " - ") %>%
   mutate(pair = ifelse(nchar(pair) > 25,
-                       str_replace(pair, "−", "−\n"),
+                       str_replace(pair, "-", "-\n"),
                        pair))
 
 plot_diffs_ci <- ggplot() + 
   geom_density(data = pairs_plot_data_ci, aes(x = value),
                fill = ngo_cols("blue"), colour = NA, alpha = 0.4) + 
-  geom_segment(data = diffs_coef_pairs_detail_ci, 
+  geom_segment(data = diffs_coef_pairs_detail_ci,
                aes(x = q5, xend = q95, y = 0, yend = 0),
                size = 3) +
   geom_vline(data = diffs_coef_pairs_detail_ci, aes(xintercept = median), size = 0.25) +
@@ -699,21 +700,22 @@ all_chains_cif <- bind_cols(newdata_conditions_cif, chains_nested_cif) %>%
 # All the pairwise differences in a single data frame, grouped by issue
 pairs_conditions_cif <- all_chains_cif %>% 
   mutate(diffs_coef_pairs = data %>% map(~ mcmc_pairwise_diffs(.)),
-         diffs_coef_pairs_detail = diffs_coef_pairs %>% map(~ tidy_diffs(.)))
+         diffs_coef_pairs_detail = diffs_coef_pairs %>% map(~ tidy_diffs(.)),
+         diffs_coefs = diffs_coef_pairs %>% map(~ .$mcmc_diffs))
 
 # Extract coefficient details and plot data
 diffs_coef_pairs_detail_cif <- pairs_conditions_cif %>% 
   unnest(diffs_coef_pairs_detail) %>% 
-  select(-data, -diffs_coef_pairs)
+  select(-data, -diffs_coef_pairs, -diffs_coefs)
 
 pairs_plot_data_cif <- pairs_conditions_cif %>% 
-  select(issue, funding, diffs_coef_pairs) %>% 
-  unnest(diffs_coef_pairs) %>%
+  select(issue, funding, diffs_coefs) %>% 
+  unnest(diffs_coefs) %>%
   gather(pair, value, -issue, -funding) %>%
   mutate(pair1 = pair) %>%
-  separate(pair1, into = c("group1", "group2"), sep = " − ") %>%
+  separate(pair1, into = c("group1", "group2"), sep = " - ") %>%
   mutate(pair = ifelse(nchar(pair) > 25,
-                       str_replace(pair, "−", "−\n"),
+                       str_replace(pair, "-", "-\n"),
                        pair))
 
 plot_diffs_cif <- ggplot() + 
@@ -742,7 +744,7 @@ diffs_coef_pairs_detail_singles <- bind_rows(diffs_coef_pairs_detail_c,
                                              diffs_coef_pairs_detail_i,
                                              diffs_coef_pairs_detail_f) %>%
   mutate(pair = ifelse(nchar(pair) > 25,
-                       str_replace(pair, "−", "−\n"),
+                       str_replace(pair, "-", "-\n"),
                        pair),
          pair = fct_inorder(pair, ordered = TRUE))
 
@@ -775,6 +777,7 @@ bind_rows(diffs_coef_pairs_detail_c,
           diffs_coef_pairs_detail_i,
           diffs_coef_pairs_detail_f) %>% 
   select(`Frame` = pair, `∆~median~` = median, 
+         `% change~median~` = median_pct_change,
          `p(∆ > 0)` = p.greater0, `p(∆ < 0)` = p.less0, `p(∆ ≠ 0)` = p.diff.not0) %>% 
   pandoc.table.return(missing = "—", 
                       caption = "Median difference between likelihood to donate across single conditions {#tbl:amount-single-diffs}") %T>%
@@ -798,9 +801,9 @@ plot_diffs_all +
 
 (plot_diffs_all +
   plot_annotation(caption = "90% credible intervals shown in black. Solid vertical line = median; dotted vertical line = 0",
-                  tag_levels = "A", theme = theme_ngos())) %T>% 
+                  tag_levels = "A", theme = theme_ngos())) %T>%
   ggsave(., filename = file.path(here(), "output", "figures", "amount-diffs.pdf"),
-         width = 8, height = 5, units = "in", device = cairo_pdf) %>% 
+         width = 8, height = 5, units = "in", device = cairo_pdf) %>%
   ggsave(., filename = file.path(here(), "output", "figures", "amount-diffs.png"),
          width = 8, height = 5, units = "in", type = "cairo", dpi = 300)
 ```
@@ -810,10 +813,11 @@ bind_rows(diffs_coef_pairs_detail_c,
           diffs_coef_pairs_detail_ci,
           diffs_coef_pairs_detail_cif) %>% 
   select(Issue = issue, Funding = funding, 
-         `No crackdown − crackdown~median~` = median, 
+         `Crackdown - No crackdown~median~` = median, 
+         `% change~median~` = median_pct_change,
          `p(∆ > 0)` = p.greater0, `p(∆ < 0)` = p.less0, `p(∆ ≠ 0)` = p.diff.not0) %>% 
   pandoc.table.return(missing = "—", 
-                      caption = 'Median difference between amounts donated in "no crackdown" (control) and "crackdown" conditions {#tbl:amount-diffs}') %T>%
+                      caption = 'Median difference between amounts donated in "crackdown" (treatment) and "no crackdown" (control) conditions {#tbl:amount-diffs}') %T>%
   cat() %>% 
   cat(file = file.path(here(), "output", "tables", "tbl-amount-diffs.md"))
 ```
@@ -999,12 +1003,12 @@ diffs_coef_likely_pairs_c <- chains_fitted_likely_c %>%
 
 diffs_coef_likely_pairs_detail_c <- tidy_diffs(diffs_coef_likely_pairs_c)
 
-pairs_likely_plot_data_c <- diffs_coef_likely_pairs_c %>%
+pairs_likely_plot_data_c <- diffs_coef_likely_pairs_c$mcmc_diffs %>%
   gather(pair, value) %>%
   mutate(pair1 = pair) %>%
-  separate(pair1, into = c("group1", "group2"), sep = " − ") %>%
+  separate(pair1, into = c("group1", "group2"), sep = " - ") %>%
   mutate(pair = ifelse(nchar(pair) > 25,
-                       str_replace(pair, "−", "−\n"),
+                       str_replace(pair, "-", "-\n"),
                        pair))
   
 plot_diffs_likely_c <- ggplot() + 
@@ -1031,12 +1035,12 @@ diffs_coef_likely_pairs_i <- chains_fitted_likely_i %>%
 
 diffs_coef_likely_pairs_detail_i <- tidy_diffs(diffs_coef_likely_pairs_i)
 
-pairs_likely_plot_data_i <- diffs_coef_likely_pairs_i %>%
+pairs_likely_plot_data_i <- diffs_coef_likely_pairs_i$mcmc_diffs %>%
   gather(pair, value) %>%
   mutate(pair1 = pair) %>%
-  separate(pair1, into = c("group1", "group2"), sep = " − ") %>%
+  separate(pair1, into = c("group1", "group2"), sep = " - ") %>%
   mutate(pair = ifelse(nchar(pair) > 25,
-                       str_replace(pair, "−", "−\n"),
+                       str_replace(pair, "-", "-\n"),
                        pair))
 ```
 
@@ -1048,12 +1052,12 @@ diffs_coef_likely_pairs_f <- chains_fitted_likely_f %>%
 
 diffs_coef_likely_pairs_detail_f <- tidy_diffs(diffs_coef_likely_pairs_f)
 
-pairs_likely_plot_data_f <- diffs_coef_likely_pairs_f %>%
+pairs_likely_plot_data_f <- diffs_coef_likely_pairs_f$mcmc_diffs %>%
   gather(pair, value) %>%
   mutate(pair1 = pair) %>%
-  separate(pair1, into = c("group1", "group2"), sep = " − ") %>%
+  separate(pair1, into = c("group1", "group2"), sep = " - ") %>%
   mutate(pair = ifelse(nchar(pair) > 25,
-                       str_replace(pair, "−", "−\n"),
+                       str_replace(pair, "-", "-\n"),
                        pair))
 ```
 
@@ -1080,7 +1084,8 @@ all_chains_likely_ci <- bind_cols(newdata_conditions_ci,
 # All the pairwise differences in a single data frame, grouped by issue
 pairs_likely_conditions_ci <- all_chains_likely_ci %>% 
   mutate(diffs_coef_pairs = data %>% map(~ mcmc_pairwise_diffs(.)),
-         diffs_coef_pairs_detail = diffs_coef_pairs %>% map(~ tidy_diffs(.)))
+         diffs_coef_pairs_detail = diffs_coef_pairs %>% map(~ tidy_diffs(.)),
+         diffs_coefs = diffs_coef_pairs %>% map(~ .$mcmc_diffs))
 
 # Extract coefficient details and plot data
 diffs_coef_likely_pairs_detail_ci <- pairs_likely_conditions_ci %>% 
@@ -1088,13 +1093,13 @@ diffs_coef_likely_pairs_detail_ci <- pairs_likely_conditions_ci %>%
   select(-data, -diffs_coef_pairs)
 
 pairs_likely_plot_data_ci <- pairs_likely_conditions_ci %>% 
-  select(issue, diffs_coef_pairs) %>% 
-  unnest(diffs_coef_pairs) %>%
+  select(issue, diffs_coefs) %>% 
+  unnest(diffs_coefs) %>%
   gather(pair, value, -issue) %>%
   mutate(pair1 = pair) %>%
-  separate(pair1, into = c("group1", "group2"), sep = " − ") %>%
+  separate(pair1, into = c("group1", "group2"), sep = " - ") %>%
   mutate(pair = ifelse(nchar(pair) > 25,
-                       str_replace(pair, "−", "−\n"),
+                       str_replace(pair, "-", "-\n"),
                        pair))
 
 plot_diffs_likely_ci <- ggplot() + 
@@ -1136,31 +1141,32 @@ all_chains_likely_cif <- bind_cols(newdata_conditions_cif,
 # All the pairwise differences in a single data frame, grouped by issue
 pairs_likely_conditions_cif <- all_chains_likely_cif %>% 
   mutate(diffs_coef_pairs = data %>% map(~ mcmc_pairwise_diffs(.)),
-         diffs_coef_pairs_detail = diffs_coef_pairs %>% map(~ tidy_diffs(.)))
+         diffs_coef_pairs_detail = diffs_coef_pairs %>% map(~ tidy_diffs(.)),
+         diffs_coefs = diffs_coef_pairs %>% map(~ .$mcmc_diffs))
 
 # Extract coefficient details and plot data
 diffs_coef_likely_pairs_detail_cif <- pairs_likely_conditions_cif %>% 
   unnest(diffs_coef_pairs_detail) %>% 
-  select(-data, -diffs_coef_pairs)
+  select(-data, -diffs_coef_pairs, -diffs_coefs)
 
 pairs_likely_plot_data_cif <- pairs_likely_conditions_cif %>% 
-  select(issue, funding, diffs_coef_pairs) %>% 
-  unnest(diffs_coef_pairs) %>%
+  select(issue, funding, diffs_coefs) %>% 
+  unnest(diffs_coefs) %>%
   gather(pair, value, -issue, -funding) %>%
   mutate(pair1 = pair) %>%
-  separate(pair1, into = c("group1", "group2"), sep = " − ") %>%
+  separate(pair1, into = c("group1", "group2"), sep = " - ") %>%
   mutate(pair = ifelse(nchar(pair) > 25,
-                       str_replace(pair, "−", "−\n"),
+                       str_replace(pair, "-", "-\n"),
                        pair))
 
-plot_diffs_likely_cif <- ggplot() + 
+plot_diffs_likely_cif <- ggplot() +
   geom_density(data = pairs_likely_plot_data_cif, aes(x = value),
-               fill = ngo_cols("red"), colour = NA, alpha = 0.4) + 
-  geom_segment(data = diffs_coef_likely_pairs_detail_cif, 
+               fill = ngo_cols("red"), colour = NA, alpha = 0.4) +
+  geom_segment(data = diffs_coef_likely_pairs_detail_cif,
                aes(x = q5, xend = q95, y = 0, yend = 0),
                size = 3) +
-  geom_vline(data = diffs_coef_likely_pairs_detail_cif, 
-             aes(xintercept = median), size = 0.25) +
+  geom_vline(data = diffs_coef_likely_pairs_detail_cif,
+             aes(xintercept = `median`), size = 0.25) +
   geom_vline(xintercept = 0, linetype = "dotted") +
   guides(fill = FALSE, color = FALSE) +
   scale_x_continuous(labels = percent) +
@@ -1181,7 +1187,7 @@ diffs_coef_likely_pairs_detail_singles <- bind_rows(diffs_coef_likely_pairs_deta
                                                     diffs_coef_likely_pairs_detail_i,
                                                     diffs_coef_likely_pairs_detail_f) %>%
   mutate(pair = ifelse(nchar(pair) > 25,
-                       str_replace(pair, "−", "−\n"),
+                       str_replace(pair, "-", "-\n"),
                        pair),
          pair = fct_inorder(pair, ordered = TRUE))
 
@@ -1214,6 +1220,7 @@ bind_rows(diffs_coef_likely_pairs_detail_c,
           diffs_coef_likely_pairs_detail_i,
           diffs_coef_likely_pairs_detail_f) %>% 
   select(`Frame` = pair, `∆~median~` = median, 
+         `% change~median~` = median_pct_change,
          `p(∆ > 0)` = p.greater0, `p(∆ < 0)` = p.less0, `p(∆ ≠ 0)` = p.diff.not0) %>% 
   pandoc.table.return(missing = "—", 
                       caption = "Median difference between likelihood to donate across single conditions {#tbl:likelihood-single-diffs}") %T>%
@@ -1236,10 +1243,10 @@ plot_diffs_likely_all +
                   tag_levels = "A", theme = theme_ngos())
 
 (plot_diffs_likely_all +
-  plot_annotation(caption = "90% credible intervals shown in black. Solid vertical line = median; dotted vertical line = 0",
-                  tag_levels = "A", theme = theme_ngos())) %T>% 
+    plot_annotation(caption = "90% credible intervals shown in black. Solid vertical line = median; dotted vertical line = 0",
+                    tag_levels = "A", theme = theme_ngos())) %T>%
   ggsave(., filename = file.path(here(), "output", "figures", "likelihood-diffs.pdf"),
-         width = 8, height = 5, units = "in", device = cairo_pdf) %>% 
+         width = 8, height = 5, units = "in", device = cairo_pdf) %>%
   ggsave(., filename = file.path(here(), "output", "figures", "likelihood-diffs.png"),
          width = 8, height = 5, units = "in", type = "cairo", dpi = 300)
 ```
@@ -1249,10 +1256,11 @@ bind_rows(diffs_coef_likely_pairs_detail_c,
           diffs_coef_likely_pairs_detail_ci,
           diffs_coef_likely_pairs_detail_cif) %>% 
   select(Issue = issue, Funding = funding, 
-         `No crackdown − crackdown~median~` = median, 
+         `Crackdown - No crackdown~median~` = median, 
+         `% change~median~` = median_pct_change,
          `p(∆ > 0)` = p.greater0, `p(∆ < 0)` = p.less0, `p(∆ ≠ 0)` = p.diff.not0) %>% 
   pandoc.table.return(missing = "—", 
-                      caption = 'Median difference between likelihood to donate in "no crackdown" (control) and "crackdown" conditions {#tbl:likelihood-diffs}') %T>%
+                      caption = 'Median difference between likelihood to donate in "crackdown" (treatment) and "crackdown" (control) conditions {#tbl:likelihood-diffs}') %T>%
   cat() %>% 
   cat(file = file.path(here(), "output", "tables", "tbl-likelihood-diffs.md"))
 ```

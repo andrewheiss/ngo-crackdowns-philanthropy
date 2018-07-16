@@ -13,20 +13,33 @@ options(mc.cores = parallel::detectCores())
 # Adapted from http://stackoverflow.com/a/28187446/120898
 mcmc_pairwise_diffs <- function(chains) {
   pair_names <- outer(colnames(chains), colnames(chains),
-                      paste, sep = " − ")
+                      paste, sep = " - ")
   pairs_to_omit <- which(upper.tri(pair_names, diag = TRUE))
   
   mcmc_diffs <- outer(1:ncol(chains), 1:ncol(chains),
                       function(x, y) chains[,x] - chains[,y]) %>% 
-    magrittr::set_colnames(pair_names) %>% 
-    select(-pairs_to_omit)
+    magrittr::set_colnames(., pair_names) %>% 
+    select(-pairs_to_omit) %>% 
+    as_data_frame()
   
-  return(mcmc_diffs)
+  mcmc_pct_change <- outer(1:ncol(chains), 1:ncol(chains),
+                      function(x, y) (chains[,x] - chains[,y]) / chains[,y]) %>% 
+    magrittr::set_colnames(., pair_names) %>% 
+    select(-pairs_to_omit) %>% 
+    as_data_frame()
+  
+  return(list(mcmc_diffs = mcmc_diffs, mcmc_pct_change = mcmc_pct_change))
 }
 
 # Summarize the differences between MCMC pairs
 tidy_diffs <- function(diffs_pairs) {
-  diffs_pairs %>% 
+  pct_change_pairs <- diffs_pairs$mcmc_pct_change %>% 
+    gather(pair, value) %>% 
+    group_by(pair) %>% 
+    summarise(mean_pct_change = mean(value),
+              median_pct_change = median(value))
+  
+  mcmc_diffs_pairs <- diffs_pairs$mcmc_diffs %>% 
     gather(pair, value) %>% 
     group_by(pair) %>% 
     summarise(mean = mean(value),
@@ -40,6 +53,9 @@ tidy_diffs <- function(diffs_pairs) {
               p.greater0 = mean(value > 0),
               p.less0 = mean(value < 0),
               p.diff.not0 = ifelse(median > 0, p.greater0, p.less0))
+  
+  diffs_summary <- left_join(mcmc_diffs_pairs, pct_change_pairs, by = "pair")
+  return(diffs_summary)
 }
 
 
