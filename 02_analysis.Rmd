@@ -1268,15 +1268,99 @@ bind_rows(diffs_coef_likely_pairs_detail_c,
 
 # Summary of hypotheses
 
-```{r hypotheses-summary, warning=FALSE, message=FALSE, results="asis"}
-# TODO: Make this more dynamic so I don't have to type all the values manually
-hypotheses <- read_csv(here("text", "hypotheses-summary.csv"))
+```{r hypotheses-summary-figure, fig.width=8, fig.height=6.5}
+hypotheses <- tribble(
+  ~dv, ~hypothesis, ~summary,
+  "Likelihood", "H1a: Donors more likely\nto give to NGOs\nfacing crackdown", diffs_coef_likely_pairs_detail_c,
+  "Likelihood", "H2a: Donors more likely\nto give to humanitarian\nNGOs facing crackdown", diffs_coef_likely_pairs_detail_ci,
+  "Likelihood", "H3a: Donors more likely\nto give to privately funded\nNGOs facing crackdown", diffs_coef_likely_pairs_detail_cif,
+  "Amount", "H1b: Donors give more \nto NGOs facing crackdown", diffs_coef_pairs_detail_c,
+  "Amount", "H2b: Donors give more \nto humanitarian NGOs\nfacing crackdown", diffs_coef_pairs_detail_ci,
+  "Amount", "H3b: Donors give more \nto privately funded NGOs\nfacing crackdown", diffs_coef_pairs_detail_cif
+)
 
-hypotheses %>% 
-  pandoc.table.return(justify = "ll", style = "grid", keep.line.breaks = TRUE,
-                      caption = "Summary of all hypotheses {#tbl:hypotheses}") %T>%
-  cat() %>% 
-  cat(file = here("output", "tables", "tbl-hypotheses.md"))
+plot_hypotheses <- hypotheses %>% 
+  unnest(summary) %>% 
+  select(-diffs_coefs) %>% 
+  mutate(condition = paste0(issue, " + ", funding),
+         condition = recode(condition, 
+                            `Human rights + NA` = "Human rights",
+                            `Humanitarian assistance + NA` = "Humanitarian assistance",
+                            `NA + NA` = "Crackdown only")) %>% 
+  mutate(hypothesis_custom = case_when(
+    .$condition == "Human rights + Government" ~ paste(hypothesis, "\n(government funding condition)"),
+    .$condition == "Humanitarian assistance + Government" ~ paste(hypothesis, "\n(government funding condition)"),
+    .$condition == "Human rights + Private" ~ paste(hypothesis, "\n(private funding condition)"),
+    .$condition == "Humanitarian assistance + Private" ~ paste(hypothesis, "\n(private funding condition)"),
+    TRUE ~ hypothesis
+  )) %>% 
+  mutate(issue = fct_rev(fct_explicit_na(issue, na_level = "Crackdown only")),
+         hypothesis_facet = ifelse(str_detect(hypothesis, "H3"), 2, 1),
+         p_lab = case_when(
+           .$dv == "Likelihood" ~ sprintf("∆ = %.2f; p(∆ ≠ 0) = %.2f", .$median, .$p.diff.not0),
+           .$dv == "Amount" ~ sprintf("∆ = $%.2f; p(∆ ≠ 0) = %.2f", .$median, .$p.diff.not0)
+         ))
+
+plot_hypotheses_likely <- filter(plot_hypotheses, dv == "Likelihood")
+plot_hypotheses_amount <- filter(plot_hypotheses, dv == "Amount")
+
+plot_summary_likely <- ggplot(plot_hypotheses_likely, 
+                              aes(x = median, y = fct_rev(hypothesis_custom))) +
+  geom_pointrangeh(aes(xmin = q5, xmax = q95, color = issue),
+                   position = position_dodgev(height = 0.5)) +
+  geom_vline(xintercept = 0, size = 0.25, linetype = "dashed") +
+  geom_label(data = filter(plot_hypotheses_likely, issue == "Human rights"), 
+             aes(label = p_lab, color = issue), size = 3, nudge_y = 0.35, show.legend = FALSE) +
+  geom_label(data = filter(plot_hypotheses_likely, issue == "Humanitarian assistance"), 
+             aes(label = p_lab, color = issue), size = 3, nudge_y = -0.35, show.legend = FALSE) +
+  geom_label(data = filter(plot_hypotheses_likely, issue == "Crackdown only"), 
+             aes(label = p_lab, color = issue), size = 3, nudge_y = 0.2, show.legend = FALSE) +
+  labs(x = expression(paste("Effect of crackdown: (Crackdown - No crackdown)"["median"])),
+       y = NULL, subtitle = "Likelihood of donation") +
+  scale_x_continuous(labels = percent_format(accuracy = 1)) +
+  scale_color_manual(values = ngo_cols("dark grey", "blue", "red", name = FALSE), name = NULL) +
+  coord_cartesian(clip = "off") +
+  theme_ngos() + 
+  theme(strip.text = element_blank(),
+        panel.grid.minor = element_blank(),
+        plot.subtitle = element_text(size = rel(1.2), face = "plain", #hjust = 0.5,
+                                    family = "Encode Sans Condensed Medium")) +
+  facet_wrap(~ hypothesis_facet, nrow = 1, scales = "free")
+
+plot_summary_amount <- ggplot(plot_hypotheses_amount, 
+                              aes(x = median, y = fct_rev(hypothesis_custom))) +
+  geom_pointrangeh(aes(xmin = q5, xmax = q95, color = issue),
+                   position = position_dodgev(height = 0.5)) +
+  geom_vline(xintercept = 0, size = 0.25, linetype = "dashed") +
+  geom_label(data = filter(plot_hypotheses_amount, issue == "Human rights"), 
+             aes(label = p_lab, color = issue), size = 3, nudge_y = 0.35, show.legend = FALSE) +
+  geom_label(data = filter(plot_hypotheses_amount, issue == "Humanitarian assistance"), 
+             aes(label = p_lab, color = issue), size = 3, nudge_y = -0.35, show.legend = FALSE) +
+  geom_label(data = filter(plot_hypotheses_amount, issue == "Crackdown only"), 
+             aes(label = p_lab, color = issue), size = 3, nudge_y = 0.2, show.legend = FALSE) +
+  labs(x = expression(paste("Effect of crackdown: (Crackdown - No crackdown)"["median"])),
+       y = NULL, subtitle = "Amount donated",
+       caption = "90% credible intervals shown around each point") +
+  scale_x_continuous(labels = dollar_format()) +
+  scale_color_manual(values = ngo_cols("dark grey", "blue", "red", name = FALSE), guide = FALSE) +
+  coord_cartesian(clip = "off") +
+  theme_ngos() + 
+  theme(strip.text = element_blank(),
+        panel.grid.minor = element_blank(),
+        plot.subtitle = element_text(size = rel(1.2), face = "plain", #hjust = 0.5,
+                                    family = "Encode Sans Condensed Medium")) +
+  facet_wrap(~ hypothesis_facet, nrow = 1, scales = "free")
+
+plot_summary_diffs <- plot_summary_likely + plot_summary_amount +
+  plot_layout(ncol = 1)
+
+plot_summary_diffs
+
+plot_summary_diffs %T>%
+  ggsave(., filename = here("output", "figures", "summary-diffs.pdf"),
+         width = 8, height = 6.5, units = "in", device = cairo_pdf) %>%
+  ggsave(., filename = here("output", "figures", "summary-diffs.png"),
+         width = 8, height = 6.5, units = "in", type = "cairo", dpi = 300)
 ```
 
 

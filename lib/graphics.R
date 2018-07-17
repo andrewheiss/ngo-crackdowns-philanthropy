@@ -9,8 +9,8 @@ theme_spark <- function() {
 }
 
 theme_ngos <- function(base_size = 11, base_family = "Encode Sans Condensed", density = FALSE) {
-  update_geom_defaults("label", list(family = "Encode Sans Condensed Medium"))
-  update_geom_defaults("text", list(family = "Encode Sans Condensed Medium"))
+  update_geom_defaults("label", list(family = "Encode Sans Condensed Light", face = "plain"))
+  update_geom_defaults("text", list(family = "Encode Sans Condensed Light", face = "plain"))
   
   ret <- theme_bw(base_size, base_family) +
     theme(plot.title = element_text(size = rel(1.4), face = "plain",
