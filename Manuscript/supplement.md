@@ -114,6 +114,8 @@ We obtain the posterior distribution of each dependent variable with Markov Chai
 !INCLUDE "../output/tables/tbl-avg-results.md"
 \fingroup
 
+\newpage
+
 ## Model coefficients: likelihood of donation
 
 !INCLUDE "output/tables/tbl-models-amount.md"
