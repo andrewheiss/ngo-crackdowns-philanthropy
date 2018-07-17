@@ -36,8 +36,8 @@ median.factor <- median.ordered
 
 # Load data
 # results_file <- file.path(here(), "data", "test_data.csv")
-results_file <- file.path(here(), "private", 
-                          "NGO Crackdowns and Philanthropy, March 2018 pilot_March 23, 2018_20.01.csv")
+results_file <- here("private", 
+                     "NGO Crackdowns and Philanthropy, March 2018 pilot_March 23, 2018_20.01.csv")
 
 # Possible answers
 favorability <- c("Very unfavorable", "Unfavorable", "Neutral", 
@@ -97,7 +97,7 @@ results_raw <- read_csv(results_file, skip = 16,
 # The code for determining these is in a script that is excluded from the main
 # repository because of privacy issues (it deals directly with MTurk worker
 # IDs), called "private/approve_mturkers.R". It outputs this text list of codes.
-codes_to_exclude <- read_csv(file.path(here(), "data", "codes_to_exclude.csv"))
+codes_to_exclude <- read_csv(here("data", "codes_to_exclude.csv"))
 
 # Clean everything
 results_check_attention <- results_raw %>%
@@ -228,9 +228,9 @@ results <- results_check_attention %>%
                                                     "Other", "Prefer not to say")))
 
 # Save final clean data
-saveRDS(results, file.path(here(), "data", "results_clean.rds"))
-write_csvy(results, file = file.path(here(), "data", "results_clean.csv"),
-           metadata = file.path(here(), "data", "results_clean.yaml"), na = "NA")
+saveRDS(results, here("data", "results_clean.rds"))
+write_csvy(results, file = here("data", "results_clean.csv"),
+           metadata = here("data", "results_clean.yaml"), na = "NA")
 ```
 
 ```{r completed-summary}
@@ -247,8 +247,8 @@ completed_summary <- results_check_attention %>%
   right_join(completed_skeleton, by = c("reason", "crackdown", "issue", "funding")) %>% 
   replace_na(list(n = 0))
 
-saveRDS(completed_summary, file.path(here(), "data", "completion_summary.rds"))
-write_csv(completed_summary, file.path(here(), "data", "completion_summary.csv"))
+saveRDS(completed_summary, here("data", "completion_summary.rds"))
+write_csv(completed_summary, here("data", "completion_summary.csv"))
 ```
 
 

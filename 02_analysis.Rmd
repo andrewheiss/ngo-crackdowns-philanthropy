@@ -24,12 +24,12 @@ library(janitor)
 library(huxtable)
 library(here)
 
-source(file.path(here(), "lib", "graphics.R"))
-source(file.path(here(), "lib", "pander_options.R"))
-source(file.path(here(), "lib", "modeling.R"))
+source(here("lib", "graphics.R"))
+source(here("lib", "pander_options.R"))
+source(here("lib", "modeling.R"))
 
 # Load data
-results <- readRDS(file.path(here(), "data", "results_clean.rds"))
+results <- readRDS(here("data", "results_clean.rds"))
 # qwraps2::lazyload_cache_dir("02_analysis_cache/html")
 
 
@@ -71,11 +71,11 @@ level_summary <- function(x, variable, df = results) {
   file_name <- gsub("\\.| ", "_", tolower(variable))
   md_img <- paste0("![](output/figures/summary-table/", file_name, ")")
 
-  ggsave(fig_bar, filename = file.path(here(), "output", "figures", "summary-table",
-                                       paste0(file_name, ".pdf")), 
+  ggsave(fig_bar, filename = here("output", "figures", "summary-table",
+                                  paste0(file_name, ".pdf")), 
          width = 1, height = 0.2, device = cairo_pdf)
-  ggsave(fig_bar, filename = file.path(here(), "output", "figures", "summary-table",
-                                       paste0(file_name, ".png")), 
+  ggsave(fig_bar, filename = here("output", "figures", "summary-table",
+                                  paste0(file_name, ".png")), 
          width = 1, height = 0.2, type = "cairo", bg = "transparent", dpi = 300)
 
   output <- data_frame(spark = md_img, summary = inline_summary)
@@ -94,11 +94,11 @@ numeric_summary <- function(x, variable) {
   file_name <- gsub("\\.| ", "_", tolower(variable))
   md_img <- paste0("![](output/figures/summary-table/", file_name, ")")
 
-  ggsave(fig_hist, filename = file.path(here(), "output", "figures", "summary-table",
-                                        paste0(file_name, ".pdf")), 
+  ggsave(fig_hist, filename = here("output", "figures", "summary-table",
+                                   paste0(file_name, ".pdf")), 
          width = 1, height = 0.2, device = cairo_pdf)
-  ggsave(fig_hist, filename = file.path(here(), "output", "figures", "summary-table",
-                                        paste0(file_name, ".png")), 
+  ggsave(fig_hist, filename = here("output", "figures", "summary-table",
+                                   paste0(file_name, ".png")), 
          width = 1, height = 0.2, type = "cairo", bg = "transparent", dpi = 300)
   
   output <- data_frame(spark = md_img, summary = inline_summary)
@@ -127,7 +127,7 @@ results %>% count(crackdown, issue, funding) %>%
   janitor::adorn_totals(., where = "row") %T>% 
   pandoc.table() %>% 
   pandoc.table.return(caption = "Balance of experimental conditions {#tbl:experimental-conditions}") %>% 
-  cat(file = file.path(here(), "output", "tables", "tbl-experimental-conditions.md"))
+  cat(file = here("output", "tables", "tbl-experimental-conditions.md"))
 ```
 
 ## Descriptive statistics table
@@ -174,7 +174,7 @@ results_summary_stats %>%
   select(-N) %>% 
   pandoc.table.return(caption = "Descriptive statistics {#tbl:descriptive-stats}",
                       split.cell = 80, split.table = Inf) %T>% 
-  cat(file = file.path(here(), "output", "tables", "tbl-descriptive-stats.md")) %>% 
+  cat(file = here("output", "tables", "tbl-descriptive-stats.md")) %>%
   cat()
 ```
 
@@ -210,7 +210,7 @@ conditions_summary_clean <- conditions_summary %>%
 conditions_summary_clean %T>% 
   pandoc.table() %>% 
   pandoc.table.return(caption = "Average likelihood and amount donated across experimental conditions {#tbl:avg-results}") %>% 
-  cat(file = file.path(here(), "output", "tables", "tbl-avg-results.md"))
+  cat(file = here("output", "tables", "tbl-avg-results.md"))
 ```
 
 \
@@ -281,9 +281,9 @@ plot_donate_summary <- ggplot(donate_summary, aes(x = n, y = donate_likely,
 
 plot_donate_summary %T>% 
   print() %T>%
-  ggsave(., filename = file.path(here(), "output", "figures", "donate_summary.pdf"),
+  ggsave(., filename = here("output", "figures", "donate_summary.pdf"),
          width = 9, height = 4, units = "in", device = cairo_pdf) %>% 
-  ggsave(., filename = file.path(here(), "output", "figures", "donate_summary.png"),
+  ggsave(., filename = here("output", "figures", "donate_summary.png"),
          width = 9, height = 4, units = "in", type = "cairo", dpi = 300)
 ```
 
@@ -300,9 +300,9 @@ plot_amount_summary <- ggplot(results, aes(x = amount_donate)) +
 
 plot_amount_summary %T>% 
   print() %T>%
-  ggsave(., filename = file.path(here(), "output", "figures", "amount_summary.pdf"),
+  ggsave(., filename = here("output", "figures", "amount_summary.pdf"),
          width = 9, height = 2.75, units = "in", device = cairo_pdf) %>% 
-  ggsave(., filename = file.path(here(), "output", "figures", "amount_summary.png"),
+  ggsave(., filename = here("output", "figures", "amount_summary.png"),
          width = 9, height = 2.75, units = "in", type = "cairo", dpi = 300)
 ```
 
@@ -370,7 +370,7 @@ conditions_summary_clean %>%
   bind_cols(interpretation) %T>% 
   pandoc.table() %>% 
   pandoc.table.return(caption = "Combinations of coefficients to add to determine means across experimental conditions {#tbl:coefficients-to-add}") %>% 
-  cat(file = file.path(here(), "output", "tables", "tbl-coefficients-to-add.md"))
+  cat(file = here("output", "tables", "tbl-coefficients-to-add.md"))
 ```
 
 \
@@ -409,7 +409,7 @@ huxreg(m_amount_c, m_amount_ci, m_amount_cif,
        stars = NULL) %T>% 
   print_hux() %>% 
   to_md(max_width = 100) %>% 
-  cat(file = file.path(here(), "output", "tables", "tbl-models-amount.md"))
+  cat(file = here("output", "tables", "tbl-models-amount.md"))
 ```
 
 ## Predicted medians
@@ -531,9 +531,9 @@ plot_amount_singles <- ggplot(coef_summary_singles, aes(y = estimate, x = value)
 
 plot_amount_singles %T>%
   print() %T>%
-  ggsave(., filename = file.path(here(), "output", "figures", "amount_single_summary.pdf"),
+  ggsave(., filename = here("output", "figures", "amount_single_summary.pdf"),
          width = 7, height = 2.5, units = "in", device = cairo_pdf) %>% 
-  ggsave(., filename = file.path(here(), "output", "figures", "amount_single_summary.png"),
+  ggsave(., filename = here("output", "figures", "amount_single_summary.png"),
          width = 7, height = 2.5, units = "in", type = "cairo", dpi = 300)
 ```
 
@@ -550,9 +550,9 @@ plot_amount_all +
 (plot_amount_all + 
     plot_annotation(caption = "90% credible intervals shown around each point",
                     tag_levels = "A", theme = theme_ngos())) %T>% 
-  ggsave(., filename = file.path(here(), "output", "figures", "amount-medians.pdf"),
+  ggsave(., filename = here("output", "figures", "amount-medians.pdf"),
          width = 8, height = 4.25, units = "in", device = cairo_pdf) %>% 
-  ggsave(., filename = file.path(here(), "output", "figures", "amount-medians.png"),
+  ggsave(., filename = here("output", "figures", "amount-medians.png"),
          width = 8, height = 4.25, units = "in", type = "cairo", dpi = 300)
 ```
 
@@ -766,9 +766,9 @@ plot_diffs_singles <- ggplot() +
 
 plot_diffs_singles %T>%
   print() %T>% 
-  ggsave(., filename = file.path(here(), "output", "figures", "amount-singles-diffs.pdf"),
+  ggsave(., filename = here("output", "figures", "amount-singles-diffs.pdf"),
          width = 7, height = 2.5, units = "in", device = cairo_pdf) %>% 
-  ggsave(., filename = file.path(here(), "output", "figures", "amount-singles-diffs.png"),
+  ggsave(., filename = here("output", "figures", "amount-singles-diffs.png"),
          width = 7, height = 2.5, units = "in", type = "cairo", dpi = 300)
 ```
 
@@ -782,7 +782,7 @@ bind_rows(diffs_coef_pairs_detail_c,
   pandoc.table.return(missing = "—", 
                       caption = "Median difference between likelihood to donate across single conditions {#tbl:amount-single-diffs}") %T>%
   cat() %>% 
-  cat(file = file.path(here(), "output", "tables", "tbl-amount-single-diffs.md"))
+  cat(file = here("output", "tables", "tbl-amount-single-diffs.md"))
 ```
 
 \
@@ -802,9 +802,9 @@ plot_diffs_all +
 (plot_diffs_all +
   plot_annotation(caption = "90% credible intervals shown in black. Solid vertical line = median; dotted vertical line = 0",
                   tag_levels = "A", theme = theme_ngos())) %T>%
-  ggsave(., filename = file.path(here(), "output", "figures", "amount-diffs.pdf"),
+  ggsave(., filename = here("output", "figures", "amount-diffs.pdf"),
          width = 8, height = 5, units = "in", device = cairo_pdf) %>%
-  ggsave(., filename = file.path(here(), "output", "figures", "amount-diffs.png"),
+  ggsave(., filename = here("output", "figures", "amount-diffs.png"),
          width = 8, height = 5, units = "in", type = "cairo", dpi = 300)
 ```
 
@@ -819,7 +819,7 @@ bind_rows(diffs_coef_pairs_detail_c,
   pandoc.table.return(missing = "—", 
                       caption = 'Median difference between amounts donated in "crackdown" (treatment) and "no crackdown" (control) conditions {#tbl:amount-diffs}') %T>%
   cat() %>% 
-  cat(file = file.path(here(), "output", "tables", "tbl-amount-diffs.md"))
+  cat(file = here("output", "tables", "tbl-amount-diffs.md"))
 ```
 
 \
@@ -860,7 +860,7 @@ huxreg(m_likely_c, m_likely_ci, m_likely_cif,
        stars = NULL) %T>% 
   print_hux() %>% 
   to_md(max_width = 100) %>% 
-  cat(file = file.path(here(), "output", "tables", "tbl-models-likelihood.md"))
+  cat(file = here("output", "tables", "tbl-models-likelihood.md"))
 ```
 
 ## Predicted medians
@@ -986,9 +986,9 @@ plot_likely_all +
 (plot_likely_all +
   plot_annotation(caption = "90% credible intervals shown around each point",
                   tag_levels = "A", theme = theme_ngos())) %T>% 
-  ggsave(., filename = file.path(here(), "output", "figures", "likelihood-medians.pdf"),
+  ggsave(., filename = here("output", "figures", "likelihood-medians.pdf"),
          width = 8, height = 4.25, units = "in", device = cairo_pdf) %>% 
-  ggsave(., filename = file.path(here(), "output", "figures", "likelihood-medians.png"),
+  ggsave(., filename = here("output", "figures", "likelihood-medians.png"),
          width = 8, height = 4.25, units = "in", type = "cairo", dpi = 300)
 ```
 
@@ -1209,9 +1209,9 @@ plot_diffs_likely_singles <- ggplot() +
 
 plot_diffs_likely_singles %T>%
   print() %T>% 
-  ggsave(., filename = file.path(here(), "output", "figures", "likelihood-singles-diffs.pdf"),
+  ggsave(., filename = here("output", "figures", "likelihood-singles-diffs.pdf"),
          width = 7, height = 2.5, units = "in", device = cairo_pdf) %>% 
-  ggsave(., filename = file.path(here(), "output", "figures", "likelihood-singles-diffs.png"),
+  ggsave(., filename = here("output", "figures", "likelihood-singles-diffs.png"),
          width = 7, height = 2.5, units = "in", type = "cairo", dpi = 300)
 ```
 
@@ -1225,7 +1225,7 @@ bind_rows(diffs_coef_likely_pairs_detail_c,
   pandoc.table.return(missing = "—", 
                       caption = "Median difference between likelihood to donate across single conditions {#tbl:likelihood-single-diffs}") %T>%
   cat() %>% 
-  cat(file = file.path(here(), "output", "tables", "tbl-likelihood-single-diffs.md"))
+  cat(file = here("output", "tables", "tbl-likelihood-single-diffs.md"))
 ```
 
 \
@@ -1245,9 +1245,9 @@ plot_diffs_likely_all +
 (plot_diffs_likely_all +
     plot_annotation(caption = "90% credible intervals shown in black. Solid vertical line = median; dotted vertical line = 0",
                     tag_levels = "A", theme = theme_ngos())) %T>%
-  ggsave(., filename = file.path(here(), "output", "figures", "likelihood-diffs.pdf"),
+  ggsave(., filename = here("output", "figures", "likelihood-diffs.pdf"),
          width = 8, height = 5, units = "in", device = cairo_pdf) %>%
-  ggsave(., filename = file.path(here(), "output", "figures", "likelihood-diffs.png"),
+  ggsave(., filename = here("output", "figures", "likelihood-diffs.png"),
          width = 8, height = 5, units = "in", type = "cairo", dpi = 300)
 ```
 
@@ -1262,7 +1262,7 @@ bind_rows(diffs_coef_likely_pairs_detail_c,
   pandoc.table.return(missing = "—", 
                       caption = 'Median difference between likelihood to donate in "crackdown" (treatment) and "crackdown" (control) conditions {#tbl:likelihood-diffs}') %T>%
   cat() %>% 
-  cat(file = file.path(here(), "output", "tables", "tbl-likelihood-diffs.md"))
+  cat(file = here("output", "tables", "tbl-likelihood-diffs.md"))
 ```
 
 
@@ -1276,7 +1276,7 @@ hypotheses %>%
   pandoc.table.return(justify = "ll", style = "grid", keep.line.breaks = TRUE,
                       caption = "Summary of all hypotheses {#tbl:hypotheses}") %T>%
   cat() %>% 
-  cat(file = file.path(here(), "output", "tables", "tbl-hypotheses.md"))
+  cat(file = here("output", "tables", "tbl-hypotheses.md"))
 ```
 
 
