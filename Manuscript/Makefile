@@ -44,7 +44,6 @@ PREFIX = /Users/andrew/.pandoc
 # references to PDFs with PNGs, but will not convert the PDFs
 PNG_CONVERT = --no-convert
 
-
 # Location of your working bibliography file
 BIB_FILE = bibliography.bib
 
@@ -69,11 +68,26 @@ TEX_DIR = tex_out
 # Cross reference options
 CROSSREF = --filter pandoc-crossref -M figPrefix:"Figure" -M eqnPrefix:"Equation" -M tblPrefix:"Table"
 
-# To add version control footer support in PDFs:
-#   1. Run vcinit in the directory
-#   2. Place `./vc` at the front of the formula
-#   3. Add `-V vc` to the pandoc command
-#   4. Change pagestyle to athgit instead of ath
+# Blinding and version control
+BLINDED = TRUE
+VC_ENABLE = TRUE
+
+# Blindify stuff if needed
+ifeq ($(BLINDED), TRUE)
+	BLINDIFY = | ../lib/accecare.py ../lib/replacements.csv
+	VC_ENABLE = FALSE
+else
+	BLINDIFY = 
+endif
+
+# Enable fancy version control footers if needed
+ifeq ($(VC_ENABLE), TRUE)
+	VC_COMMAND = ./vc
+	VC_PANDOC = -V pagestyle=athgit -V vc
+else
+	VC_COMMAND = 
+	VC_PANDOC = 
+endif
 
 
 #--------------------
@@ -120,7 +134,7 @@ bib:	$(BIB)
 
 %.html:	%.md
 	@echo "$(WARN_COLOR)Converting Markdown to HTML using standard template...$(NO_COLOR)"
-	replace_includes $< | replace_pdfs $(PNG_CONVERT) | \
+	replace_includes $< | replace_pdfs $(PNG_CONVERT) $(BLINDIFY) | \
 	pandoc -r markdown+autolink_bare_uris+ascii_identifiers+smart -s -w html \
 		$(CROSSREF) \
 		--default-image-extension=png \
@@ -135,9 +149,9 @@ bib:	$(BIB)
 	@echo "$(OK_COLOR)All done!$(NO_COLOR)"
 
 %.tex:	%.md
-	./vc
+	$(VC_COMMAND)
 	@echo "$(WARN_COLOR)Converting Markdown to TeX using hikma-article template...$(NO_COLOR)"
-	replace_includes $< | \
+	replace_includes $< $(BLINDIFY) | \
 	pandoc -r markdown+simple_tables+table_captions+yaml_metadata_block+smart+raw_tex -w latex -s \
 		$(CROSSREF) \
 		--default-image-extension=pdf \
@@ -149,8 +163,7 @@ bib:	$(BIB)
 		-V $(TEX_REF) \
 		--bibliography=$(BIB_FILE) \
 		-V chapterstyle=hikma-article \
-		-V pagestyle=athgit \
-		-V vc \
+		$(VC_PANDOC) \
 		--base-header-level=1 \
 	-o $@
 	@echo "$(WARN_COLOR)...converting TeX to PDF with latexmk (prepare for lots of output)...$(NO_COLOR)"
@@ -159,7 +172,7 @@ bib:	$(BIB)
 
 %.odt:	%.md
 	@echo "$(WARN_COLOR)Converting Markdown to .odt using standard template...$(NO_COLOR)"
-	replace_includes $< | replace_pdfs $(PNG_CONVERT) | \
+	replace_includes $< | replace_pdfs $(PNG_CONVERT) $(BLINDIFY) | \
 	pandoc -r markdown+simple_tables+table_captions+yaml_metadata_block+smart -w odt \
 		$(CROSSREF) \
 		--default-image-extension=png \
@@ -180,12 +193,12 @@ bib:	$(BIB)
 
 %-manuscript.odt: %.md
 	@echo "$(WARN_COLOR)Converting Markdown to .odt using manuscript template...$(NO_COLOR)"
-	replace_includes $< | replace_pdfs $(PNG_CONVERT) | move_figs_tables_to_end | \
+	replace_includes $< | replace_pdfs $(PNG_CONVERT) | move_figs_tables_to_end $(BLINDIFY) | \
 	pandoc -r markdown+simple_tables+table_captions+yaml_metadata_block+smart -w odt \
 		$(CROSSREF) \
 		--default-image-extension=png \
 		--template=$(PREFIX)/templates/odt-manuscript.template \
-		--reference-odt=$(PREFIX)/styles/reference-manuscript.odt \
+		--reference-doc=$(PREFIX)/styles/reference-manuscript.odt \
 		--filter pandoc-citeproc \
 		--csl=$(PREFIX)/csl/$(CSL).csl \
 		--bibliography=$(BIB_FILE) \
