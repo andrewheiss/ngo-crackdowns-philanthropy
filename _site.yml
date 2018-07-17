@@ -3,6 +3,7 @@ exclude:
 - data
 - Icon?
 - manuscript
+- Manuscript
 - misc
 - sandbox
 - lib
