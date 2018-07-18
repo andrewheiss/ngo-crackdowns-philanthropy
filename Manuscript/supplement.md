@@ -4,9 +4,11 @@ author:
 - name: Suparna Chaudhry
   affiliation: Christopher Newport University
   email: suparna.chaudhry@cnu.edu
+  url: http://www.suparnachaudhry.com/
 - name: Andrew Heiss
   affiliation: Brigham Young University
   email: andrew_heiss@byu.edu
+  url: https://www.andrewheiss.com/
 date: July 15, 2018
 published: 
 git-repo: https://github.com/andrewheiss/ngo-crackdowns-philanthropy
