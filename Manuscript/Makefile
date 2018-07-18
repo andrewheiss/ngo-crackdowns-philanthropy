@@ -116,6 +116,7 @@ endif
 # Targets
 HTML=$(SRC:.md=.html)
 TEX=$(SRC:.md=.tex)
+MS_TEX=$(SRC:.md=-manuscript.tex)
 ODT=$(SRC:.md=.odt)
 DOCX=$(SRC:.md=.docx)
 MS_ODT=$(SRC:.md=-manuscript.odt)
@@ -130,6 +131,7 @@ docx:	clean $(DOCX)
 ms: 	clean $(MS_ODT)
 msdocx:	clean $(MS_DOCX)
 tex:	clean $(TEX)
+mstex:	clean $(MS_TEX)
 bib:	$(BIB)
 
 %.html:	%.md
@@ -165,6 +167,27 @@ bib:	$(BIB)
 		-V $(TEX_REF) \
 		--bibliography=$(BIB_FILE) \
 		-V chapterstyle=hikma-article \
+		$(VC_PANDOC) \
+		--base-header-level=1 \
+	-o $@
+	@echo "$(WARN_COLOR)...converting TeX to PDF with latexmk (prepare for lots of output)...$(NO_COLOR)"
+	latexmk -outdir=$(MS_DIR_FOR_TEX)$(TEX_DIR) -xelatex -quiet $@
+	@echo "$(OK_COLOR)All done!$(NO_COLOR)"
+
+%-manuscript.tex:	%.md
+	$(VC_COMMAND)
+	@echo "$(WARN_COLOR)Converting Markdown to TeX using hikma-article manuscript template...$(NO_COLOR)"
+	replace_includes $< $(BLINDIFY) | \
+	pandoc -r markdown+simple_tables+table_captions+yaml_metadata_block+smart+raw_tex -w latex -s \
+		$(CROSSREF) \
+		--default-image-extension=pdf \
+		--filter pandoc-latex-fontsize \
+		--pdf-engine=xelatex \
+		--table-of-contents \
+		--template=$(PREFIX)/templates/xelatex-manuscript.template \
+		--biblatex \
+		-V $(TEX_REF) \
+		--bibliography=$(BIB_FILE) \
 		$(VC_PANDOC) \
 		--base-header-level=1 \
 	-o $@
@@ -215,4 +238,4 @@ clean:
 	rm -f $(addsuffix .html, $(BASE)) \
 		$(addsuffix .odt, $(BASE)) $(addsuffix .docx, $(BASE)) \
 		$(addsuffix -manuscript.odt, $(BASE)) $(addsuffix -manuscript.docx, $(BASE)) \
-		$(addsuffix .tex, $(BASE)) $(addsuffix .bib, $(BASE))
+		$(addsuffix .tex, $(BASE)) $(addsuffix -manuscript.tex, $(BASE)) $(addsuffix .bib, $(BASE))
