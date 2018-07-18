@@ -140,8 +140,9 @@ bib:	$(BIB)
 		--default-image-extension=png \
 		--mathjax \
 		--table-of-contents \
+		--metadata link-citations=true \
 		--template=$(PREFIX)/templates/html.template \
-		--css=$(PREFIX)/styles/marked/kultiad-serif.css \
+		--css=$(PREFIX)/styles/ath-clean/ath-clean.css \
 		--filter pandoc-citeproc \
 		--csl=$(PREFIX)/csl/$(CSL).csl \
 		--bibliography=$(BIB_FILE) \
