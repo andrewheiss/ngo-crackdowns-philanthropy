@@ -9,7 +9,8 @@ author:
   affiliation: Brigham Young University
   email: andrew_heiss@byu.edu
   url: https://www.andrewheiss.com/
-date: July 15, 2018
+date: July 18, 2018
+title-page: false
 published: 
 git-repo: https://github.com/andrewheiss/ngo-crackdowns-philanthropy
 reference-section-title: References

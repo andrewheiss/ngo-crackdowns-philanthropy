@@ -1,5 +1,6 @@
 ---
 title: "Charity During Crackdown: Analyzing the Impact of State Repression of NGOs on Philanthropy"
+short-title: Charity During Crackdown
 author:
 - name: Suparna Chaudhry
   affiliation: Christopher Newport University
@@ -11,13 +12,20 @@ author:
   url: https://www.andrewheiss.com/
 date: July 18, 2018
 published: Please do not cite without permission.
+keywords: Philanthropy, NGOs, Legal restrictions, Foreign funding
 git-repo: https://github.com/andrewheiss/ngo-crackdowns-philanthropy
 reference-section-title: References
 toc: false
+title-page: true
 abstract: >-
   State crackdown on non-governmental organizations (NGOs), particularly through legal restrictions on funding, has become increasingly common. How do legal restrictions on NGOs impact patterns of private philanthropic giving and individual donor decision-making? With reduced funding for NGOs working on contentious issues, and an absence of philanthropic culture in many developing countries, many NGOs rely on funds from private donors in Western countries. Using a survey experiment, we explore how this crackdown changes donors' preferences based on the issue area and funding sources of the NGO. We find that private donors are responsive to the legal difficulties international NGOs face abroad and are more likely to donate to legally besieged privately funded human rights NGOs. Additionally, already-likely donors give substantially more to legally restricted NGOs working on humanitarian issues. We conclude by discussing the implications for the sustainability of NGOs working abroad.
 thanks: >-
   We thank Mark Buntaine, Michael DeCrescenzo, Jeffrey Friedman, Thomas Leeper, and Tristian Mahr for their helpful comments and input. We also thank Samantha Camilletti and Joshua Dutro for their excellent research assistance. This experiment received approval by the human subjects research committees at both Christopher Newport University (018.042) and Brigham Young University (E18104). We preregistered our hypotheses and research design at the Open Science Framework, and our preregistration protocol is available at <https://osf.io/dx973/>.
+author-note: >-
+  Suparna Chaudhry, PhD, Assistant Professor of Political Science, Christopher Newport University; Andrew Heiss, PhD, Visiting Assistant Professor, Romney Institute of Public Service and Ethics, Brigham Young University
+correspondence: >-
+  Correspondence concerning this article should be addressed to Andrew Heiss, PhD, Romney Institute of Public Service and Ethics, Brigham Young University, Provo, UT 84602. Contact: andrewheiss@gmail.com
+word-count: 3,998
 ---
 
 In January 2011, the Egyptian uprisings against Hosni Mubarak presented an opportunity for domestic non-governmental organizations (NGOs) to leverage their knowledge and expertise to transform Egypt into a democratic state. However, just as these organizations began to take advantage of new levels of public engagement and civic freedoms, successive Egyptian governments passed laws restricting foreign funding for domestic NGOs. Subsequently, international donor agencies cut support for Egyptian NGOs out of concern that they would be accused of offering them illegal support [@Brechenmacher:2017]. Egypt is not alone in its non-violent crackdown on NGOs. India, Bolivia, Hungary, China, Russia, and others have required that funds to NGOs be routed through state-owned banks, mandated that funds cannot be used for "political" purposes, or prohibited NGOs from accepting any funds from foreign sources [@Carothers:2015; @DPR:2015].
