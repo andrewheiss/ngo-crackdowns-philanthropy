@@ -197,12 +197,3 @@ Payment
 !INCLUDE "../text/experiment.md"
 
 \newpage
-
-
-# IRB
-
-This project received IRB approval from the human subjects research committees at both Christopher Newport University and Brigham Young University. We include a generic version of our protocol below.
-
-!INCLUDE "../text/irb.md"
-
-\newpage
