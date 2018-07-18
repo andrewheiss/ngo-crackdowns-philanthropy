@@ -135,12 +135,13 @@ bib:	$(BIB)
 %.html:	%.md
 	@echo "$(WARN_COLOR)Converting Markdown to HTML using standard template...$(NO_COLOR)"
 	replace_includes $< | replace_pdfs $(PNG_CONVERT) $(BLINDIFY) | \
-	pandoc -r markdown+autolink_bare_uris+ascii_identifiers+smart -s -w html \
+	pandoc -r markdown+ascii_identifiers+smart -s -w html \
 		$(CROSSREF) \
 		--default-image-extension=png \
 		--mathjax \
 		--table-of-contents \
 		--metadata link-citations=true \
+		--metadata linkReferences=true \
 		--template=$(PREFIX)/templates/html.template \
 		--css=$(PREFIX)/styles/ath-clean/ath-clean.css \
 		--filter pandoc-citeproc \
