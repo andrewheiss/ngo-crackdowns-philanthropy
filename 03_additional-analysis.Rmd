@@ -330,7 +330,7 @@ tbl_sample_pop <- calc_sample_pop %>%
                     .f = ~ format_hpdi(.x$conf.low, .x$conf.high, .y))) %>% 
   mutate_at(vars(National, Sample, diffs_median), funs(percent)) %>% 
   select(Variable, Sample, National, 
-         `Sample − National~posterior\\ median~` = diffs_median,
+         `∆~median~` = diffs_median,
          `90% HPDI` = diffs_hpdi_fancy)
 
 note_row <- data_frame(Variable = c("*^a^Annual CPS, March 2017*",

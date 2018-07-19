@@ -777,7 +777,7 @@ bind_rows(diffs_coef_pairs_detail_c,
           diffs_coef_pairs_detail_i,
           diffs_coef_pairs_detail_f) %>% 
   select(`Frame` = pair, `∆~median~` = median, 
-         `% change~median~` = median_pct_change,
+         `%∆~median~` = median_pct_change,
          `p(∆ > 0)` = p.greater0, `p(∆ < 0)` = p.less0, `p(∆ ≠ 0)` = p.diff.not0) %>% 
   pandoc.table.return(missing = "—", 
                       caption = "Median difference between likelihood to donate across single conditions {#tbl:amount-single-diffs}") %T>%
@@ -813,8 +813,8 @@ bind_rows(diffs_coef_pairs_detail_c,
           diffs_coef_pairs_detail_ci,
           diffs_coef_pairs_detail_cif) %>% 
   select(Issue = issue, Funding = funding, 
-         `Crackdown - No crackdown~median~` = median, 
-         `% change~median~` = median_pct_change,
+         `∆~median~` = median, 
+         `%∆~median~` = median_pct_change,
          `p(∆ > 0)` = p.greater0, `p(∆ < 0)` = p.less0, `p(∆ ≠ 0)` = p.diff.not0) %>% 
   pandoc.table.return(missing = "—", 
                       caption = 'Median difference between amounts donated in "crackdown" (treatment) and "no crackdown" (control) conditions {#tbl:amount-diffs}') %T>%
@@ -1220,7 +1220,7 @@ bind_rows(diffs_coef_likely_pairs_detail_c,
           diffs_coef_likely_pairs_detail_i,
           diffs_coef_likely_pairs_detail_f) %>% 
   select(`Frame` = pair, `∆~median~` = median, 
-         `% change~median~` = median_pct_change,
+         `%∆~median~` = median_pct_change,
          `p(∆ > 0)` = p.greater0, `p(∆ < 0)` = p.less0, `p(∆ ≠ 0)` = p.diff.not0) %>% 
   pandoc.table.return(missing = "—", 
                       caption = "Median difference between likelihood to donate across single conditions {#tbl:likelihood-single-diffs}") %T>%
@@ -1256,8 +1256,8 @@ bind_rows(diffs_coef_likely_pairs_detail_c,
           diffs_coef_likely_pairs_detail_ci,
           diffs_coef_likely_pairs_detail_cif) %>% 
   select(Issue = issue, Funding = funding, 
-         `Crackdown - No crackdown~median~` = median, 
-         `% change~median~` = median_pct_change,
+         `∆~median~` = median, 
+         `%∆~median~` = median_pct_change,
          `p(∆ > 0)` = p.greater0, `p(∆ < 0)` = p.less0, `p(∆ ≠ 0)` = p.diff.not0) %>% 
   pandoc.table.return(missing = "—", 
                       caption = 'Median difference between likelihood to donate in "crackdown" (treatment) and "crackdown" (control) conditions {#tbl:likelihood-diffs}') %T>%
