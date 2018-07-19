@@ -1,5 +1,6 @@
 ---
 title: "Supplement to Charity During Crackdown: Analyzing the Impact of State Repression of NGOs on Philanthropy"
+short-title: Supplement to Charity During Crackdown
 author:
 - name: Suparna Chaudhry
   affiliation: Christopher Newport University
@@ -15,6 +16,7 @@ published:
 git-repo: https://github.com/andrewheiss/ngo-crackdowns-philanthropy
 reference-section-title: References
 toc: true
+appendix: true
 ---
 
 # Sample
@@ -197,6 +199,6 @@ Payment
 
 :   Participants were paid $0.75 for successfully completing the experiment, commensurate with a $9/hour wage.
 
-!INCLUDE "../text/experiment.md"
+!INCLUDE "../text/experiment_blind.md"
 
 \newpage

@@ -6,13 +6,14 @@ author:
   affiliation: Christopher Newport University
   email: suparna.chaudhry@cnu.edu
   url: http://www.suparnachaudhry.com/
+  twitter: SuparnaChaudhry
 - name: Andrew Heiss
   affiliation: Brigham Young University
   email: andrew_heiss@byu.edu
   url: https://www.andrewheiss.com/
-date: July 18, 2018
+  twitter: andrewheiss
+date: July 19, 2018
 published: Please do not cite without permission.
-keywords: Philanthropy, NGOs, Legal restrictions, Foreign funding
 git-repo: https://github.com/andrewheiss/ngo-crackdowns-philanthropy
 reference-section-title: References
 toc: false
@@ -22,9 +23,10 @@ abstract: >-
 thanks: >-
   We thank Mark Buntaine, Michael DeCrescenzo, Jeffrey Friedman, Thomas Leeper, and Tristian Mahr for their helpful comments and input. We also thank Samantha Camilletti and Joshua Dutro for their excellent research assistance. This experiment received approval by the human subjects research committees at both Christopher Newport University (018.042) and Brigham Young University (E18104). We preregistered our hypotheses and research design at the Open Science Framework, and our preregistration protocol is available at <https://osf.io/dx973/>.
 author-note: >-
-  Suparna Chaudhry, PhD, Assistant Professor of Political Science, Christopher Newport University; Andrew Heiss, PhD, Visiting Assistant Professor, Romney Institute of Public Service and Ethics, Brigham Young University
+  Suparna Chaudhry, PhD, Assistant Professor of Political Science, Christopher Newport University; Andrew Heiss, PhD, Visiting Assistant Professor, Romney Institute of Public Service and Ethics, Brigham Young University. 
+additional-info: Figures should appear in color online only, not in print.
 correspondence: >-
-  Correspondence concerning this article should be addressed to Andrew Heiss, PhD, Romney Institute of Public Service and Ethics, Brigham Young University, Provo, UT 84602. Contact: andrewheiss@gmail.com
+  Correspondence concerning this article should be addressed to Suparna Chaudhry, PhD, Department of Political Science, Christopher Newport University, Newport News, VA 23606, 757-594-7821. Contact: suparna.chaudhry@cnu.edu
 word-count: 3,998
 ---
 
