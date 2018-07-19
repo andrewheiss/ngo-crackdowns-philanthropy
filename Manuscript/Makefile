@@ -74,7 +74,8 @@ VC_ENABLE = TRUE
 
 # Blindify stuff if needed
 ifeq ($(BLINDED), TRUE)
-	BLINDIFY = | ../lib/accecare.py ../lib/replacements.csv
+	# BLINDIFY = | ../lib/accecare.py ../lib/replacements.csv
+	BLINDIFY = 
 	VC_ENABLE = FALSE
 else
 	BLINDIFY = 
