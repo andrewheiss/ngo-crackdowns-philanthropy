@@ -285,7 +285,7 @@ compare_sample_to_pop_bayes <- function(sample_value, population_value) {
                                                  pop_prop = population_value),
                            chains = CHAINS, iter = ITER, warmup = WARMUP, seed = BAYES_SEED)
   
-  tidied <- tidyMCMC(mcmc_samples, conf.int = TRUE, conf.level = 0.9, 
+  tidied <- tidyMCMC(mcmc_samples, conf.int = TRUE, conf.level = 0.95, 
                      estimate.method = "median", conf.method = "HPDinterval") %>%
     mutate(in_hpdi = (population_value >= conf.low & population_value <= conf.high))
   
@@ -331,11 +331,11 @@ tbl_sample_pop <- calc_sample_pop %>%
   mutate_at(vars(National, Sample, diffs_median), funs(percent)) %>% 
   select(Variable, Sample, National, 
          `∆~median~` = diffs_median,
-         `90% HPDI` = diffs_hpdi_fancy)
+         `95% HPDI` = diffs_hpdi_fancy)
 
-note_row <- data_frame(Variable = c("*^a^Annual CPS, March 2017*",
-                                    "*^b^Monthly CPS, September 2015*",
-                                    "*^†^National value is outside the sample highest posterior density interval (HPDI)*"))
+note_row <- tibble(Variable = c("*^a^Annual CPS, March 2017*",
+                                "*^b^Monthly CPS, September 2015*",
+                                "*^†^National value is outside the sample highest posterior density interval (HPDI)*"))
 
 bind_rows(tbl_sample_pop, note_row) %>% 
   pandoc.table.return(keep.line.breaks = TRUE, style = "multiline", justify = "lcccc", 
@@ -453,11 +453,11 @@ huxreg(m_amount_c, m_amount_ci, m_amount_cif,
 ## Coefficient plot
 
 ```{r models-coefs-plot-amount, warning=FALSE, message=FALSE, fig.width=8, fig.height=5}
-posterior_details <- data_frame(model_name = c("Basic model", "Full model"),
-                                model = list(m_amount_cif,
-                                             m_amount_cif_full)) %>% 
-  mutate(posterior = model %>% map(~ as_data_frame(.)),
-         tidy_summary = model %>% map(~ tidyMCMC(., conf.int = TRUE, conf.level = 0.9,
+posterior_details <- tibble(model_name = c("Basic model", "Full model"),
+                            model = list(m_amount_cif,
+                                         m_amount_cif_full)) %>% 
+  mutate(posterior = model %>% map(~ as_tibble(.)),
+         tidy_summary = model %>% map(~ tidyMCMC(., conf.int = TRUE, conf.level = 0.95,
                                                  conf.method = "HPDinterval"))) 
 
 coefs_posterior <- posterior_details %>%
@@ -483,8 +483,8 @@ amount_coefs_full <- ggplot(coefs_posterior, aes(x = value, y = fct_rev(term_cle
                size = 1) +
   geom_vline(xintercept = 0, linetype = "dotted", size = 1) + 
   scale_fill_manual(values = ngo_cols("red", "blue", name = FALSE), name = NULL) +
-  labs(x = "Posterior median estimate + 90% credible interval", y = NULL,
-       caption = "90% credible intervals shown in black. Solid vertical line = median; dotted vertical line = 0") +
+  labs(x = "Posterior median estimate + 95% credible interval", y = NULL,
+       caption = "95% credible intervals shown in black. Solid vertical line = median; dotted vertical line = 0") +
   facet_wrap(~ full_model, scales = "free") + 
   theme_ngos() +
   theme(legend.position = "bottom",
@@ -520,7 +520,7 @@ chains_fitted_charity <- posterior_linpred(m_amount_c_full,
 
 coef_summary_charity <- newdata_conditions_charity %>% 
   bind_cols(tidyMCMC(chains_fitted_charity, estimate.method = "median",
-                     conf.int = TRUE, conf.level = 0.9, conf.method = "HPDinterval")) %>% 
+                     conf.int = TRUE, conf.level = 0.95, conf.method = "HPDinterval")) %>% 
   mutate_at(vars(crackdown, give_charity_3), funs(fct_inorder(., ordered = TRUE)))
 
 ggplot(coef_summary_charity, aes(x = fct_rev(give_charity_3), y = estimate)) +
@@ -549,7 +549,7 @@ chains_fitted_vol_relig <- posterior_linpred(m_amount_c_full,
 
 coef_summary_vol_relig <- newdata_conditions_vol_relig %>% 
   bind_cols(tidyMCMC(chains_fitted_vol_relig, estimate.method = "median",
-                     conf.int = TRUE, conf.level = 0.9, conf.method = "HPDinterval")) %>% 
+                     conf.int = TRUE, conf.level = 0.95, conf.method = "HPDinterval")) %>% 
   mutate_at(vars(crackdown, volunteer, religiosity_bin), funs(fct_inorder(., ordered = TRUE))) %>% 
   mutate(religiosity_bin = fct_recode(religiosity_bin,
                                       `Rarely attend religious services` = "Rarely",
@@ -623,11 +623,11 @@ huxreg(m_likely_c, m_likely_ci, m_likely_cif,
 ## Coefficient plot
 
 ```{r models-coefs-plot-likely, warning=FALSE, message=FALSE, fig.width=8, fig.height=5}
-posterior_details_likely <- data_frame(model_name = c("Basic model", "Full model"),
-                                       model = list(m_likely_cif,
-                                                    m_likely_cif_full)) %>% 
-  mutate(posterior = model %>% map(~ as_data_frame(.)),
-         tidy_summary = model %>% map(~ tidyMCMC(., conf.int = TRUE, conf.level = 0.9,
+posterior_details_likely <- tibble(model_name = c("Basic model", "Full model"),
+                                   model = list(m_likely_cif,
+                                                m_likely_cif_full)) %>% 
+  mutate(posterior = model %>% map(~ as_tibble(.)),
+         tidy_summary = model %>% map(~ tidyMCMC(., conf.int = TRUE, conf.level = 0.95,
                                                  conf.method = "HPDinterval"))) 
 
 coefs_posterior_likely <- posterior_details_likely %>%
@@ -653,8 +653,8 @@ likely_coefs_full <- ggplot(coefs_posterior_likely, aes(x = value, y = fct_rev(t
                size = 1) +
   geom_vline(xintercept = 0, linetype = "dotted", size = 1) + 
   scale_fill_manual(values = ngo_cols("red", "blue", name = FALSE), name = NULL) +
-  labs(x = "Posterior median estimate + 90% credible interval", y = NULL,
-       caption = "90% credible intervals shown in black. Solid vertical line = median; dotted vertical line = 0") +
+  labs(x = "Posterior median estimate + 95% credible interval", y = NULL,
+       caption = "95% credible intervals shown in black. Solid vertical line = median; dotted vertical line = 0") +
   facet_wrap(~ full_model, scales = "free") + 
   theme_ngos() +
   theme(legend.position = "bottom",
