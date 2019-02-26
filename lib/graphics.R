@@ -45,6 +45,12 @@ theme_ngos <- function(base_size = 11, base_family = "Encode Sans Condensed", de
 }
 
 
+# Point size --------------------------------------------------------------
+# Convert mms to pts 
+pts <- function(x) {
+  as.numeric(grid::convertUnit(grid::unit(x, "pt"), "mm"))
+}
+
 # Colors ------------------------------------------------------------------
 
 # How to create custom palettes:
