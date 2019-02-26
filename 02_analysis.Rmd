@@ -1,20 +1,18 @@
 ---
 title: "Results"
 author: "Andrew Heiss and Suparna Chaudhry"
-date: "Last run: `r format(Sys.time(), '%B %e, %Y')`"
+date: "Last run: `r format(Sys.time(), '%F')`"
 output: 
   html_document:
     code_folding: hide
-    pandoc_args: [
-      "--default-image-extension=png"
-    ]
 editor_options: 
   chunk_output_type: console
 ---
 
 ```{r load-libraries-data, warning=FALSE, message=FALSE}
 library(tidyverse)
-library(rstanarm)
+library(rstan)
+library(tidybayes)
 library(broom)
 library(ggstance)
 library(patchwork)
@@ -55,7 +53,7 @@ level_summary <- function(x, variable, df = results) {
     x_levels <- unique(df[[variable]])
   }
   
-  factor_summary <- data_frame(x) %>% 
+  factor_summary <- tibble(x) %>% 
     count(x) %>%
     mutate(pct = n / sum(n),
            fancy = paste0(x, " (", n, "; ", percent(pct), ")"),
@@ -78,7 +76,7 @@ level_summary <- function(x, variable, df = results) {
                                   paste0(file_name, ".png")), 
          width = 1, height = 0.2, type = "cairo", bg = "transparent", dpi = 300)
 
-  output <- data_frame(spark = md_img, summary = inline_summary)
+  output <- tibble(spark = md_img, summary = inline_summary)
   return(output)
 }
 
@@ -101,7 +99,7 @@ numeric_summary <- function(x, variable) {
                                    paste0(file_name, ".png")), 
          width = 1, height = 0.2, type = "cairo", bg = "transparent", dpi = 300)
   
-  output <- data_frame(spark = md_img, summary = inline_summary)
+  output <- tibble(spark = md_img, summary = inline_summary)
   return(output)
 }
 
@@ -217,50 +215,6 @@ conditions_summary_clean %T>%
 
 # Visualize important variables
 
-## Prior favorability towards NGOs
-
-```{r fig-ngo-favorability, fig.width=7, fig.height=4}
-favorability_cols <- data_frame(value = c("Very unfavorable", "Unfavorable", "Neutral",
-                                          "Favorable", "Very favorable"),
-                                color = ngo_pal("ordered")(5))
-
-ngo_favorability_raw <- results %>%
-  select(favor_humanitarian, favor_human_rights, favor_development) %>% 
-  gather(variable, value) %>% 
-  count(variable, value) %>% 
-  left_join(vars_to_summarize, by = "variable") %>% 
-  left_join(favorability_cols, by = "value") %>%
-  mutate(clean_name = str_replace(clean_name, "towards", "towards\n")) %>% 
-  mutate(value = factor(value, levels = levels(results$favor_humanitarian), ordered = TRUE),
-         clean_name = fct_inorder(clean_name, ordered = TRUE)) %>%
-  arrange(value) %>% 
-  mutate(color = fct_inorder(color, ordered = TRUE))
-
-ngo_favorability_high <- ngo_favorability_raw %>% 
-  filter(!str_detect(value, "nfav")) %>% 
-  mutate(n = ifelse(value == "Neutral", n / 2, n),
-         n_plot = n,
-         value = fct_rev(value), color = fct_rev(color))
-
-ngo_favorability_low <- ngo_favorability_raw %>% 
-  filter(str_detect(value, "nfav") | value == "Neutral") %>% 
-  mutate(n = ifelse(value == "Neutral", n / 2, n),
-         n_plot = -n)
-
-ggplot(mapping = aes(x = n_plot, y = clean_name, fill = color)) +
-  geom_barh(data = ngo_favorability_high, stat = "identity") +
-  geom_barh(data = ngo_favorability_low, stat = "identity") +
-  geom_vline(xintercept = 0, color = "black") +
-  scale_x_continuous(labels = abs) +
-  scale_fill_identity(labels = levels(ngo_favorability_raw$value),
-                      breaks = levels(ngo_favorability_raw$color),
-                      guide = "legend", name = NULL) +
-  labs(x = NULL, y = NULL) +
-  theme_ngos() +
-  theme(panel.grid.minor = element_blank(),
-        panel.grid.major.y = element_blank())
-```
-
 ## Likelihood of donation
 
 ```{r fig-likelihood-bars, fig.width=9, fig.height=4}
@@ -273,7 +227,7 @@ plot_donate_summary <- ggplot(donate_summary, aes(x = n, y = donate_likely,
                                                   fill = highlight)) +
   geom_barh(stat = "identity") +
   scale_x_continuous(sec.axis = sec_axis(~ . / sum(donate_summary$n),
-                                         labels = percent)) +
+                                         labels = percent_format(accuracy = 1))) +
   scale_fill_manual(values = ngo_cols("green", "blue", name = FALSE), guide = FALSE) +
   labs(x = NULL, y = NULL) +
   theme_ngos() +
@@ -308,1061 +262,574 @@ plot_amount_summary %T>%
 
 \
 
-# Interpreting interactions in models
-
-Ordinarily, people use ANOVA to analyze 3-way, 2 × 2 × 2 factorial designs, [like this](https://mypages.valdosta.edu/mwhatley/3600/2x2x2.htm). A more flexible ([yet identical!](https://www.theanalysisfactor.com/why-anova-and-linear-regression-are-the-same-analysis/)) way to do this is to use a regular regression model with interaction terms for each of the conditions, like so (here we use three, since we can use simper models to get averages for the larger umbrella groups, like just crackdowns and crackdown + issue):
-
-- Model 1: 
-
-    $$
-    y = \beta_0 + \beta_1 \text{Crackdown}
-    $$
-
-- Model 2: 
-
-    $$
-    \begin{aligned}
-    y =& \beta_0 + \beta_1 \text{Crackdown} + \beta_2 \text{Issue } + \\
-    & \beta_3 \text{Crackdown} \times \text{Issue}
-    \end{aligned}
-    $$
-
-- Model 3: 
-
-    $$
-    \begin{aligned}
-    y =& \beta_0 + \beta_1 \text{Crackdown} + \beta_2 \text{Issue} + \beta_3 \text{Funding } + \\
-    & \beta_4 \text{Crackdown} \times \text{Issue } + \\
-    & \beta_5 \text{Crackdown} \times \text{Funding } + \\
-    & \beta_6 \text{Issue} \times \text{Funding } + \\
-    & \beta_7 \text{Crackdown} \times \text{Issue} \times \text{Funding}
-    \end{aligned}
-    $$
-
-Adding different combinations of the coefficients provides the average values for each combination of factors, which corresponds to the average likelihood and amount donated table above. 
-
-```{r interaction-interpretation, results="asis"}
-model1 <- "1"
-model2 <- "2"
-model3 <- "3"
-
-interpretation <- tribble(
-  ~Model, ~`Coefficients to add together`,
-  model3, "Intercept",
-  model3, "Intercept + Funding",
-  model2, "Intercept",
-  model3, "Intercept + Issue",
-  model3, "Intercept + Issue + Funding + (Issue × Funding)",
-  model2, "Intercept + Issue",
-  model1, "Intercept",
-  model3, "Intercept + Crackdown",
-  model3, "Intercept + Crackdown + Funding + (Crackdown × Funding)",
-  model2, "Intercept + Crackdown",
-  model3, "Intercept + Crackdown + Issue + (Crackdown × Issue)",
-  model3, "Intercept + Crackdown + Issue + Funding + (Crackdown × Issue) + (Crackdown × Funding) + (Issue × Funding) + (Crackdown × Issue × Funding)",
-  model2, "Intercept + Crackdown + Issue + (Crackdown × Issue)",
-  model1, "Intercept + Crackdown"
-)
-
-conditions_summary_clean %>% 
-  select(1:3) %>% 
-  slice(-n()) %>% 
-  bind_cols(interpretation) %T>% 
-  pandoc.table() %>% 
-  pandoc.table.return(caption = "Combinations of coefficients to add to determine means across experimental conditions {#tbl:coefficients-to-add}") %>% 
-  cat(file = here("output", "tables", "tbl-coefficients-to-add.md"))
+```{r all-datasets-nested}
+all_models <- tribble(
+  ~title, ~df,
+  "Crackdown", results,
+  # Ha, cheat here by renaming the issue and funding columns to crackdown. 
+  # All other tests are based on the crackdown column except these two, so
+  # rather than build all sorts of convoluted arguments and functions, we just
+  # rename these as issue and funding
+  "Issue", mutate(results, crackdown = issue),
+  "Funding", mutate(results, crackdown = funding),
+  # Create all the nested conditions
+  "Human rights | Crackdown", filter(results, issue == "Human rights"),
+  "Humanitarian assistance | Crackdown", filter(results, issue != "Human rights"),
+  "Government | Crackdown", filter(results, funding == "Government"),
+  "Private | Crackdown", filter(results, funding == "Private"),
+  "Human rights | Government | Crackdown", filter(results, issue == "Human rights", funding == "Government"),
+  "Human rights | Private | Crackdown", filter(results, issue == "Human rights", funding == "Private"),
+  "Humanitarian assistance | Government | Crackdown", filter(results, issue != "Human rights", funding == "Government"),
+  "Humanitarian assistance | Private | Crackdown", filter(results, issue != "Human rights", funding == "Private")
+) 
 ```
 
-\
+# Treatment effects: Likelihood of donation
 
-# Amount donated
+This time around, we're not using interactionful regression models to calculate all these differences in groups. Instead we use real live Stan code to estimate the differences in group means and proportions! 
 
-## Models
+## Priors and models
 
-```{r build-models-amount, warning=FALSE, message=FALSE, cache=TRUE}
-# Basic interaction models
-m_amount_c <- stan_glm(amount_donate ~ crackdown,
-                       data = results, family = gaussian(),
-                       prior = cauchy(location = 0, scale = 2.5),
-                       prior_intercept = cauchy(location = 0, scale = 10),
-                       chains = CHAINS, iter = ITER, warmup = WARMUP, seed = BAYES_SEED)
+We estimate the proportion of people responding that they'd be likely to donate to the organization with a binomial distribution, with a prior $\theta$ distribution of $\text{Beta}(5, 5)$. We build the following model in Stan:
 
-m_amount_ci <- update(m_amount_c, . ~ . + issue + crackdown * issue)
+$$
+\begin{aligned}
+n_{\text{group 1, group 2}} &\sim \text{Binomial}(n_{\text{total in group}}, \theta_{\text{group}}) &\text{[likelihood]}\\
+\text{Difference} &= n_{\text{group 2}} - n_{\text{group 1}} &\text{[difference in proportions]} \\
+n &: \text{Number likely to donate} \\
+\\
+\theta_{\text{group 1, group 2}} &\sim \text{Beta}(5, 5) &\text{[prior prob. of being likely to donate]}
+\end{aligned}
+$$
 
-m_amount_cif <- update(m_amount_c, . ~ . + 
-                         issue + funding + crackdown * issue + crackdown * funding + 
-                         issue * funding + crackdown * issue * funding)
-
-# Models with just issue and just funding
-m_amount_i <- update(m_amount_c, . ~ issue)
-m_amount_f <- update(m_amount_c, . ~ funding)
+```{r priors-likely, fig.width=2.75, fig.height=1.5, fig.align="center"}
+likely_theta <- ggplot(data = tibble(x = c(0, 1)), aes(x = x)) +
+  geom_area(stat = "function", fun = dbeta, args = list(shape1 = 5, shape2 = 5), 
+            fill = "grey80", color = "black") +
+  labs(x = expression(Probability ~ of ~ being ~ likely ~ to ~ donate ~ (theta)), y = "Density") +
+  annotate(geom = "label", x = 0.5, y = 1, label = "Beta(5, 5)", size = pts(9)) +
+  theme_ngos(base_size = 9, density = TRUE)
+likely_theta
 ```
 
-```{r tbl-models-amount, warning=FALSE, results="asis"}
-# Get subset of coefficients
-coefs_to_include <- list(m_amount_c, m_amount_ci, m_amount_cif) %>% 
-  map(~ tidy(.)) %>% bind_rows() %>% distinct(term) %>% pull(term)
+## Differences
 
-huxreg(m_amount_c, m_amount_ci, m_amount_cif, 
-       coefs = clean_coefs_named[clean_coefs_named %in% coefs_to_include],
-       statistics = model_stats_bayes,
-       stars = NULL) %T>% 
-  print_hux() %>% 
-  to_md(max_width = 100) %>% 
-  cat(file = here("output", "tables", "tbl-models-amount.md"))
+```{r run-likely-models, results="hide", cache=TRUE}
+# This takes forever because of C++ compiling and actual MCMC sampling, so this
+# chunk is cached
+
+# Compile model
+donate_likely <- stan_model(here("lib", "donate_likely.stan"))
+
+# Sample from the compiled model
+all_models_likely_run <- all_models %>% 
+  # Simplify data for sending to Stan
+  mutate(stan_data_counts = df %>% map(~ {
+    df_counts <- .x %>% 
+      count(crackdown, donate_likely_bin) %>% 
+      group_by(crackdown) %>% 
+      mutate(total = sum(n)) %>% 
+      filter(donate_likely_bin == "Likely")
+    
+    return(list(
+      n_total_1 = df_counts$total[1],
+      n_total_2 = df_counts$total[2],
+      n_likely_1 = df_counts$n[1],
+      n_likely_2 = df_counts$n[2]
+    ))
+  })) %>% 
+  # Run the actual model on the simplified data
+  mutate(model = stan_data_counts %>% map(~ {
+    sampling(donate_likely, data = .x, control = list(max_treedepth = 15),
+             chains = CHAINS, iter = ITER, warmup = WARMUP, seed = BAYES_SEED)
+  })) 
+
+# Extract stuff
+all_models_likely <- all_models_likely_run %>% 
+  # Extract posterior chains
+  mutate(posterior_chains_long = map(model, ~ {
+      .x %>% gather_draws(theta_1, theta_2, theta_diff, pct_change)
+  })) %>% 
+  mutate(posterior_chains_wide = map(model, ~ {
+      .x %>% spread_draws(theta_1, theta_2, theta_diff, pct_change)
+  })) %>% 
+  # Get HDI medians in tidy form
+  mutate(tidy = posterior_chains_long %>% map(~ {
+    .x %>% median_hdci() %>% to_broom_names()
+  }))
 ```
 
-## Predicted medians
-
-The Stan people really really don't like `posterior_linepred()`, since it throws away a lot of the uncertainty that comes from actually getting a posterior distribution (like, [they didn't even want to invent it, and then when they did they wanted to hide it](https://github.com/stan-dev/rstanarm/issues/85), and it has a big warning in the documentation). But this approach here mirrors using `predict()` to combine all the coefficients and intercept terms in a regular frequentist linear model and it's probably appropriate for this situation because all the coefficients are actually linked together behind the scenes and create group mean estimates. If I use the full force of `posterior_predict()`, I add more uncertainty with each added coefficient (so in a 2×2×2 version, the 8th condition is actually the sum of all 8 coefficients, which means it gets 8 levels of uncertainity, which is probably excessive). But we do it both ways too, just to be on the safe side.
-
-```{r amount-median-c}
-newdata_conditions_c <- results %>% expand(nesting(crackdown))
-
-chains_fitted_c <- posterior_linpred(m_amount_c, 
-                                     newdata = newdata_conditions_c)
-
-# posterior_fit <- posterior_predict(m_amount_c, 
-#                                    newdata = newdata_conditions_c,
-#                                    draws = 50, seed = BAYES_SEED)
-
-coef_summary_c <- newdata_conditions_c %>% 
-  bind_cols(tidyMCMC(chains_fitted_c, estimate.method = "median",
-                     conf.int = TRUE, conf.level = 0.9, conf.method = "HPDinterval"))
-
-# newdata <- newdata_conditions %>% 
-#   bind_cols(tidyMCMC(posterior_fit, estimate.method = "median",
-#                      conf.int = TRUE, conf.level = 0.9, conf.method = "HPDinterval"))
-
-plot_amount_c <- ggplot(coef_summary_c, aes(y = estimate, x = crackdown)) + 
-  # geom_point(data = results, aes(y = amount_donate, x = crackdown),
-  #            color = "grey50", size = 0.5, alpha = 0.25) +
-  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), color = ngo_cols("green")) + 
-  scale_y_continuous(labels = dollar) +
-  labs(x = NULL, y = "Median amount donated") +
-  # coord_cartesian(ylim = c(0, 100)) +
-  theme_ngos() +
-  theme(panel.grid.major.x = element_blank())
-```
-
-```{r amount-median-i}
-newdata_conditions_i <- results %>% expand(nesting(issue))
-
-chains_fitted_i <- posterior_linpred(m_amount_i, 
-                                     newdata = newdata_conditions_i)
-
-coef_summary_i <- newdata_conditions_i %>% 
-  bind_cols(tidyMCMC(chains_fitted_i, estimate.method = "median",
-                     conf.int = TRUE, conf.level = 0.9, conf.method = "HPDinterval"))
-```
-
-```{r amount-median-f}
-newdata_conditions_f <- results %>% expand(nesting(funding))
-
-chains_fitted_f <- posterior_linpred(m_amount_f, 
-                                     newdata = newdata_conditions_f)
-
-coef_summary_f <- newdata_conditions_f %>% 
-  bind_cols(tidyMCMC(chains_fitted_f, estimate.method = "median",
-                     conf.int = TRUE, conf.level = 0.9, conf.method = "HPDinterval"))
-```
-
-```{r amount-median-ci}
-newdata_conditions_ci <- results %>% expand(nesting(crackdown, issue))
-
-chains_fitted_ci <- posterior_linpred(m_amount_ci, 
-                                      newdata = newdata_conditions_ci)
-
-coef_summary_ci <- newdata_conditions_ci %>% 
-  bind_cols(tidyMCMC(chains_fitted_ci, estimate.method = "median",
-                     conf.int = TRUE, conf.level = 0.9, conf.method = "HPDinterval"))
-
-plot_amount_ci <- ggplot(coef_summary_ci, aes(y = estimate, x = crackdown)) + 
-  # geom_point(data = results, aes(y = amount_donate, x = crackdown),
-  #            color = "grey50", size = 0.5, alpha = 0.25) +
-  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), color = ngo_cols("blue")) + 
-  scale_y_continuous(labels = dollar) +
-  labs(x = NULL, y = "Median amount donated") +
-  # coord_cartesian(ylim = c(0, 100)) +
-  theme_ngos() +
-  theme(panel.grid.major.x = element_blank(),
-        strip.text = element_text(margin = margin(5, 0, 2, 0, "pt"))) +
-  facet_wrap(~ issue)
-```
-
-```{r amount-median-cif}
-newdata_conditions_cif <- results %>% expand(nesting(crackdown, issue, funding))
-
-chains_fitted_cif <- posterior_linpred(m_amount_cif, 
-                                       newdata = newdata_conditions_cif)
-
-coef_summary_cif <- newdata_conditions_cif %>% 
-  bind_cols(tidyMCMC(chains_fitted_cif, estimate.method = "median",
-                     conf.int = TRUE, conf.level = 0.9, conf.method = "HPDinterval"))
-
-plot_amount_cif <- ggplot(coef_summary_cif, aes(y = estimate, x = crackdown)) + 
-  # geom_point(data = results, aes(y = amount_donate, x = crackdown),
-  #            color = "grey50", size = 0.5, alpha = 0.5) +
-  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), color = ngo_cols("red")) +
-  scale_y_continuous(labels = dollar) +
-  labs(x = NULL, y = "Median amount donated") +
-  theme_ngos() +
-  theme(panel.grid.major.x = element_blank(),
-        strip.text = element_text(margin = margin(5, 0, 2, 0, "pt"))) +
-  facet_wrap(~ issue + funding)
-```
-
-```{r plot-single-amount-medians, warning=FALSE, fig.width=7, fig.height=2.5}
-coef_summary_singles <- bind_rows(coef_summary_c, coef_summary_i, coef_summary_f) %>% 
-  gather(condition, value, crackdown, issue, funding) %>% 
-  filter(!is.na(value)) %>% 
-  mutate(value = fct_inorder(value, ordered = TRUE),
-         condition = fct_inorder(str_to_title(condition), ordered = TRUE))
-
-plot_amount_singles <- ggplot(coef_summary_singles, aes(y = estimate, x = value)) + 
-  geom_pointrange(aes(ymin = conf.low, ymax = conf.high, color = condition)) +
-  scale_y_continuous(labels = dollar) +
-  scale_color_manual(values = ngo_cols("green", "blue", "red", name = FALSE), guide = FALSE) +
-  labs(x = NULL, y = "Median amount donated") +
-  theme_ngos() +
-  theme(panel.grid.major.x = element_blank(),
-        strip.text = element_text(margin = margin(5, 0, 2, 0, "pt"))) +
-  facet_wrap(~ condition, scales = "free_x")
-
-plot_amount_singles %T>%
-  print() %T>%
-  ggsave(., filename = here("output", "figures", "amount_single_summary.pdf"),
-         width = 7, height = 2.5, units = "in", device = cairo_pdf) %>% 
-  ggsave(., filename = here("output", "figures", "amount_single_summary.png"),
-         width = 7, height = 2.5, units = "in", type = "cairo", dpi = 300)
-```
-
-```{r plot-all-amount-medians, fig.width=8, fig.height=6}
-plot_amount_all <- 
-  (plot_amount_c / plot_amount_ci) | 
-  plot_amount_cif
-
-plot_amount_all +
-  plot_annotation(title = "Median donation in control and crackdown groups,\nconditioned by other experimental groups",
-                  subtitle = "90% credible intervals shown around each point",
-                  tag_levels = "A", theme = theme_ngos())
-
-(plot_amount_all + 
-    plot_annotation(caption = "90% credible intervals shown around each point",
-                    tag_levels = "A", theme = theme_ngos())) %T>% 
-  ggsave(., filename = here("output", "figures", "amount-medians.pdf"),
-         width = 8, height = 4.25, units = "in", device = cairo_pdf) %>% 
-  ggsave(., filename = here("output", "figures", "amount-medians.png"),
-         width = 8, height = 4.25, units = "in", type = "cairo", dpi = 300)
-```
-
-
-## Differences in medians
-
-```{r amount-diffs-c}
-diffs_coef_pairs_c <- chains_fitted_c %>% 
-  as_data_frame() %>% 
-  magrittr::set_colnames(levels(newdata_conditions_c$crackdown)) %>% 
-  mcmc_pairwise_diffs()
-
-diffs_coef_pairs_detail_c <- tidy_diffs(diffs_coef_pairs_c)
-
-pairs_plot_data_c <- diffs_coef_pairs_c$mcmc_diffs %>%
-  gather(pair, value) %>%
-  mutate(pair1 = pair) %>%
-  separate(pair1, into = c("group1", "group2"), sep = " - ") %>%
-  mutate(pair = ifelse(nchar(pair) > 25,
-                       str_replace(pair, "-", "-\n"),
-                       pair))
-  
-plot_diffs_c <- ggplot() + 
-  geom_density(data = pairs_plot_data_c, aes(x = value),
-               fill = ngo_cols("green"), colour = NA, alpha = 0.4) + 
-  geom_segment(data = diffs_coef_pairs_detail_c, 
-               aes(x = q5, xend = q95, y = 0, yend = 0),
-               size = 3) +
-  geom_vline(data = diffs_coef_pairs_detail_c, aes(xintercept = median), size = 0.25) +
-  geom_vline(xintercept = 0, linetype = "dotted") +
-  guides(fill = FALSE, color = FALSE) +
-  labs(x = "Difference in medians") +
-  theme_ngos(density = TRUE) +
-  facet_wrap(~ pair)
-```
-
-```{r amount-diffs-i}
-diffs_coef_pairs_i <- chains_fitted_i %>% 
-  as_data_frame() %>% 
-  magrittr::set_colnames(levels(newdata_conditions_i$issue)) %>% 
-  mcmc_pairwise_diffs()
-
-diffs_coef_pairs_detail_i <- tidy_diffs(diffs_coef_pairs_i)
-
-pairs_plot_data_i <- diffs_coef_pairs_i$mcmc_diffs %>%
-  gather(pair, value) %>%
-  mutate(pair1 = pair) %>%
-  separate(pair1, into = c("group1", "group2"), sep = " - ") %>%
-  mutate(pair = ifelse(nchar(pair) > 25,
-                       str_replace(pair, "-", "-\n"),
-                       pair))
-```
-
-```{r amount-diffs-f}
-diffs_coef_pairs_f <- chains_fitted_f %>% 
-  as_data_frame() %>% 
-  magrittr::set_colnames(levels(newdata_conditions_f$funding)) %>% 
-  mcmc_pairwise_diffs()
-
-diffs_coef_pairs_detail_f <- tidy_diffs(diffs_coef_pairs_f)
-
-pairs_plot_data_f <- diffs_coef_pairs_f$mcmc_diffs %>%
-  gather(pair, value) %>%
-  mutate(pair1 = pair) %>%
-  separate(pair1, into = c("group1", "group2"), sep = " - ") %>%
-  mutate(pair = ifelse(nchar(pair) > 25,
-                       str_replace(pair, "-", "-\n"),
-                       pair))
-```
-
-```{r amount-diffs-ci}
-# Nest each fitted chain into a single row that corresponds to each newdata_condition
-chains_nested_ci <- chains_fitted_ci %>% 
-  as_data_frame() %>% 
-  mutate(id = 1:n()) %>% 
-  gather(condition, value, -id) %>% 
-  group_by(condition) %>% 
-  nest()
-
-# Add the fitted chains to the conditions, spread the main crackdown condition
-# into two columns, then nest everything by issue
-all_chains_ci <- bind_cols(newdata_conditions_ci, chains_nested_ci) %>% 
-  unnest(data) %>% 
-  select(-condition) %>% 
-  group_by(issue) %>% 
-  spread(crackdown, value) %>% 
-  select(-id) %>% 
-  nest()
-
-# All the pairwise differences in a single data frame, grouped by issue
-pairs_conditions_ci <- all_chains_ci %>% 
-  mutate(diffs_coef_pairs = data %>% map(~ mcmc_pairwise_diffs(.)),
-         diffs_coef_pairs_detail = diffs_coef_pairs %>% map(~ tidy_diffs(.)),
-         diffs_coefs = diffs_coef_pairs %>% map(~ .$mcmc_diffs))
-
-# Extract coefficient details and plot data
-diffs_coef_pairs_detail_ci <- pairs_conditions_ci %>% 
-  unnest(diffs_coef_pairs_detail) %>% 
-  select(-data, -diffs_coef_pairs, -diffs_coefs) #%>% 
-  #mutate(pair = "Hey")
-
-pairs_plot_data_ci <- pairs_conditions_ci %>% 
-  select(issue, diffs_coefs) %>% 
-  unnest(diffs_coefs) %>%
-  gather(pair, value, -issue) %>%
-  mutate(pair1 = pair) %>%
-  separate(pair1, into = c("group1", "group2"), sep = " - ") %>%
-  mutate(pair = ifelse(nchar(pair) > 25,
-                       str_replace(pair, "-", "-\n"),
-                       pair))
-
-plot_diffs_ci <- ggplot() + 
-  geom_density(data = pairs_plot_data_ci, aes(x = value),
-               fill = ngo_cols("blue"), colour = NA, alpha = 0.4) + 
-  geom_segment(data = diffs_coef_pairs_detail_ci,
-               aes(x = q5, xend = q95, y = 0, yend = 0),
-               size = 3) +
-  geom_vline(data = diffs_coef_pairs_detail_ci, aes(xintercept = median), size = 0.25) +
-  geom_vline(xintercept = 0, linetype = "dotted") +
-  guides(fill = FALSE, color = FALSE) +
-  labs(x = "Difference in medians") +
-  theme_ngos(density = TRUE) +
-  facet_wrap(~ issue + pair)
-```
-
-```{r amount-diffs-cif}
-# Nest each fitted chain into a single row that corresponds to each newdata_condition
-chains_nested_cif <- chains_fitted_cif %>% 
-  as_data_frame() %>% 
-  mutate(id = 1:n()) %>% 
-  gather(condition, value, -id) %>% 
-  group_by(condition) %>% 
-  nest()
-
-# Add the fitted chains to the conditions, spread the main crackdown condition
-# into two columns, then nest everything by issue
-all_chains_cif <- bind_cols(newdata_conditions_cif, chains_nested_cif) %>% 
-  unnest(data) %>% 
-  select(-condition) %>% 
-  group_by(issue, funding) %>% 
-  spread(crackdown, value) %>% 
-  select(-id) %>% 
-  nest()
-
-# All the pairwise differences in a single data frame, grouped by issue
-pairs_conditions_cif <- all_chains_cif %>% 
-  mutate(diffs_coef_pairs = data %>% map(~ mcmc_pairwise_diffs(.)),
-         diffs_coef_pairs_detail = diffs_coef_pairs %>% map(~ tidy_diffs(.)),
-         diffs_coefs = diffs_coef_pairs %>% map(~ .$mcmc_diffs))
-
-# Extract coefficient details and plot data
-diffs_coef_pairs_detail_cif <- pairs_conditions_cif %>% 
-  unnest(diffs_coef_pairs_detail) %>% 
-  select(-data, -diffs_coef_pairs, -diffs_coefs)
-
-pairs_plot_data_cif <- pairs_conditions_cif %>% 
-  select(issue, funding, diffs_coefs) %>% 
-  unnest(diffs_coefs) %>%
-  gather(pair, value, -issue, -funding) %>%
-  mutate(pair1 = pair) %>%
-  separate(pair1, into = c("group1", "group2"), sep = " - ") %>%
-  mutate(pair = ifelse(nchar(pair) > 25,
-                       str_replace(pair, "-", "-\n"),
-                       pair))
-
-plot_diffs_cif <- ggplot() + 
-  geom_density(data = pairs_plot_data_cif, aes(x = value),
-               fill = ngo_cols("red"), colour = NA, alpha = 0.4) + 
-  geom_segment(data = diffs_coef_pairs_detail_cif, 
-               aes(x = q5, xend = q95, y = 0, yend = 0),
-               size = 3) +
-  geom_vline(data = diffs_coef_pairs_detail_cif, aes(xintercept = median), size = 0.25) +
-  geom_vline(xintercept = 0, linetype = "dotted") +
-  guides(fill = FALSE, color = FALSE) +
-  labs(x = "Difference in medians") +
-  theme_ngos(density = TRUE) +
-  facet_wrap(~ issue + funding + pair)
-```
-
-**Compare only individual conditions:**
-
-```{r plot-single-amount-diffs, fig.width=7, fig.height=2.5}
-diffs_plot_data_singles <- bind_rows(pairs_plot_data_c,
-                                     pairs_plot_data_i,
-                                     pairs_plot_data_f) %>% 
-  mutate(pair = fct_inorder(pair, ordered = TRUE))
-
-diffs_coef_pairs_detail_singles <- bind_rows(diffs_coef_pairs_detail_c,
-                                             diffs_coef_pairs_detail_i,
-                                             diffs_coef_pairs_detail_f) %>%
-  mutate(pair = ifelse(nchar(pair) > 25,
-                       str_replace(pair, "-", "-\n"),
-                       pair),
-         pair = fct_inorder(pair, ordered = TRUE))
-
-plot_diffs_singles <- ggplot() +
-  geom_density(data = diffs_plot_data_singles, 
-               aes(x = value, fill = pair),
-               colour = NA, alpha = 0.4) +
-  geom_segment(data = diffs_coef_pairs_detail_singles, 
-               aes(x = q5, xend = q95, y = 0, yend = 0, group = pair),
-               size = 3) +
-  geom_vline(data = diffs_coef_pairs_detail_singles, 
-             aes(xintercept = median), size = 0.25) +
-  geom_vline(xintercept = 0, linetype = "dotted") +
-  scale_x_continuous(labels = dollar) +
-  scale_fill_manual(values = ngo_cols("green", "blue", "red", name = FALSE), guide = FALSE) +
-  labs(x = "Difference in medians") +
-  theme_ngos(density = TRUE) +
-  facet_wrap(~ pair)
-
-plot_diffs_singles %T>%
-  print() %T>% 
-  ggsave(., filename = here("output", "figures", "amount-singles-diffs.pdf"),
-         width = 7, height = 2.5, units = "in", device = cairo_pdf) %>% 
-  ggsave(., filename = here("output", "figures", "amount-singles-diffs.png"),
-         width = 7, height = 2.5, units = "in", type = "cairo", dpi = 300)
-```
-
-```{r tbl-single-amount-diffs, results="asis"}
-bind_rows(diffs_coef_pairs_detail_c,
-          diffs_coef_pairs_detail_i,
-          diffs_coef_pairs_detail_f) %>% 
-  select(`Frame` = pair, `∆~median~` = median, 
-         `%∆~median~` = median_pct_change,
-         `p(∆ > 0)` = p.greater0, `p(∆ < 0)` = p.less0, `p(∆ ≠ 0)` = p.diff.not0) %>% 
-  pandoc.table.return(missing = "—", 
-                      caption = "Median difference between likelihood to donate across single conditions {#tbl:amount-single-diffs}") %T>%
-  cat() %>% 
-  cat(file = here("output", "tables", "tbl-amount-single-diffs.md"))
-```
-
-\
-
-**Compare nested conditions (what we're really most concerned about):**
-
-```{r plot-all-amount-diffs, fig.width=8, fig.height=6}
-plot_diffs_all <- 
-  (plot_diffs_c / plot_diffs_ci) | 
-  plot_diffs_cif
-
-plot_diffs_all +
-  plot_annotation(title = "Differences in median amount donated in control and crackdown groups,\nconditioned by other experimental groups",
-                  subtitle = "90% credible intervals shown in black. Solid vertical line = median; dotted vertical line = 0",
-                  tag_levels = "A", theme = theme_ngos())
-
-(plot_diffs_all +
-  plot_annotation(caption = "90% credible intervals shown in black. Solid vertical line = median; dotted vertical line = 0",
-                  tag_levels = "A", theme = theme_ngos())) %T>%
-  ggsave(., filename = here("output", "figures", "amount-diffs.pdf"),
-         width = 8, height = 5, units = "in", device = cairo_pdf) %>%
-  ggsave(., filename = here("output", "figures", "amount-diffs.png"),
-         width = 8, height = 5, units = "in", type = "cairo", dpi = 300)
-```
-
-```{r tbl-all-amount-diffs, results="asis"}
-bind_rows(diffs_coef_pairs_detail_c,
-          diffs_coef_pairs_detail_ci,
-          diffs_coef_pairs_detail_cif) %>% 
-  select(Issue = issue, Funding = funding, 
-         `∆~median~` = median, 
-         `%∆~median~` = median_pct_change,
-         `p(∆ > 0)` = p.greater0, `p(∆ < 0)` = p.less0, `p(∆ ≠ 0)` = p.diff.not0) %>% 
-  pandoc.table.return(missing = "—", 
-                      caption = 'Median difference between amounts donated in "crackdown" (treatment) and "no crackdown" (control) conditions {#tbl:amount-diffs}') %T>%
-  cat() %>% 
-  cat(file = here("output", "tables", "tbl-amount-diffs.md"))
-```
-
-\
-
-# Likelihood of donation
-
-## Models
-
-```{r build-models-likely, warning=FALSE, message=FALSE, cache=TRUE}
-# Basic interaction models
-# Weakly informative student t priors, since these coefficients are log-odds
-# See https://github.com/stan-dev/stan/wiki/Prior-Choice-Recommendations#prior-for-the-regression-coefficients-in-logistic-regression-non-sparse-case and https://arxiv.org/abs/1507.07170
-m_likely_c <- stan_glm(donate_likely_bin ~ crackdown,
-                       data = results, family = binomial(link = "logit"),
-                       prior = student_t(3, 0, 2.5),
-                       prior_intercept = student_t(3, 0, 10),
-                       chains = CHAINS, iter = ITER, warmup = WARMUP, seed = BAYES_SEED)
-
-m_likely_ci <- update(m_likely_c, . ~ . + issue + crackdown * issue)
-
-m_likely_cif <- update(m_likely_c, . ~ . + 
-                         issue + funding + crackdown * issue + crackdown * funding + 
-                         issue * funding + crackdown * issue * funding)
-
-# Models with just issue and just funding
-m_likely_i <- update(m_likely_c, . ~ issue)
-m_likely_f <- update(m_likely_c, . ~ funding)
-```
-
-```{r tbl-models-likely, warning=FALSE, results="asis"}
-# Get subset of coefficients
-coefs_to_include <- list(m_likely_c, m_likely_ci, m_likely_cif) %>% 
-  map(~ tidy(.)) %>% bind_rows() %>% distinct(term) %>% pull(term)
-
-huxreg(m_likely_c, m_likely_ci, m_likely_cif, 
-       coefs = clean_coefs_named[clean_coefs_named %in% coefs_to_include],
-       statistics = model_stats_bayes,
-       stars = NULL) %T>% 
-  print_hux() %>% 
-  to_md(max_width = 100) %>% 
-  cat(file = here("output", "tables", "tbl-models-likelihood.md"))
-```
-
-## Predicted medians
-
-```{r likely-median-c}
-newdata_conditions_c <- results %>% expand(nesting(crackdown))
-
-# transform = TRUE does the same thing as plogis(as.matrix(m_likely_c))
-chains_fitted_likely_c <- posterior_linpred(m_likely_c, 
-                                            newdata = newdata_conditions_c, 
-                                            transform = TRUE)
-
-coef_summary_likely_c <- newdata_conditions_c %>% 
-  bind_cols(tidyMCMC(chains_fitted_likely_c, estimate.method = "median",
-                     conf.int = TRUE, conf.level = 0.9, conf.method = "HPDinterval"))
-
-plot_likely_c <- ggplot(coef_summary_likely_c, aes(y = estimate, x = crackdown)) + 
-  # geom_point(data = results, aes(y = amount_donate, x = crackdown),
-  #            color = "grey50", size = 0.5, alpha = 0.25) +
-  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), color = ngo_cols("green")) + 
-  scale_y_continuous(labels = percent) +
-  labs(x = NULL, y = "Probability of donating") +
-  # coord_cartesian(ylim = c(0, 100)) +
-  theme_ngos() +
-  theme(panel.grid.major.x = element_blank())
-```
-
-```{r likely-median-i}
-newdata_conditions_i <- results %>% expand(nesting(issue))
-
-chains_fitted_likely_i <- posterior_linpred(m_likely_i, 
-                                            newdata = newdata_conditions_i, 
-                                            transform = TRUE)
-
-coef_summary_likely_i <- newdata_conditions_i %>% 
-  bind_cols(tidyMCMC(chains_fitted_likely_i, estimate.method = "median",
-                     conf.int = TRUE, conf.level = 0.9, conf.method = "HPDinterval"))
-
-plot_likely_i <- ggplot(coef_summary_likely_i, aes(y = estimate, x = issue)) + 
-  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), color = ngo_cols("green")) + 
-  scale_y_continuous(labels = percent) +
-  labs(x = NULL, y = "Probability of donating") +
-  theme_ngos() +
-  theme(panel.grid.major.x = element_blank())
-```
-
-```{r likely-median-f}
-newdata_conditions_f <- results %>% expand(nesting(funding))
-
-chains_fitted_likely_f <- posterior_linpred(m_likely_f, 
-                                            newdata = newdata_conditions_f, 
-                                            transform = TRUE)
-
-coef_summary_likely_f <- newdata_conditions_f %>% 
-  bind_cols(tidyMCMC(chains_fitted_likely_f, estimate.method = "median",
-                     conf.int = TRUE, conf.level = 0.9, conf.method = "HPDinterval"))
-
-plot_likely_f <- ggplot(coef_summary_likely_f, aes(y = estimate, x = funding)) + 
-  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), color = ngo_cols("green")) + 
-  scale_y_continuous(labels = percent) +
-  labs(x = NULL, y = "Probability of donating") +
-  theme_ngos() +
-  theme(panel.grid.major.x = element_blank())
-```
-
-```{r likely-median-ci}
-newdata_conditions_ci <- results %>% expand(nesting(crackdown, issue))
-
-chains_fitted_likely_ci <- posterior_linpred(m_likely_ci, 
-                                             newdata = newdata_conditions_ci,
-                                             transform = TRUE)
-
-coef_summary_likely_ci <- newdata_conditions_ci %>% 
-  bind_cols(tidyMCMC(chains_fitted_likely_ci, estimate.method = "median",
-                     conf.int = TRUE, conf.level = 0.9, conf.method = "HPDinterval"))
-
-plot_likely_ci <- ggplot(coef_summary_likely_ci, aes(y = estimate, x = crackdown)) + 
-  # geom_point(data = results, aes(y = amount_donate, x = crackdown),
-  #            color = "grey50", size = 0.5, alpha = 0.25) +
-  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), color = ngo_cols("blue")) + 
-  scale_y_continuous(labels = percent) +
-  labs(x = NULL, y = "Probability of donating") +
-  # coord_cartesian(ylim = c(0, 100)) +
-  theme_ngos() +
-  theme(panel.grid.major.x = element_blank(),
-        strip.text = element_text(margin = margin(5, 0, 2, 0, "pt"))) +
-  facet_wrap(~ issue)
-```
-
-```{r likely-median-cif}
-newdata_conditions_cif <- results %>% expand(nesting(crackdown, issue, funding))
-
-chains_fitted_likely_cif <- posterior_linpred(m_likely_cif, 
-                                              newdata = newdata_conditions_cif,
-                                              transform = TRUE)
-
-coef_summary_likely_cif <- newdata_conditions_cif %>% 
-  bind_cols(tidyMCMC(chains_fitted_likely_cif, estimate.method = "median",
-                     conf.int = TRUE, conf.level = 0.9, conf.method = "HPDinterval"))
-
-plot_likely_cif <- ggplot(coef_summary_likely_cif, aes(y = estimate, x = crackdown)) + 
-  # geom_point(data = results, aes(y = amount_donate, x = crackdown),
-  #            color = "grey50", size = 0.5, alpha = 0.5) +
-  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), color = ngo_cols("red")) +
-  scale_y_continuous(labels = percent) +
-  labs(x = NULL, y = "Probability of donating") +
-  theme_ngos() +
-  theme(panel.grid.major.x = element_blank(),
-        strip.text = element_text(margin = margin(5, 0, 2, 0, "pt"))) +
-  facet_wrap(~ issue + funding)
-```
-
-```{r plot-all-likely-medians, fig.width=8, fig.height=6}
-plot_likely_all <- 
-  (plot_likely_c / plot_likely_ci) | 
-  plot_likely_cif
-
-plot_likely_all +
-  plot_annotation(title = "Median likelihood of donation in control and crackdown groups,\nconditioned by other experimental groups",
-                  subtitle = "90% credible intervals shown around each point",
-                  tag_levels = "A", theme = theme_ngos())
-
-(plot_likely_all +
-  plot_annotation(caption = "90% credible intervals shown around each point",
-                  tag_levels = "A", theme = theme_ngos())) %T>% 
-  ggsave(., filename = here("output", "figures", "likelihood-medians.pdf"),
-         width = 8, height = 4.25, units = "in", device = cairo_pdf) %>% 
-  ggsave(., filename = here("output", "figures", "likelihood-medians.png"),
-         width = 8, height = 4.25, units = "in", type = "cairo", dpi = 300)
-```
-
-
-## Differences in medians
-
-```{r likely-diffs-c}
-diffs_coef_likely_pairs_c <- chains_fitted_likely_c %>% 
-  as_data_frame() %>% 
-  magrittr::set_colnames(levels(newdata_conditions_c$crackdown)) %>% 
-  mcmc_pairwise_diffs()
-
-diffs_coef_likely_pairs_detail_c <- tidy_diffs(diffs_coef_likely_pairs_c)
-
-pairs_likely_plot_data_c <- diffs_coef_likely_pairs_c$mcmc_diffs %>%
-  gather(pair, value) %>%
-  mutate(pair1 = pair) %>%
-  separate(pair1, into = c("group1", "group2"), sep = " - ") %>%
-  mutate(pair = ifelse(nchar(pair) > 25,
-                       str_replace(pair, "-", "-\n"),
-                       pair))
-  
-plot_diffs_likely_c <- ggplot() + 
-  geom_density(data = pairs_likely_plot_data_c, aes(x = value),
-               fill = ngo_cols("green"), colour = NA, alpha = 0.4) + 
-  geom_segment(data = diffs_coef_likely_pairs_detail_c, 
-               aes(x = q5, xend = q95, y = 0, yend = 0),
-               size = 3) +
-  geom_vline(data = diffs_coef_likely_pairs_detail_c, 
-             aes(xintercept = median), size = 0.25) +
-  geom_vline(xintercept = 0, linetype = "dotted") +
-  guides(fill = FALSE, color = FALSE) +
-  scale_x_continuous(labels = percent) +
-  labs(x = "Difference in medians") +
-  theme_ngos(density = TRUE) +
-  facet_wrap(~ pair)
-```
-
-```{r likely-diffs-i}
-diffs_coef_likely_pairs_i <- chains_fitted_likely_i %>% 
-  as_data_frame() %>% 
-  magrittr::set_colnames(levels(newdata_conditions_i$issue)) %>% 
-  mcmc_pairwise_diffs()
-
-diffs_coef_likely_pairs_detail_i <- tidy_diffs(diffs_coef_likely_pairs_i)
-
-pairs_likely_plot_data_i <- diffs_coef_likely_pairs_i$mcmc_diffs %>%
-  gather(pair, value) %>%
-  mutate(pair1 = pair) %>%
-  separate(pair1, into = c("group1", "group2"), sep = " - ") %>%
-  mutate(pair = ifelse(nchar(pair) > 25,
-                       str_replace(pair, "-", "-\n"),
-                       pair))
-```
-
-```{r likely-diffs-f}
-diffs_coef_likely_pairs_f <- chains_fitted_likely_f %>% 
-  as_data_frame() %>% 
-  magrittr::set_colnames(levels(newdata_conditions_f$funding)) %>% 
-  mcmc_pairwise_diffs()
-
-diffs_coef_likely_pairs_detail_f <- tidy_diffs(diffs_coef_likely_pairs_f)
-
-pairs_likely_plot_data_f <- diffs_coef_likely_pairs_f$mcmc_diffs %>%
-  gather(pair, value) %>%
-  mutate(pair1 = pair) %>%
-  separate(pair1, into = c("group1", "group2"), sep = " - ") %>%
-  mutate(pair = ifelse(nchar(pair) > 25,
-                       str_replace(pair, "-", "-\n"),
-                       pair))
-```
-
-```{r likely-diffs-ci}
-# Nest each fitted chain into a single row that corresponds to each newdata_condition
-chains_nested_likely_ci <- chains_fitted_likely_ci %>% 
-  as_data_frame() %>% 
-  mutate(id = 1:n()) %>% 
-  gather(condition, value, -id) %>% 
-  group_by(condition) %>% 
-  nest()
-
-# Add the fitted chains to the conditions, spread the main crackdown condition
-# into two columns, then nest everything by issue
-all_chains_likely_ci <- bind_cols(newdata_conditions_ci, 
-                                  chains_nested_likely_ci) %>% 
-  unnest(data) %>% 
-  select(-condition) %>% 
-  group_by(issue) %>% 
-  spread(crackdown, value) %>% 
-  select(-id) %>% 
-  nest()
-
-# All the pairwise differences in a single data frame, grouped by issue
-pairs_likely_conditions_ci <- all_chains_likely_ci %>% 
-  mutate(diffs_coef_pairs = data %>% map(~ mcmc_pairwise_diffs(.)),
-         diffs_coef_pairs_detail = diffs_coef_pairs %>% map(~ tidy_diffs(.)),
-         diffs_coefs = diffs_coef_pairs %>% map(~ .$mcmc_diffs))
-
-# Extract coefficient details and plot data
-diffs_coef_likely_pairs_detail_ci <- pairs_likely_conditions_ci %>% 
-  unnest(diffs_coef_pairs_detail) %>% 
-  select(-data, -diffs_coef_pairs)
-
-pairs_likely_plot_data_ci <- pairs_likely_conditions_ci %>% 
-  select(issue, diffs_coefs) %>% 
-  unnest(diffs_coefs) %>%
-  gather(pair, value, -issue) %>%
-  mutate(pair1 = pair) %>%
-  separate(pair1, into = c("group1", "group2"), sep = " - ") %>%
-  mutate(pair = ifelse(nchar(pair) > 25,
-                       str_replace(pair, "-", "-\n"),
-                       pair))
-
-plot_diffs_likely_ci <- ggplot() + 
-  geom_density(data = pairs_likely_plot_data_ci, aes(x = value),
-               fill = ngo_cols("blue"), colour = NA, alpha = 0.4) + 
-  geom_segment(data = diffs_coef_likely_pairs_detail_ci, 
-               aes(x = q5, xend = q95, y = 0, yend = 0),
-               size = 3) +
-  geom_vline(data = diffs_coef_likely_pairs_detail_ci, 
-             aes(xintercept = median), size = 0.25) +
-  geom_vline(xintercept = 0, linetype = "dotted") +
-  guides(fill = FALSE, color = FALSE) +
-  scale_x_continuous(labels = percent) +
-  labs(x = "Difference in medians") +
-  theme_ngos(density = TRUE) +
-  facet_wrap(~ issue + pair)
-```
-
-```{r likely-diffs-cif}
-# Nest each fitted chain into a single row that corresponds to each newdata_condition
-chains_nested_likely_cif <- chains_fitted_likely_cif %>% 
-  as_data_frame() %>% 
-  mutate(id = 1:n()) %>% 
-  gather(condition, value, -id) %>% 
-  group_by(condition) %>% 
-  nest()
-
-# Add the fitted chains to the conditions, spread the main crackdown condition
-# into two columns, then nest everything by issue
-all_chains_likely_cif <- bind_cols(newdata_conditions_cif, 
-                                   chains_nested_likely_cif) %>% 
-  unnest(data) %>% 
-  select(-condition) %>% 
-  group_by(issue, funding) %>% 
-  spread(crackdown, value) %>% 
-  select(-id) %>% 
-  nest()
-
-# All the pairwise differences in a single data frame, grouped by issue
-pairs_likely_conditions_cif <- all_chains_likely_cif %>% 
-  mutate(diffs_coef_pairs = data %>% map(~ mcmc_pairwise_diffs(.)),
-         diffs_coef_pairs_detail = diffs_coef_pairs %>% map(~ tidy_diffs(.)),
-         diffs_coefs = diffs_coef_pairs %>% map(~ .$mcmc_diffs))
-
-# Extract coefficient details and plot data
-diffs_coef_likely_pairs_detail_cif <- pairs_likely_conditions_cif %>% 
-  unnest(diffs_coef_pairs_detail) %>% 
-  select(-data, -diffs_coef_pairs, -diffs_coefs)
-
-pairs_likely_plot_data_cif <- pairs_likely_conditions_cif %>% 
-  select(issue, funding, diffs_coefs) %>% 
-  unnest(diffs_coefs) %>%
-  gather(pair, value, -issue, -funding) %>%
-  mutate(pair1 = pair) %>%
-  separate(pair1, into = c("group1", "group2"), sep = " - ") %>%
-  mutate(pair = ifelse(nchar(pair) > 25,
-                       str_replace(pair, "-", "-\n"),
-                       pair))
-
-plot_diffs_likely_cif <- ggplot() +
-  geom_density(data = pairs_likely_plot_data_cif, aes(x = value),
-               fill = ngo_cols("red"), colour = NA, alpha = 0.4) +
-  geom_segment(data = diffs_coef_likely_pairs_detail_cif,
-               aes(x = q5, xend = q95, y = 0, yend = 0),
-               size = 3) +
-  geom_vline(data = diffs_coef_likely_pairs_detail_cif,
-             aes(xintercept = `median`), size = 0.25) +
-  geom_vline(xintercept = 0, linetype = "dotted") +
-  guides(fill = FALSE, color = FALSE) +
-  scale_x_continuous(labels = percent) +
-  labs(x = "Difference in medians") +
-  theme_ngos(density = TRUE) +
-  facet_wrap(~ issue + funding + pair)
-```
-
-**Compare only individual conditions:**
-
-```{r plot-single-likely-diffs, fig.width=7, fig.height=2.5}
-diffs_likely_plot_data_singles <- bind_rows(pairs_likely_plot_data_c,
-                                            pairs_likely_plot_data_i,
-                                            pairs_likely_plot_data_f) %>% 
-  mutate(pair = fct_inorder(pair, ordered = TRUE))
-
-diffs_coef_likely_pairs_detail_singles <- bind_rows(diffs_coef_likely_pairs_detail_c,
-                                                    diffs_coef_likely_pairs_detail_i,
-                                                    diffs_coef_likely_pairs_detail_f) %>%
-  mutate(pair = ifelse(nchar(pair) > 25,
-                       str_replace(pair, "-", "-\n"),
-                       pair),
-         pair = fct_inorder(pair, ordered = TRUE))
-
-plot_diffs_likely_singles <- ggplot() +
-  geom_density(data = diffs_likely_plot_data_singles, 
-               aes(x = value, fill = pair),
-               colour = NA, alpha = 0.4) +
-  geom_segment(data = diffs_coef_likely_pairs_detail_singles, 
-               aes(x = q5, xend = q95, y = 0, yend = 0, group = pair),
-               size = 3) +
-  geom_vline(data = diffs_coef_likely_pairs_detail_singles, 
-             aes(xintercept = median), size = 0.25) +
-  geom_vline(xintercept = 0, linetype = "dotted") +
-  scale_x_continuous(labels = percent) +
-  scale_fill_manual(values = ngo_cols("green", "blue", "red", name = FALSE), guide = FALSE) +
-  labs(x = "Difference in medians") +
-  theme_ngos(density = TRUE) +
-  facet_wrap(~ pair)
-
-plot_diffs_likely_singles %T>%
-  print() %T>% 
-  ggsave(., filename = here("output", "figures", "likelihood-singles-diffs.pdf"),
-         width = 7, height = 2.5, units = "in", device = cairo_pdf) %>% 
-  ggsave(., filename = here("output", "figures", "likelihood-singles-diffs.png"),
-         width = 7, height = 2.5, units = "in", type = "cairo", dpi = 300)
-```
-
-```{r tbl-single-likely-diffs, results="asis"}
-bind_rows(diffs_coef_likely_pairs_detail_c,
-          diffs_coef_likely_pairs_detail_i,
-          diffs_coef_likely_pairs_detail_f) %>% 
-  select(`Frame` = pair, `∆~median~` = median, 
-         `%∆~median~` = median_pct_change,
-         `p(∆ > 0)` = p.greater0, `p(∆ < 0)` = p.less0, `p(∆ ≠ 0)` = p.diff.not0) %>% 
-  pandoc.table.return(missing = "—", 
-                      caption = "Median difference between likelihood to donate across single conditions {#tbl:likelihood-single-diffs}") %T>%
-  cat() %>% 
-  cat(file = here("output", "tables", "tbl-likelihood-single-diffs.md"))
-```
-
-\
-
-**Compare nested conditions (what we're really most concerned about):**
-
-```{r plot-all-likely-diffs, fig.width=8, fig.height=6}
-plot_diffs_likely_all <- 
-  (plot_diffs_likely_c / plot_diffs_likely_ci) | 
-  plot_diffs_likely_cif
-
-plot_diffs_likely_all +
-  plot_annotation(title = "Differences in donation likelihood in control and crackdown groups,\nconditioned by other experimental groups",
-                  subtitle = "90% credible intervals shown in black. Solid vertical line = median; dotted vertical line = 0",
-                  tag_levels = "A", theme = theme_ngos())
-
-(plot_diffs_likely_all +
-    plot_annotation(caption = "90% credible intervals shown in black. Solid vertical line = median; dotted vertical line = 0",
-                    tag_levels = "A", theme = theme_ngos())) %T>%
-  ggsave(., filename = here("output", "figures", "likelihood-diffs.pdf"),
-         width = 8, height = 5, units = "in", device = cairo_pdf) %>%
-  ggsave(., filename = here("output", "figures", "likelihood-diffs.png"),
-         width = 8, height = 5, units = "in", type = "cairo", dpi = 300)
-```
-
-```{r tbl-all-likely-diffs, results="asis"}
-bind_rows(diffs_coef_likely_pairs_detail_c,
-          diffs_coef_likely_pairs_detail_ci,
-          diffs_coef_likely_pairs_detail_cif) %>% 
-  select(Issue = issue, Funding = funding, 
-         `∆~median~` = median, 
-         `%∆~median~` = median_pct_change,
-         `p(∆ > 0)` = p.greater0, `p(∆ < 0)` = p.less0, `p(∆ ≠ 0)` = p.diff.not0) %>% 
-  pandoc.table.return(missing = "—", 
-                      caption = 'Median difference between likelihood to donate in "crackdown" (treatment) and "crackdown" (control) conditions {#tbl:likelihood-diffs}') %T>%
-  cat() %>% 
-  cat(file = here("output", "tables", "tbl-likelihood-diffs.md"))
-```
-
-
-# Summary of hypotheses
-
-```{r hypotheses-summary-figure, fig.width=8, fig.height=6.5}
-hypotheses <- tribble(
-  ~dv, ~hypothesis, ~summary,
-  "Likelihood", "H1a: Donors more likely\nto give to NGOs\nfacing crackdown", diffs_coef_likely_pairs_detail_c,
-  "Likelihood", "H2a: Donors more likely\nto give to humanitarian\nNGOs facing crackdown", diffs_coef_likely_pairs_detail_ci,
-  "Likelihood", "H3a: Donors more likely\nto give to privately funded\nNGOs facing crackdown", diffs_coef_likely_pairs_detail_cif,
-  "Amount", "H1b: Donors give more \nto NGOs facing crackdown", diffs_coef_pairs_detail_c,
-  "Amount", "H2b: Donors give more \nto humanitarian NGOs\nfacing crackdown", diffs_coef_pairs_detail_ci,
-  "Amount", "H3b: Donors give more \nto privately funded NGOs\nfacing crackdown", diffs_coef_pairs_detail_cif
-)
-
-plot_hypotheses <- hypotheses %>% 
-  unnest(summary) %>% 
-  select(-diffs_coefs) %>% 
-  mutate(condition = paste0(issue, " + ", funding),
-         condition = recode(condition, 
-                            `Human rights + NA` = "Human rights",
-                            `Humanitarian assistance + NA` = "Humanitarian assistance",
-                            `NA + NA` = "Crackdown only")) %>% 
-  mutate(hypothesis_custom = case_when(
-    .$condition == "Human rights + Government" ~ paste(hypothesis, "\n(government funding condition)"),
-    .$condition == "Humanitarian assistance + Government" ~ paste(hypothesis, "\n(government funding condition)"),
-    .$condition == "Human rights + Private" ~ paste(hypothesis, "\n(private funding condition)"),
-    .$condition == "Humanitarian assistance + Private" ~ paste(hypothesis, "\n(private funding condition)"),
-    TRUE ~ hypothesis
+```{r plot-likely-diffs, warning=FALSE, fig.width=6, fig.height=8}
+tidied_diffs_likely <- all_models_likely %>% 
+  unnest(posterior_chains_long) %>% 
+  filter(.variable == "theta_diff") %>% 
+  mutate(category = case_when(
+    str_count(title, "\\|") == 0 ~ "Level 1",
+    str_count(title, "\\|") == 1 ~ "Level 2",
+    str_count(title, "\\|") == 2 ~ "Level 3"
   )) %>% 
-  mutate(issue = fct_rev(fct_explicit_na(issue, na_level = "Crackdown only")),
-         hypothesis_facet = ifelse(str_detect(hypothesis, "H3"), 2, 1),
-         p_lab = case_when(
-           .$dv == "Likelihood" ~ sprintf("∆ = %.2f; p(∆ ≠ 0) = %.2f", .$median, .$p.diff.not0),
-           .$dv == "Amount" ~ sprintf("∆ = $%.2f; p(∆ ≠ 0) = %.2f", .$median, .$p.diff.not0)
-         ))
+  mutate(title = str_remove(title, " \\| Crackdown"))
 
-plot_hypotheses_likely <- filter(plot_hypotheses, dv == "Likelihood")
-plot_hypotheses_amount <- filter(plot_hypotheses, dv == "Amount")
+level1_likely <- tidied_diffs_likely %>% 
+  filter(category == "Level 1") %>%
+  mutate(title = recode(title, 
+                        Crackdown = "Crackdown −\nNo crackdown",
+                        Issue = "Humanitarian\nassistance −\nHuman rights",
+                        Funding = "Private −\nGovernment\nfunding")) %>% 
+  mutate(title = fct_inorder(title))
 
-plot_summary_likely <- ggplot(plot_hypotheses_likely, 
-                              aes(x = median, y = fct_rev(hypothesis_custom))) +
-  geom_pointrangeh(aes(xmin = q5, xmax = q95, color = issue),
-                   position = position_dodgev(height = 0.5)) +
-  geom_vline(xintercept = 0, size = 0.25, linetype = "dashed") +
-  geom_label(data = filter(plot_hypotheses_likely, issue == "Human rights"), 
-             aes(label = p_lab, color = issue), size = 3, nudge_y = 0.35, show.legend = FALSE) +
-  geom_label(data = filter(plot_hypotheses_likely, issue == "Humanitarian assistance"), 
-             aes(label = p_lab, color = issue), size = 3, nudge_y = -0.35, show.legend = FALSE) +
-  geom_label(data = filter(plot_hypotheses_likely, issue == "Crackdown only"), 
-             aes(label = p_lab, color = issue), size = 3, nudge_y = 0.2, show.legend = FALSE) +
-  labs(x = expression(paste("Effect of crackdown: (Crackdown - No crackdown)"["median"])),
-       y = NULL, subtitle = "Likelihood of donation") +
+plot_diff_likely_a <- ggplot(level1_likely, aes(x = .value, y = fct_rev(title), fill = title)) +
+  geom_halfeyeh(.width = c(0.8, 0.95)) +
+  geom_vline(xintercept = 0) +
   scale_x_continuous(labels = percent_format(accuracy = 1)) +
-  scale_color_manual(values = ngo_cols("dark grey", "blue", "red", name = FALSE), name = NULL) +
-  coord_cartesian(clip = "off") +
-  theme_ngos() + 
-  theme(strip.text = element_blank(),
-        panel.grid.minor = element_blank(),
-        plot.subtitle = element_text(size = rel(1.2), face = "plain", #hjust = 0.5,
-                                    family = "Encode Sans Condensed Medium")) +
-  facet_wrap(~ hypothesis_facet, nrow = 1, scales = "free")
+  scale_fill_manual(values = ngo_cols(c("blue", "red", "orange"), name = FALSE), guide = FALSE) +
+  labs(x = "Median difference in donation likelihood", y = NULL, tag = "A") +
+  theme_ngos() +
+  theme(panel.grid.major.y = element_blank())
 
-plot_summary_amount <- ggplot(plot_hypotheses_amount, 
-                              aes(x = median, y = fct_rev(hypothesis_custom))) +
-  geom_pointrangeh(aes(xmin = q5, xmax = q95, color = issue),
-                   position = position_dodgev(height = 0.5)) +
-  geom_vline(xintercept = 0, size = 0.25, linetype = "dashed") +
-  geom_label(data = filter(plot_hypotheses_amount, issue == "Human rights"), 
-             aes(label = p_lab, color = issue), size = 3, nudge_y = 0.35, show.legend = FALSE) +
-  geom_label(data = filter(plot_hypotheses_amount, issue == "Humanitarian assistance"), 
-             aes(label = p_lab, color = issue), size = 3, nudge_y = -0.35, show.legend = FALSE) +
-  geom_label(data = filter(plot_hypotheses_amount, issue == "Crackdown only"), 
-             aes(label = p_lab, color = issue), size = 3, nudge_y = 0.2, show.legend = FALSE) +
-  labs(x = expression(paste("Effect of crackdown: (Crackdown - No crackdown)"["median"])),
-       y = NULL, subtitle = "Amount donated",
-       caption = "90% credible intervals shown around each point") +
-  scale_x_continuous(labels = dollar_format()) +
-  scale_color_manual(values = ngo_cols("dark grey", "blue", "red", name = FALSE), guide = FALSE) +
-  coord_cartesian(clip = "off") +
-  theme_ngos() + 
-  theme(strip.text = element_blank(),
-        panel.grid.minor = element_blank(),
-        plot.subtitle = element_text(size = rel(1.2), face = "plain", #hjust = 0.5,
-                                    family = "Encode Sans Condensed Medium")) +
-  facet_wrap(~ hypothesis_facet, nrow = 1, scales = "free")
+level2_likely <- tidied_diffs_likely %>% 
+  filter(category == "Level 2") %>%
+  mutate(condition = case_when(
+    title %in% c("Human rights", "Humanitarian assistance") ~ "Issue",
+    title %in% c("Government", "Private") ~ "Funding"
+  )) %>% 
+  mutate(facet_title = case_when(
+    title %in% c("Human rights", "Humanitarian assistance") ~ paste(title, "issues"),
+    title %in% c("Government", "Private") ~ paste(title, "funding")
+  )) %>% 
+  mutate(title = case_when(
+    title %in% c("Humanitarian assistance", "Private") ~ "",
+    TRUE ~ "Crackdown −\nNo crackdown")
+  )
 
-plot_summary_diffs <- plot_summary_likely + plot_summary_amount +
-  plot_layout(ncol = 1)
+plot_diff_likely_b <- ggplot(filter(level2_likely, condition == "Issue"), 
+                             aes(x = .value, y = fct_rev(title))) +
+  geom_halfeyeh(.width = c(0.8, 0.95), fill = ngo_cols("red", name = FALSE)) +
+  geom_vline(xintercept = 0) +
+  scale_x_continuous(labels = percent_format(accuracy = 1)) +
+  labs(x = NULL, y = NULL, tag = "B") +
+  facet_wrap(~ facet_title, scales = "free_y") +
+  theme_ngos() +
+  theme(panel.grid.major.y = element_blank())
 
-plot_summary_diffs
+plot_diff_likely_c <- ggplot(filter(level2_likely, condition == "Funding"), 
+                             aes(x = .value, y = fct_rev(title))) +
+  geom_halfeyeh(.width = c(0.8, 0.95), fill = ngo_cols("orange", name = FALSE)) +
+  geom_vline(xintercept = 0) +
+  scale_x_continuous(labels = percent_format(accuracy = 1)) +
+  labs(x = "Median difference in donation likelihood", y = NULL, tag = "C") +
+  facet_wrap(~ facet_title, scales = "free_y") +
+  theme_ngos() +
+  theme(panel.grid.major.y = element_blank())
 
-plot_summary_diffs %T>%
-  ggsave(., filename = here("output", "figures", "summary-diffs.pdf"),
-         width = 8, height = 6.5, units = "in", device = cairo_pdf) %>%
-  ggsave(., filename = here("output", "figures", "summary-diffs.png"),
-         width = 8, height = 6.5, units = "in", type = "cairo", dpi = 300)
+level3_likely <- tidied_diffs_likely %>% 
+  filter(category == "Level 3") %>%
+  separate(title, c("issue", "funding"), sep = " \\| ") %>%
+  mutate(issue = paste(issue, "issues"),
+         funding = paste(funding, "funding")) %>% 
+  mutate(facet_title = paste0(issue, "\n", funding)) %>% 
+  mutate(title = case_when(
+    funding == "Private funding" ~ "",
+    TRUE ~ "Crackdown −\nNo crackdown")
+  )
+
+plot_diff_likely_d <- ggplot(level3_likely, aes(x = .value, y = fct_rev(title))) +
+  geom_halfeyeh(.width = c(0.8, 0.95), fill = ngo_cols("green", name = FALSE)) +
+  geom_vline(xintercept = 0) +
+  scale_x_continuous(labels = percent_format(accuracy = 1)) +
+  labs(x = "Median difference in donation likelihood", y = NULL, tag = "D") +
+  facet_wrap(~ facet_title, scales = "free_y") +
+  theme_ngos() +
+  theme(panel.grid.major.y = element_blank())
+
+plot_diffs_likely_all <- plot_diff_likely_a / 
+  (plot_diff_likely_b / plot_diff_likely_c) / 
+  plot_diff_likely_d
+
+plot_diffs_likely_all
+
+plot_diffs_likely_all %T>% 
+  ggsave(., filename = here("output", "figures", "likely-diffs.pdf"),
+         width = 6, height = 8, units = "in", device = cairo_pdf) %>%
+  ggsave(., filename = here("output", "figures", "likely-diffs.png"),
+         width = 6, height = 8, units = "in", type = "cairo", dpi = 300)
 ```
 
+```{r tbl-likely-diffs-level1, warning=FALSE, message=FALSE, results="asis"}
+tbl_likely_tidy <- all_models_likely %>% 
+  unnest(tidy) %>% 
+  filter(term %in% c("theta_diff", "pct_change")) %>% 
+  select(title, term, estimate) %>% 
+  spread(term, estimate) %>% 
+  mutate(category = case_when(
+    str_count(title, "\\|") == 0 ~ "Level 1",
+    str_count(title, "\\|") == 1 ~ "Level 2",
+    str_count(title, "\\|") == 2 ~ "Level 3"
+  )) 
+
+tbl_likely_probs <- all_models_likely %>% 
+  unnest(posterior_chains_long) %>% 
+  filter(.variable == "theta_diff") %>% 
+  group_by(title) %>% 
+  summarize(p.greater0 = mean(.value > 0),
+            p.less0 = mean(.value < 0),
+            p.diff.not0 = ifelse(median(.value) > 0, p.greater0, p.less0)) %>% 
+  ungroup()
+
+tbl_likely_tidy %>% 
+  left_join(tbl_likely_probs, by = "title") %>% 
+  filter(category == "Level 1") %>%
+  mutate(title = recode(title, 
+                        Crackdown = "Crackdown −\nNo crackdown",
+                        Issue = "Humanitarian\nassistance −\nHuman rights",
+                        Funding = "Private −\nGovernment\nfunding")) %>% 
+  mutate(title = fct_inorder(title)) %>% 
+  select(`Frame` = title, `∆` = theta_diff, `%∆` = pct_change,
+         `p(∆ > 0)` = p.greater0, `p(∆ < 0)` = p.less0, `p(∆ ≠ 0)` = p.diff.not0) %>% 
+  pandoc.table.return(caption = 'Difference between likelihood of donation across single conditions; values represent posterior medians {#tbl:likely-diffs-1}') %T>%
+  cat() %>% 
+  cat(file = here("output", "tables", "tbl-likely-diffs-1.md"))
+```
+
+```{r tbl-likely-diffs-level2, warning=FALSE, message=FALSE, results="asis"}
+tbl_likely_tidy %>% 
+  left_join(tbl_likely_probs, by = "title") %>% 
+  filter(category == "Level 2") %>%
+  mutate(title_clean = str_remove(title, " \\| Crackdown")) %>% 
+  mutate(title_clean = case_when(
+    title_clean %in% c("Human rights", "Humanitarian assistance") ~ paste(title_clean, "issues"),
+    title_clean %in% c("Government", "Private") ~ paste(title_clean, "funding")
+  )) %>% 
+  mutate(title_clean = factor(title_clean, 
+                              levels = c("Human rights issues", 
+                                         "Humanitarian assistance issues", 
+                                         "Government funding", "Private funding"))) %>% 
+  arrange(title_clean) %>% 
+  select(Frame = title_clean, `∆` = theta_diff, `%∆` = pct_change,
+         `p(∆ > 0)` = p.greater0, `p(∆ < 0)` = p.less0, `p(∆ ≠ 0)` = p.diff.not0) %>% 
+  pandoc.table.return(caption = 'Difference between likelihood of donation in "crackdown" (treatment) and "no crackdown" (control) conditions; values represent posterior medians {#tbl:likely-diffs-2}') %T>%
+  cat() %>% 
+  cat(file = here("output", "tables", "tbl-likely-diffs-2.md"))
+```
+
+```{r tbl-likely-diffs-level3, warning=FALSE, message=FALSE, results="asis"}
+tbl_likely_tidy %>% 
+  left_join(tbl_likely_probs, by = "title") %>% 
+  filter(category == "Level 3") %>%
+  mutate(title_clean = str_remove(title, " \\| Crackdown")) %>% 
+  separate(title_clean, c("Issue", "Funding"), sep = " \\| ") %>% 
+  mutate(Issue = factor(Issue, levels = c("Human rights", "Humanitarian assistance")),
+         Funding = factor(Funding, levels = c("Government", "Private"))) %>% 
+  arrange(Issue, Funding) %>% 
+  select(`Issue frame` = Issue, `Funding frame` = Funding, `∆` = theta_diff, `%∆` = pct_change,
+         `p(∆ > 0)` = p.greater0, `p(∆ < 0)` = p.less0, `p(∆ ≠ 0)` = p.diff.not0) %>% 
+  pandoc.table.return(caption = 'Difference between likelihood of donation in "crackdown" (treatment) and "no crackdown" (control) conditions; values represent posterior medians {#tbl:likely-diffs-3}') %T>%
+  cat() %>% 
+  cat(file = here("output", "tables", "tbl-likely-diffs-3.md"))
+```
+
+\
+
+# Treatment effects: Amount donated
+
+## Priors and models
+
+Following [John Kruschke's "Bayesian Estimation Supersedes the t-test (BEST)" procedure](http://www.indiana.edu/~kruschke/BEST/BEST.pdf), we estimate means for each group with a t-distribution. We use the following priors for the distribution parameters:
+
+$$
+\begin{aligned}
+x_{\text{group 1, group 2}} &\sim \text{Student } t(\nu, \mu, \sigma) &\text{[likelihood]}\\
+\text{Difference} &= x_{\text{group 2}} - x_{\text{group 1}} &\text{[difference in means]} \\
+x &: \text{Mean amount donated} \\
+\\
+\nu &\sim \text{Exponential}(1 / 29) &\text{[prior normality]} \\
+\mu_{\text{group 1, group 2}} &\sim \mathcal{N}(\bar{x}_{\text{group 1, group 2}}, 10) &\text{[prior donation mean per group]}\\
+\sigma_{\text{group 1, group 2}} &\sim \text{Cauchy}(0, 1)&\text{[prior donation sd per group]}
+\end{aligned}
+$$
+
+```{r priors-amounts, fig.width=8, fig.height=1.5}
+amount_nu <- ggplot(data = tibble(x = c(0, 200)), aes(x = x)) +
+  geom_area(stat = "function", fun = dexp, args = list(rate = 1/29), 
+            fill = "grey80", color = "black") +
+  labs(x = expression(Normality ~ parameter ~ (nu)), y = "Density") +
+  annotate(geom = "label", x = 100, y = 0.009, 
+           label = "Exponential(1/29)", size = pts(9)) +
+  theme_ngos(base_size = 9, density = TRUE)
+
+amount_mu <- ggplot(data = tibble(x = c(0, 100)), aes(x = x)) +
+  geom_area(stat = "function", fun = dnorm, args = list(mean = 50, sd = 10),
+            fill = "grey80", color = "black") +
+  scale_x_continuous(breaks = c(seq(0, 100, 25)),
+                     labels = c("−$50", "−$25", "Group average", "+$25", "+$50")) +
+  annotate(geom = "label", x = 50, y = 0.01, label = "N(bar(x), 10)", 
+           parse = TRUE, size = pts(9)) +
+  labs(x = expression(Average ~ donated ~ (mu)), y = NULL) +
+  theme_ngos(base_size = 9, density = TRUE)
+
+amount_sigma <- ggplot(data = tibble(x = c(0, 10)), aes(x = x)) +
+  geom_area(stat = "function", fun = dcauchy, args = list(location = 0, scale = 1),
+            fill = "grey80", color = "black") +
+  scale_x_continuous(labels = dollar) +
+  annotate(geom = "label", x = 5, y = 0.08, label = "Cauchy(0, 1)", size = pts(9)) +
+  labs(x = expression(SD ~ donated ~ (sigma)), y = NULL) +
+  theme_ngos(base_size = 9, density = TRUE)
+
+amount_nu + amount_mu + amount_sigma
+```
+
+
+## Differences
+
+```{r run-amount-models, results="hide", cache=TRUE}
+# This takes forever because of C++ compiling and actual MCMC sampling, so this
+# chunk is cached
+
+# Compile model
+amount_donated_best <- stan_model(here("lib", "amount_donated_best.stan"))
+
+# Sample from the compiled model
+all_models_amount_run <- all_models %>% 
+  # Simplify data for sending to Stan
+  mutate(stan_data = df %>% map(~ {
+    select(.x, amount = amount_donate, group = crackdown)
+  })) %>% 
+  # Run the actual model on the simplified data
+  mutate(model = stan_data %>% map(~ {
+    sampling(amount_donated_best, data = compose_data(.x),
+             chains = CHAINS, iter = ITER, warmup = WARMUP, seed = BAYES_SEED)
+  })) 
+
+# Extract stuff
+all_models_amount <- all_models_amount_run %>% 
+  # Extract posterior chains
+  mutate(posterior_chains_long = map2(model, stan_data, ~ {
+    .x %>% 
+      recover_types(.y) %>% 
+      gather_draws(mu[group], sigma[group], mu_diff, pct_change, cohen_d, cles, nu, log10nu)
+  })) %>% 
+  mutate(posterior_chains_wide = map2(model, stan_data, ~ {
+    .x %>% 
+      recover_types(.y) %>% 
+      spread_draws(mu[group], sigma[group], mu_diff, pct_change, cohen_d, cles, nu, log10nu)
+  })) %>% 
+  # Get HDI medians in tidy form
+  mutate(tidy = posterior_chains_long %>% map(~ {
+    .x %>% median_hdci() %>% to_broom_names()
+  }))
+```
+
+```{r plot-amount-diffs, warning=FALSE, fig.width=6, fig.height=8}
+# This will generate a warning because unnest() puts the crackdown values into
+# one column and we cheated by renaming issue and funding as crackdown, so it
+# gets mad when combining the factors in crackdown with those in issue and
+# funding. But because we only care about the diffs, we don't actually need the
+# category labels here, so it's all good.
+tidied_diffs_amount <- all_models_amount %>% 
+  unnest(posterior_chains_long) %>% 
+  filter(.variable == "mu_diff") %>% 
+  mutate(category = case_when(
+    str_count(title, "\\|") == 0 ~ "Level 1",
+    str_count(title, "\\|") == 1 ~ "Level 2",
+    str_count(title, "\\|") == 2 ~ "Level 3"
+  )) %>% 
+  mutate(title = str_remove(title, " \\| Crackdown"))
+
+level1_amount <- tidied_diffs_amount %>% 
+  filter(category == "Level 1") %>%
+  mutate(title = recode(title, 
+                        Crackdown = "Crackdown −\nNo crackdown",
+                        Issue = "Humanitarian\nassistance −\nHuman rights",
+                        Funding = "Private −\nGovernment\nfunding")) %>% 
+  mutate(title = fct_inorder(title))
+
+plot_diff_amount_a <- ggplot(level1_amount, aes(x = .value, y = fct_rev(title), fill = title)) +
+  geom_vline(xintercept = 0) +
+  geom_halfeyeh(.width = c(0.8, 0.95)) +
+  scale_x_continuous(labels = dollar) +
+  scale_fill_manual(values = ngo_cols(c("blue", "red", "orange"), name = FALSE), guide = FALSE) +
+  labs(x = "Median difference in amount donated", y = NULL, tag = "A") +
+  theme_ngos() +
+  theme(panel.grid.major.y = element_blank())
+
+level2_amount <- tidied_diffs_amount %>% 
+  filter(category == "Level 2") %>%
+  mutate(condition = case_when(
+    title %in% c("Human rights", "Humanitarian assistance") ~ "Issue",
+    title %in% c("Government", "Private") ~ "Funding"
+  )) %>% 
+  mutate(facet_title = case_when(
+    title %in% c("Human rights", "Humanitarian assistance") ~ paste(title, "issues"),
+    title %in% c("Government", "Private") ~ paste(title, "funding")
+  )) %>% 
+  mutate(title = case_when(
+    title %in% c("Humanitarian assistance", "Private") ~ "",
+    TRUE ~ "Crackdown −\nNo crackdown")
+  )
+
+plot_diff_amount_b <- ggplot(filter(level2_amount, condition == "Issue"), 
+                             aes(x = .value, y = fct_rev(title))) +
+  geom_halfeyeh(.width = c(0.8, 0.95), fill = ngo_cols("red", name = FALSE)) +
+  geom_vline(xintercept = 0) +
+  scale_x_continuous(labels = dollar) +
+  labs(x = NULL, y = NULL, tag = "B") +
+  facet_wrap(~ facet_title, scales = "free_y") +
+  theme_ngos() +
+  theme(panel.grid.major.y = element_blank())
+
+plot_diff_amount_c <- ggplot(filter(level2_amount, condition == "Funding"), 
+                             aes(x = .value, y = fct_rev(title))) +
+  geom_halfeyeh(.width = c(0.8, 0.95), fill = ngo_cols("orange", name = FALSE)) +
+  geom_vline(xintercept = 0) +
+  scale_x_continuous(labels = dollar) +
+  labs(x = "Median difference in amount donated", y = NULL, tag = "C") +
+  facet_wrap(~ facet_title, scales = "free_y") +
+  theme_ngos() +
+  theme(panel.grid.major.y = element_blank())
+
+level3_amount <- tidied_diffs_amount %>% 
+  filter(category == "Level 3") %>%
+  separate(title, c("issue", "funding"), sep = " \\| ") %>%
+  mutate(issue = paste(issue, "issues"),
+         funding = paste(funding, "funding")) %>% 
+  mutate(facet_title = paste0(issue, "\n", funding)) %>% 
+  mutate(title = case_when(
+    funding == "Private funding" ~ "",
+    TRUE ~ "Crackdown −\nNo crackdown")
+  )
+
+plot_diff_amount_d <- ggplot(level3_amount, aes(x = .value, y = fct_rev(title))) +
+  geom_halfeyeh(.width = c(0.8, 0.95), fill = ngo_cols("green", name = FALSE)) +
+  geom_vline(xintercept = 0) +
+  scale_x_continuous(labels = dollar) +
+  labs(x = "Median difference in amount donated", y = NULL, tag = "D",
+       caption = "Point shows posterior median; thick black lines show 80% credible interval; thin black lines show 95% credible interval") +
+  facet_wrap(~ facet_title, scales = "free_y") +
+  theme_ngos() +
+  theme(panel.grid.major.y = element_blank())
+
+plot_diffs_amounts_all <- plot_diff_amount_a / 
+  (plot_diff_amount_b / plot_diff_amount_c) / 
+  plot_diff_amount_d
+
+plot_diffs_amounts_all
+
+plot_diffs_amounts_all %T>% 
+  ggsave(., filename = here("output", "figures", "amount-diffs.pdf"),
+         width = 6, height = 8, units = "in", device = cairo_pdf) %>%
+  ggsave(., filename = here("output", "figures", "amount-diffs.png"),
+         width = 6, height = 8, units = "in", type = "cairo", dpi = 300)
+```
+
+```{r tbl-amount-diffs-level1, warning=FALSE, message=FALSE, results="asis"}
+tbl_amounts_tidy <- all_models_amount %>% 
+  unnest(tidy) %>% 
+  filter(term %in% c("mu_diff", "pct_change")) %>% 
+  select(title, term, estimate) %>% 
+  spread(term, estimate) %>% 
+  mutate(category = case_when(
+    str_count(title, "\\|") == 0 ~ "Level 1",
+    str_count(title, "\\|") == 1 ~ "Level 2",
+    str_count(title, "\\|") == 2 ~ "Level 3"
+  )) 
+
+tbl_amounts_probs <- all_models_amount %>% 
+  unnest(posterior_chains_long) %>% 
+  filter(.variable == "mu_diff") %>% 
+  group_by(title) %>% 
+  summarize(p.greater0 = mean(.value > 0),
+            p.less0 = mean(.value < 0),
+            p.diff.not0 = ifelse(median(.value) > 0, p.greater0, p.less0)) %>% 
+  ungroup()
+
+tbl_amounts_tidy %>% 
+  left_join(tbl_amounts_probs, by = "title") %>% 
+  filter(category == "Level 1") %>%
+  mutate(title = recode(title, 
+                        Crackdown = "Crackdown −\nNo crackdown",
+                        Issue = "Humanitarian\nassistance −\nHuman rights",
+                        Funding = "Private −\nGovernment\nfunding")) %>% 
+  mutate(title = fct_inorder(title)) %>% 
+  select(`Frame` = title, `∆` = mu_diff, `%∆` = pct_change,
+         `p(∆ > 0)` = p.greater0, `p(∆ < 0)` = p.less0, `p(∆ ≠ 0)` = p.diff.not0) %>% 
+  pandoc.table.return(caption = 'Difference between amount donated across single conditions; values represent posterior medians {#tbl:amount-diffs-1}') %T>%
+  cat() %>% 
+  cat(file = here("output", "tables", "tbl-amount-diffs-1.md"))
+```
+
+```{r tbl-amount-diffs-level2, warning=FALSE, message=FALSE, results="asis"}
+tbl_amounts_tidy %>% 
+  left_join(tbl_amounts_probs, by = "title") %>% 
+  filter(category == "Level 2") %>%
+  mutate(title_clean = str_remove(title, " \\| Crackdown")) %>% 
+  mutate(title_clean = case_when(
+    title_clean %in% c("Human rights", "Humanitarian assistance") ~ paste(title_clean, "issues"),
+    title_clean %in% c("Government", "Private") ~ paste(title_clean, "funding")
+  )) %>% 
+  mutate(title_clean = factor(title_clean, 
+                              levels = c("Human rights issues", 
+                                         "Humanitarian assistance issues", 
+                                         "Government funding", "Private funding"))) %>% 
+  arrange(title_clean) %>% 
+  select(Frame = title_clean, `∆` = mu_diff, `%∆` = pct_change,
+         `p(∆ > 0)` = p.greater0, `p(∆ < 0)` = p.less0, `p(∆ ≠ 0)` = p.diff.not0) %>% 
+  pandoc.table.return(caption = 'Difference between amount donated in "crackdown" (treatment) and "no crackdown" (control) conditions; values represent posterior medians {#tbl:amount-diffs-2}') %T>%
+  cat() %>% 
+  cat(file = here("output", "tables", "tbl-amount-diffs-2.md"))
+```
+
+```{r tbl-amount-diffs-level3, warning=FALSE, message=FALSE, results="asis"}
+tbl_amounts_tidy %>% 
+  left_join(tbl_amounts_probs, by = "title") %>% 
+  filter(category == "Level 3") %>%
+  mutate(title_clean = str_remove(title, " \\| Crackdown")) %>% 
+  separate(title_clean, c("Issue", "Funding"), sep = " \\| ") %>% 
+  mutate(Issue = factor(Issue, levels = c("Human rights", "Humanitarian assistance")),
+         Funding = factor(Funding, levels = c("Government", "Private"))) %>% 
+  arrange(Issue, Funding) %>% 
+  select(`Issue frame` = Issue, `Funding frame` = Funding, `∆` = mu_diff, `%∆` = pct_change,
+         `p(∆ > 0)` = p.greater0, `p(∆ < 0)` = p.less0, `p(∆ ≠ 0)` = p.diff.not0) %>% 
+  pandoc.table.return(caption = 'Difference between amount donated in "crackdown" (treatment) and "no crackdown" (control) conditions; values represent posterior medians {#tbl:amount-diffs-3}') %T>%
+  cat() %>% 
+  cat(file = here("output", "tables", "tbl-amount-diffs-3.md"))
+```
+
+## Effect size
+
+```{r amount-effect-size, warning=FALSE}
+# Effect size
+# (μ₁ - μ₂) / sqrt( (σ₁² + σ₂²) / 2)
+tidied_eff_size_amount <- all_models_amount %>% 
+  unnest(posterior_chains_long) %>% 
+  filter(.variable == "cohen_d") %>% 
+  mutate(category = case_when(
+    str_count(title, "\\|") == 0 ~ "Level 1",
+    str_count(title, "\\|") == 1 ~ "Level 2",
+    str_count(title, "\\|") == 2 ~ "Level 3"
+  )) %>% 
+  mutate(title = str_remove(title, " \\| Crackdown")) %>% 
+  mutate(title = fct_inorder(title))
+
+effect_sizes <- tribble(
+  ~size, ~x_end,
+  "Small", 0.2,
+  "Medium", 0.5,
+  "Large", 0.8
+) %>% 
+  mutate(x_start = -x_end)
+
+ggplot(tidied_eff_size_amount, aes(x = .value, y = fct_rev(title))) +
+  geom_halfeyeh(.width = c(0.8, 0.95)) +
+  geom_vline(xintercept = 0, size = 1) +
+  geom_vline(xintercept = c(0.2, -0.2), linetype = "dotted", size = 0.5) +
+  geom_vline(xintercept = c(0.5, -0.5), linetype = "dotted", size = 0.5) +
+  geom_vline(xintercept = c(0.5, -0.5), linetype = "dotted", size = 0.5) +
+  coord_cartesian(xlim = c(-0.6, 0.6)) +
+  labs(x = "Cohen's d (effect size)", y = NULL) +
+  theme_ngos()
+```
+
+\
 
 # Original computing environment
 
