@@ -50,4 +50,5 @@ output:
     fig_width: 6
     lib_dir: site_libs
     self_contained: no
+new_session: yes
 output_dir: _site
