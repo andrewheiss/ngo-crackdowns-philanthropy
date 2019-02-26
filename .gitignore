@@ -26,6 +26,7 @@ misc/*
 private/*
 presentations/*
 submissions/*
+admin/*
 
 # R stuff
 .Rproj.user
