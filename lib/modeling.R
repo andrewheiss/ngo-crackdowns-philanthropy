@@ -1,8 +1,8 @@
 # Stan details ------------------------------------------------------------
 
 CHAINS <- 4
-ITER <-2000
-WARMUP <- 1000
+ITER <- 4000
+WARMUP <- 2000
 BAYES_SEED <- 1234
 options(mc.cores = parallel::detectCores())
 
