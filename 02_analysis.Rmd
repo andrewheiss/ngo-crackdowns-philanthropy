@@ -310,6 +310,12 @@ likely_theta <- ggplot(data = tibble(x = c(0, 1)), aes(x = x)) +
   annotate(geom = "label", x = 0.5, y = 1, label = "Beta(5, 5)", size = pts(9)) +
   theme_ngos(base_size = 9, density = TRUE)
 likely_theta
+
+likely_theta %T>% 
+  ggsave(., filename = here("output", "figures", "prior-likely.pdf"),
+         width = 2.75, height = 1.5, units = "in", device = cairo_pdf) %>%
+  ggsave(., filename = here("output", "figures", "prior-likely.png"),
+         width = 2.75, height = 1.5, units = "in", type = "cairo", dpi = 300)
 ```
 
 ## Differences
@@ -575,7 +581,14 @@ amount_sigma <- ggplot(data = tibble(x = c(0, 10)), aes(x = x)) +
   labs(x = expression(SD ~ donated ~ (sigma)), y = NULL) +
   theme_ngos(base_size = 9, density = TRUE)
 
-amount_nu + amount_mu + amount_sigma
+amount_priors <- amount_nu + amount_mu + amount_sigma
+amount_priors
+
+amount_priors %T>% 
+  ggsave(., filename = here("output", "figures", "prior-amount.pdf"),
+         width = 8, height = 1.5, units = "in", device = cairo_pdf) %>%
+  ggsave(., filename = here("output", "figures", "prior-amount.png"),
+         width = 8, height = 1.5, units = "in", type = "cairo", dpi = 300)
 ```
 
 
