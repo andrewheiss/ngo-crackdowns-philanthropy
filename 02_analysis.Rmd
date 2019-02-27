@@ -389,7 +389,7 @@ plot_diff_likely_a <- ggplot(level1_likely, aes(x = .value, y = fct_rev(title), 
   geom_vline(xintercept = 0) +
   scale_x_continuous(labels = percent_format(accuracy = 1)) +
   scale_fill_manual(values = ngo_cols(c("blue", "red", "orange"), name = FALSE), guide = FALSE) +
-  labs(x = "Median difference in donation likelihood", y = NULL, tag = "A") +
+  labs(x = "Difference in donation likelihood", y = NULL, tag = "A") +
   theme_ngos() +
   theme(panel.grid.major.y = element_blank())
 
@@ -423,7 +423,7 @@ plot_diff_likely_c <- ggplot(filter(level2_likely, condition == "Funding"),
   geom_halfeyeh(.width = c(0.8, 0.95), fill = ngo_cols("orange", name = FALSE)) +
   geom_vline(xintercept = 0) +
   scale_x_continuous(labels = percent_format(accuracy = 1)) +
-  labs(x = "Median difference in donation likelihood", y = NULL, tag = "C") +
+  labs(x = "Difference in donation likelihood", y = NULL, tag = "C") +
   facet_wrap(~ facet_title, scales = "free_y") +
   theme_ngos() +
   theme(panel.grid.major.y = element_blank())
@@ -443,7 +443,8 @@ plot_diff_likely_d <- ggplot(level3_likely, aes(x = .value, y = fct_rev(title)))
   geom_halfeyeh(.width = c(0.8, 0.95), fill = ngo_cols("green", name = FALSE)) +
   geom_vline(xintercept = 0) +
   scale_x_continuous(labels = percent_format(accuracy = 1)) +
-  labs(x = "Median difference in donation likelihood", y = NULL, tag = "D") +
+  labs(x = "Difference in donation likelihood", y = NULL, tag = "D",
+       caption = "Point shows posterior median; thick black lines show 80% credible interval; thin black lines show 95% credible interval") +
   facet_wrap(~ facet_title, scales = "free_y") +
   theme_ngos() +
   theme(panel.grid.major.y = element_blank())
@@ -464,7 +465,7 @@ plot_diffs_likely_all %T>%
 ```{r tbl-likely-diffs-level1, warning=FALSE, message=FALSE, results="asis"}
 tbl_likely_tidy <- all_models_likely %>% 
   unnest(tidy) %>% 
-  filter(term %in% c("theta_diff", "pct_change")) %>% 
+  filter(term %in% c("theta_1", "theta_2", "theta_diff", "pct_change")) %>% 
   select(title, term, estimate) %>% 
   spread(term, estimate) %>% 
   mutate(category = case_when(
@@ -490,8 +491,8 @@ tbl_likely_tidy %>%
                         Issue = "Humanitarian\nassistance −\nHuman rights",
                         Funding = "Private −\nGovernment\nfunding")) %>% 
   mutate(title = fct_inorder(title)) %>% 
-  select(`Frame` = title, `∆` = theta_diff, `%∆` = pct_change,
-         `p(∆ > 0)` = p.greater0, `p(∆ < 0)` = p.less0, `p(∆ ≠ 0)` = p.diff.not0) %>% 
+  select(`Frame` = title, `% likely~Treatment~` = theta_2, `% likely~Control~` = theta_1,
+         `∆` = theta_diff, `%∆` = pct_change, `p(∆ ≠ 0)` = p.diff.not0) %>% 
   pandoc.table.return(caption = 'Difference between likelihood of donation across single conditions; values represent posterior medians {#tbl:likely-diffs-1}') %T>%
   cat() %>% 
   cat(file = here("output", "tables", "tbl-likely-diffs-1.md"))
@@ -511,8 +512,8 @@ tbl_likely_tidy %>%
                                          "Humanitarian assistance issues", 
                                          "Government funding", "Private funding"))) %>% 
   arrange(title_clean) %>% 
-  select(Frame = title_clean, `∆` = theta_diff, `%∆` = pct_change,
-         `p(∆ > 0)` = p.greater0, `p(∆ < 0)` = p.less0, `p(∆ ≠ 0)` = p.diff.not0) %>% 
+  select(Frame = title_clean, `% likely~Crackdown~` = theta_2, `% likely~No\\ crackdown~` = theta_1,
+         `∆` = theta_diff, `%∆` = pct_change, `p(∆ ≠ 0)` = p.diff.not0) %>% 
   pandoc.table.return(caption = 'Difference between likelihood of donation in "crackdown" (treatment) and "no crackdown" (control) conditions; values represent posterior medians {#tbl:likely-diffs-2}') %T>%
   cat() %>% 
   cat(file = here("output", "tables", "tbl-likely-diffs-2.md"))
@@ -527,8 +528,9 @@ tbl_likely_tidy %>%
   mutate(Issue = factor(Issue, levels = c("Human rights", "Humanitarian assistance")),
          Funding = factor(Funding, levels = c("Government", "Private"))) %>% 
   arrange(Issue, Funding) %>% 
-  select(`Issue frame` = Issue, `Funding frame` = Funding, `∆` = theta_diff, `%∆` = pct_change,
-         `p(∆ > 0)` = p.greater0, `p(∆ < 0)` = p.less0, `p(∆ ≠ 0)` = p.diff.not0) %>% 
+  select(`Issue frame` = Issue, `Funding frame` = Funding, 
+         `% likely~Crackdown~` = theta_2, `% likely~No\\ crackdown~` = theta_1,
+         `∆` = theta_diff, `%∆` = pct_change, `p(∆ ≠ 0)` = p.diff.not0) %>% 
   pandoc.table.return(caption = 'Difference between likelihood of donation in "crackdown" (treatment) and "no crackdown" (control) conditions; values represent posterior medians {#tbl:likely-diffs-3}') %T>%
   cat() %>% 
   cat(file = here("output", "tables", "tbl-likely-diffs-3.md"))
@@ -661,7 +663,7 @@ plot_diff_amount_a <- ggplot(level1_amount, aes(x = .value, y = fct_rev(title), 
   geom_halfeyeh(.width = c(0.8, 0.95)) +
   scale_x_continuous(labels = dollar) +
   scale_fill_manual(values = ngo_cols(c("blue", "red", "orange"), name = FALSE), guide = FALSE) +
-  labs(x = "Median difference in amount donated", y = NULL, tag = "A") +
+  labs(x = "Difference in amount donated", y = NULL, tag = "A") +
   theme_ngos() +
   theme(panel.grid.major.y = element_blank())
 
@@ -695,7 +697,7 @@ plot_diff_amount_c <- ggplot(filter(level2_amount, condition == "Funding"),
   geom_halfeyeh(.width = c(0.8, 0.95), fill = ngo_cols("orange", name = FALSE)) +
   geom_vline(xintercept = 0) +
   scale_x_continuous(labels = dollar) +
-  labs(x = "Median difference in amount donated", y = NULL, tag = "C") +
+  labs(x = "Difference in amount donated", y = NULL, tag = "C") +
   facet_wrap(~ facet_title, scales = "free_y") +
   theme_ngos() +
   theme(panel.grid.major.y = element_blank())
@@ -715,7 +717,7 @@ plot_diff_amount_d <- ggplot(level3_amount, aes(x = .value, y = fct_rev(title)))
   geom_halfeyeh(.width = c(0.8, 0.95), fill = ngo_cols("green", name = FALSE)) +
   geom_vline(xintercept = 0) +
   scale_x_continuous(labels = dollar) +
-  labs(x = "Median difference in amount donated", y = NULL, tag = "D",
+  labs(x = "Difference in amount donated", y = NULL, tag = "D",
        caption = "Point shows posterior median; thick black lines show 80% credible interval; thin black lines show 95% credible interval") +
   facet_wrap(~ facet_title, scales = "free_y") +
   theme_ngos() +
@@ -737,14 +739,21 @@ plot_diffs_amounts_all %T>%
 ```{r tbl-amount-diffs-level1, warning=FALSE, message=FALSE, results="asis"}
 tbl_amounts_tidy <- all_models_amount %>% 
   unnest(tidy) %>% 
-  filter(term %in% c("mu_diff", "pct_change")) %>% 
+  filter(term %in% c("mu", "mu_diff", "pct_change")) %>% 
+  group_by(title) %>% 
+  mutate(group_id = 1:n()) %>% 
+  mutate(term = case_when(
+    term == "mu" ~ paste0(term, "_", group_id),
+    TRUE ~ term
+  )) %>% 
   select(title, term, estimate) %>% 
   spread(term, estimate) %>% 
   mutate(category = case_when(
     str_count(title, "\\|") == 0 ~ "Level 1",
     str_count(title, "\\|") == 1 ~ "Level 2",
     str_count(title, "\\|") == 2 ~ "Level 3"
-  )) 
+  )) %>% 
+  ungroup()
 
 tbl_amounts_probs <- all_models_amount %>% 
   unnest(posterior_chains_long) %>% 
@@ -763,8 +772,8 @@ tbl_amounts_tidy %>%
                         Issue = "Humanitarian\nassistance −\nHuman rights",
                         Funding = "Private −\nGovernment\nfunding")) %>% 
   mutate(title = fct_inorder(title)) %>% 
-  select(`Frame` = title, `∆` = mu_diff, `%∆` = pct_change,
-         `p(∆ > 0)` = p.greater0, `p(∆ < 0)` = p.less0, `p(∆ ≠ 0)` = p.diff.not0) %>% 
+  select(`Frame` = title, `Amount~treatment~` = mu_2, `Amount~control~` = mu_1,
+         `∆` = mu_diff, `%∆` = pct_change, `p(∆ ≠ 0)` = p.diff.not0) %>% 
   pandoc.table.return(caption = 'Difference between amount donated across single conditions; values represent posterior medians {#tbl:amount-diffs-1}') %T>%
   cat() %>% 
   cat(file = here("output", "tables", "tbl-amount-diffs-1.md"))
@@ -784,8 +793,8 @@ tbl_amounts_tidy %>%
                                          "Humanitarian assistance issues", 
                                          "Government funding", "Private funding"))) %>% 
   arrange(title_clean) %>% 
-  select(Frame = title_clean, `∆` = mu_diff, `%∆` = pct_change,
-         `p(∆ > 0)` = p.greater0, `p(∆ < 0)` = p.less0, `p(∆ ≠ 0)` = p.diff.not0) %>% 
+  select(Frame = title_clean, `Amount~Crackdown~` = mu_2, `Amount~No\\ crackdown~` = mu_1,
+         `∆` = mu_diff, `%∆` = pct_change, `p(∆ ≠ 0)` = p.diff.not0) %>% 
   pandoc.table.return(caption = 'Difference between amount donated in "crackdown" (treatment) and "no crackdown" (control) conditions; values represent posterior medians {#tbl:amount-diffs-2}') %T>%
   cat() %>% 
   cat(file = here("output", "tables", "tbl-amount-diffs-2.md"))
@@ -800,8 +809,9 @@ tbl_amounts_tidy %>%
   mutate(Issue = factor(Issue, levels = c("Human rights", "Humanitarian assistance")),
          Funding = factor(Funding, levels = c("Government", "Private"))) %>% 
   arrange(Issue, Funding) %>% 
-  select(`Issue frame` = Issue, `Funding frame` = Funding, `∆` = mu_diff, `%∆` = pct_change,
-         `p(∆ > 0)` = p.greater0, `p(∆ < 0)` = p.less0, `p(∆ ≠ 0)` = p.diff.not0) %>% 
+  select(`Issue frame` = Issue, `Funding frame` = Funding, 
+         `Amount~Crackdown~` = mu_2, `Amount~No\\ crackdown~` = mu_1,
+         `∆` = mu_diff, `%∆` = pct_change, `p(∆ ≠ 0)` = p.diff.not0) %>% 
   pandoc.table.return(caption = 'Difference between amount donated in "crackdown" (treatment) and "no crackdown" (control) conditions; values represent posterior medians {#tbl:amount-diffs-3}') %T>%
   cat() %>% 
   cat(file = here("output", "tables", "tbl-amount-diffs-3.md"))
