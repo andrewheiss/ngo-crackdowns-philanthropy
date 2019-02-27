@@ -134,7 +134,8 @@ results_check_attention <- results_raw %>%
                                      TRUE, attention1_correct)) 
 
 results <- results_check_attention %>% 
-  filter(!(confirmation_code %in% codes_to_exclude$confirmation_code)) %>%
+  filter(!(confirmation_code %in% codes_to_exclude$confirmation_code)) %>% 
+  filter(attention2_correct) %>%
   # Factorize variables
   mutate(donate_likely = factor(donate_likely, levels = likelihood, ordered = TRUE)) %>% 
   mutate_at(vars(favor_humanitarian, favor_human_rights, favor_development),
