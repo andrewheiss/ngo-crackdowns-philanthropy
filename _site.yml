@@ -4,6 +4,7 @@ exclude:
 - Icon?
 - manuscript
 - Manuscript
+- admin
 - misc
 - sandbox
 - lib
