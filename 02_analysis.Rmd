@@ -132,7 +132,7 @@ theory_dag <- dagify(Y ~ I + C + F,
 plot_dag <- ggplot(theory_dag, aes(x = x, y = y, xend = xend, yend = yend)) +
   geom_dag_node(size = 12) +
   geom_dag_edges() +
-  geom_dag_text(size = pts(9), family = "Encode Sans Condensed SemiBold") +
+  geom_dag_text(size = pts(9), family = "Roboto Condensed Bold") +
   scale_dag() +
   theme_ngos() +
   theme(panel.grid = element_blank(),

@@ -70,7 +70,7 @@ box_gp_green <- gpar(fill = ngo_cols("green"), alpha = 0.65)
 box_gp_yellow <- gpar(fill = ngo_cols("yellow"))
 box_gp_orange <- gpar(fill = ngo_cols("orange"), alpha = 0.65)
 
-txt_gp <- gpar(fontfamily = "Encode Sans Condensed Medium", 
+txt_gp <- gpar(fontfamily = "Roboto Condensed", 
                fontface = "plain", fontsize = 8)
 
 # Create boxes
@@ -360,13 +360,13 @@ theme_ngos_table <- ttheme_minimal(
     list(fg_params = 
            list(hjust = 0, x = 0.1,
                 fontsize = 7, fontface = "plain",
-                fontfamily = "Encode Sans Condensed Light"),
+                fontfamily = "Roboto Condensed Light"),
          bg_params = list(fill = "white")),
   colhead = 
     list(fg_params = 
            list(hjust = 0, x = 0.1, col = "white",
                 fontsize = 7, fontface = "plain",
-                fontfamily = "Encode Sans Condensed SemiBold"),
+                fontfamily = "Roboto Condensed Bold"),
          bg_params = list(fill = ngo_cols("blue"))),
   padding = unit(c(4, 2), "mm"))
 
