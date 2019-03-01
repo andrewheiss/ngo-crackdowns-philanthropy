@@ -17,6 +17,7 @@ library(rstan)
 library(tidybayes)
 library(broom)
 library(ggstance)
+library(ggdag)
 library(patchwork)
 library(pander)
 library(scales)
@@ -114,6 +115,36 @@ my_summary <- function(x, variable, df) {
     level_summary(x, variable, df)
   }
 }
+```
+
+
+# Causal pathway
+
+Our theory and hypotheses are laid out in the causal pathway below. Our outcomes (Y: % likely to donate and amount donated) "listen to" or respond to C (crackdown), which is our main treatment or exposure. Funding (F) and issue (I) serve as heuristics for donation and influence a government's decision to crack down on NGOs, hence the dual arrows to C and Y. 
+
+```{r causal-dag, fig.width=4.5, fig.height=2.5}
+theory_dag <- dagify(Y ~ I + C + F,
+                     C ~ I + F,
+                     outcome = "F",
+                     exposure = "C") %>% 
+  tidy_dagitty(layout = "sugiyama")
+
+plot_dag <- ggplot(theory_dag, aes(x = x, y = y, xend = xend, yend = yend)) +
+  geom_dag_node(size = 12) +
+  geom_dag_edges() +
+  geom_dag_text(size = pts(9), family = "Encode Sans Condensed SemiBold") +
+  scale_dag() +
+  theme_ngos() +
+  theme(panel.grid = element_blank(),
+        axis.title = element_blank(),
+        axis.text = element_blank())
+
+plot_dag %T>% 
+  print() %T>%
+  ggsave(., filename = here("output", "figures", "causal-path.pdf"),
+         width = 4.5, height = 2.5, units = "in", device = cairo_pdf) %>% 
+  ggsave(., filename = here("output", "figures", "causal-path.png"),
+         width = 4.5, height = 2.5, units = "in", type = "cairo", dpi = 300)
 ```
 
 
