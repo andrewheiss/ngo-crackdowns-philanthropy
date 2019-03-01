@@ -55,7 +55,7 @@ BIB_FILE = bibliography.bib
 #   * chicago-syllabus-no-bib
 #   * apa
 #   * apsa-no-bib
-CSL = chicago-author-date
+CSL = sage-harvard
 
 # LaTeX doesn't use pandoc-citeproc + CSL and instead lets biblatex handle the
 # heavy lifting. There are three possible styles built in to the template:
