@@ -107,6 +107,7 @@ n &: \text{Number likely to donate} \\
 \end{aligned}
 $$
 
+We estimate the mean amount donated in each condition using a *t* distribution [@Kruschke:2013]:
 
 $$
 \begin{aligned}
