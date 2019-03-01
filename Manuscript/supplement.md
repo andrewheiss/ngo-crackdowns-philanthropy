@@ -10,7 +10,7 @@ author:
   affiliation: Brigham Young University
   email: andrew_heiss@byu.edu
   url: https://www.andrewheiss.com/
-date: July 18, 2018
+date: March 1, 2019
 title-page: false
 published: 
 git-repo: https://github.com/andrewheiss/ngo-crackdowns-philanthropy
@@ -56,19 +56,21 @@ As seen in @tbl:exp-sample, our sample is younger, wealthier, and more educated 
 
 ## Preregistration
 
-Prior to launching the survey, we preregistered our hypotheses and research design at the Open Science Framework, and our preregistration protocol is available at [https://osf.io/dx973/](https://osf.io/dx973/). We made one deviation from the original preregistration. In the text of our preregistration, we only specifed the non-interacted versions of our hypotheses:
+Prior to launching the survey, we preregistered our hypotheses and research design at the Open Science Framework, and our preregistration protocol is available at [https://osf.io/dx973/](https://osf.io/dx973/). We made two minor deviations from the original preregistration. First, in the *text* of our preregistration, we only specified the non-nested versions of our hypotheses:
 
 1. Donors will give more/be more likely to give to NGOs that face legal crackdowns abroad
 2. Donors will give more/be more likely to give to NGOs working on humanitarian issues
 3. Donors will give more/be more likely to give to NGOs that do not receive substantial funding from government sources
 
-In our preregistered data analysis plan, however, we explain that we will test the interacted versions of the hypotheses (i.e. donors will give more to humanitarian NGOs facing legal crackdowns, etc.). This was an oversight—we inadvertently used overly simple (and incorrect) hypotheses, but correctly described the full analysis plan (using the correct, unstated, interacted hypotheses). We followed our preregistered analysis plan as expected and rephrased our hypotheses in the paper manuscript.
+In our preregistered data analysis *plan*, however, we explained that we will test the interacted versions of the hypotheses (i.e. donors will give more to humanitarian NGOs facing legal crackdowns, etc.). This was an oversight—we inadvertently used overly simple (and incorrect) textual hypotheses, but correctly described the full analysis plan (using the correct, unstated, unstated hypotheses). 
+
+Second, in our preregistration plan, we declared that we would analyze our data with a series of three Bayesian linear regression models with increasing numbers of interaction terms. To find the effect of crackdown within issue area, for instance, we used a $\text{crackdown} × \text{issue}$ term, and to find the effect of crackdown conditioned on issue and funding we used a three-way $\text{crackdown} \times \text{issue} \times \text{funding}$ term. We then planned on reassembling the different coefficient and intercept terms to approximate the mean values in each combination of conditions. To simplify our analyses in this version of the paper, we estimated group means directly with Stan [@stan; @rstan; @r-project]. This approach provides the same results as the regression models with 2- and 3-way interaction terms, but is far simpler to interpret.
 
 ## Treatment assignments and CONSORT diagram
 
-To help ensure the quality of the responses we received and filter out workers who try to get through the HIT as quickly as possible without reading the questions [@BerinskyMargolisSances:2014], we included two attention check questions in the experiment. The first check was the second question in the survey (Q1.3) and involved reading several sentences and following instructions to select specific responses. We designed this question to filter out shirking respondents. We included a second, simpler check later in the survey, to ensure that participants were still engaged (Q3.8). Only two participants did not pass this check.
+To help ensure the quality of the responses we received and filter out workers who try to get through the HIT as quickly as possible without reading the questions [@BerinskyMargolisSances:2014], we included two attention check questions in the experiment. The first check was the second question in the survey (Q1.3) and involved reading several sentences and following instructions to select specific responses. We designed this question to filter out shirking respondents. We included a second, simpler check later in the survey, to ensure that participants were still engaged (Q3.8). Only two participants did not pass this check. 
 
-@fig:consort uses a CONSORT diagram to show the assignment of participants to the eight different experimental conditions. We excluded participants that (1) did not participate in the experiment through MTurk and (2) failed the first attention check (Q1.3). We include in our analysis participants that failed the second attention check.
+@fig:consort uses a CONSORT diagram to show the assignment of participants to the eight different experimental conditions. We excluded participants that (1) did not participate in the experiment through MTurk and (2) failed either attention check.
 
 \blandscape
 
@@ -76,112 +78,45 @@ To help ensure the quality of the responses we received and filter out workers w
 
 \elandscape
 
+\newpage
 
-# Analysis procedures
 
+# Priors and models
 
-## Combining coefficients to calculate group values
-
-We test the effect of the three frames (crackdown/issue area/funding sources) on these two outcomes (likelihood of donation and amount donated) by measuring the differences in the median amount donated and the median likelihood to donate across the crackdown vs. no crackdown condition. We do this by fitting three regression models with indicator variables and interaction terms for each of the conditions. Typically, between-subjects factorial designs are analyzed with ANOVA. Using regression instead of ANOVA allows us to estimate differences in means and medians more easily and provides more flexibility when controlling for demographics or attitudes towards philanthropy. @tbl:coefficients-to-add demonstrates how to add each of the terms to estimate the average for each condition.
-
-In model specification 1, we test only for the effect of legal crackdowns on the outcome measures; in specification 2, we test for the effect of legal crackdowns on outcomes, conditioned on the issue area the NGO focuses on; and in specification 3, we test for the effect of crackdowns conditioned on both the issue area and the source of NGO funding, yielding these simplified models:
+We use two statistical models for measuring the effect of the crackdown condition on the likelihood of donating and the amount hypothetically donated. Because we measure likelihood of donation with a binary "Likely to donate" vs. "Not likely to donate" variable, we model the proportion of people responding that they would be likely to donate with a binomial distribution. We use a prior distribution of $\text{Beta}(5, 5)$ for $\theta$ to center the probability of responding positively at 50%. In more formal terms, we model this distribution as follows:
 
 $$
 \begin{aligned}
-y_{\text{Model 1}} =& \beta_0 + \beta_1 \text{Crackdown} + \varepsilon  \\
-y_{\text{Model 2}} =& \beta_0 + \beta_1 \text{Crackdown} + \beta_2 \text{Issue } + \\ 
-& \beta_3 \text{Crackdown} \times \text{Issue} + \varepsilon \\
-y_{\text{Model 3}} =& \beta_0 + \beta_1 \text{Crackdown} + \beta_2 \text{Issue} + \beta_3 \text{Funding } + \\ 
-& \beta_4 \text{Crackdown} \times \text{Issue } + \\ 
-& \beta_5 \text{Crackdown} \times \text{Funding } + \\ 
-& \beta_6 \text{Issue} \times \text{Funding } + \\ 
-& \beta_7 \text{Crackdown} \times \text{Issue} \times \text{Funding} + \varepsilon
+n_{\text{group 1, group 2}} &\sim \text{Binomial}(n_{\text{total in group}}, \theta_{\text{group}}) &\text{[likelihood]}\\
+\text{Difference} &= n_{\text{group 2}} - n_{\text{group 1}} &\text{[difference in proportions]} \\
+n &: \text{Number likely to donate} \\
+\\
+\theta_{\text{group 1, group 2}} &\sim \text{Beta}(5, 5) &\text{[prior prob. of being likely to donate]}
 \end{aligned}
 $$
 
-\blandscape
-!INCLUDE "output/tables/tbl-coefficients-to-add.md"
-\elandscape
+![Prior $\theta$ for binomial models](output/figures/prior-likely.pdf){#fig:prior-likely}
 
-## Priors
+We estimate the mean amount donated in each condition (crackdown vs. no crackdown, humanitarian assistance vs. human rights issues, private vs. government funding) using a *t* distribution. Following @Kruschke:2013, we use an exponential distribution with a rate of 1/29 for the $\nu$ parameter; a normal distribution with the group mean and standard deviation of 10 to capture wider variability in how much respondents might donate for the $\mu$ parameter; and a $\text{Cauchy}(0, 1)$ distribution for the $\sigma$ parameter. In more formal terms, we use the following model and priors:
 
-We use Bayesian OLS regression for models measuring the amount donated, and we use Bayesian logistic regression for models measuring the likelihood of donation. In both families of models, we use weakly informative prior distributions for both the coefficients and the intercepts. In the OLS models, we use a Cauchy distribution with a median of 0 and a λ of 2.5 for coefficients and a median of 0 and a λ of 10 for the intercept. Following the suggestion of @GhoshLiMitra:2017, who recommend that weak prior distributions in logistic regression models use between 3–7 degrees of freedom, we use a Student t distribution with 3 degrees of freedom, a µ of 0, and a σ of 2.5 for coefficients and a σ of 10 for the intercept in our logistic regression models.
+$$
+\begin{aligned}
+x_{\text{group 1, group 2}} &\sim \text{Student } t(\nu, \mu, \sigma) &\text{[likelihood]}\\
+\text{Difference} &= x_{\text{group 2}} - x_{\text{group 1}} &\text{[difference in means]} \\
+x &: \text{Mean amount donated} \\
+\\
+\nu &\sim \text{Exponential}(1 / 29) &\text{[prior normality]} \\
+\mu_{\text{group 1, group 2}} &\sim \mathcal{N}(\bar{x}_{\text{group 1, group 2}}, 10) &\text{[prior donation mean per group]}\\
+\sigma_{\text{group 1, group 2}} &\sim \text{Cauchy}(0, 1)&\text{[prior donation sd per group]}
+\end{aligned}
+$$
 
-We obtain the posterior distribution of each dependent variable with Markov Chain Monte Carlo (MCMC) sampling and simulate values from the joint posterior distribution of the coefficient parameters. We use Stan [@stan] through R [@rstan; @r-project] to generate 4 MCMC chains with 2,000 iterations in each chain, 1,000 of which are used for warmup. We use the medians of the simulated values from the MCMC samples as coefficient estimates and calculate the 90% highest posterior density as credible intervals.
-
-\newpage
+![Prior $\nu$, $\mu$, and $\sigma$ for amount models](output/figures/prior-amount.pdf){#fig:prior-amount}
 
 
-# Full results
-
-\stgroup
-\renewcommand*{\arraystretch}{1.75}
-!INCLUDE "../output/tables/tbl-avg-results.md"
-\fingroup
-
-\newpage
-
-## Model coefficients: likelihood of donation
-
-!INCLUDE "output/tables/tbl-models-amount.md"
-
-Table: Results for models predicting proportion of respondents who are likely to donate {#tbl:models-likelihood}
+We obtain the posterior distribution of each dependent variable with Markov Chain Monte Carlo (MCMC) sampling and simulate values from the joint posterior distribution of the coefficient parameters. We use Stan [@stan; @rstan; @r-project] to generate 4 MCMC chains with 4,000 iterations in each chain, 2,000 of which are used for warmup. We use the median values from the posterior distributions as point estimates and calculate credible intervals using the 95% highest posterior density.
 
 \newpage
-
-![Differences in donation likelihood in control and crackdown groups, conditioned by other experimental groups](output/figures/likelihood-diffs.pdf){#fig:likelihood-diffs}
-
-!INCLUDE "output/tables/tbl-likelihood-diffs.md"
-
-\clearpage
-
-## Model coefficients: amount donated
-
-!INCLUDE "output/tables/tbl-models-amount.md"
-
-Table: Results for models predicting amount respondents are willing to donate {#tbl:models-amount}
-
-\clearpage
-
-![Differences in median amount donated in control and crackdown groups, conditioned by other experimental groups](output/figures/amount-diffs.pdf){#fig:amount-diffs}
-
-!INCLUDE "output/tables/tbl-amount-diffs.md"
-
-
-\newpage
-
-\blandscape
-
-# Additional analyses
-
-To control for the effects of individual attitudes toward philanthropy, political ideology, education, and other post-treatment demographic attributes, we rerun each model with a set of additional independent variables as robustness checks. The coefficient estimates for crackdown, issue, and funding remain stable throughout.
-
-## Full models: likelihood of donation
-
-!INCLUDE "output/tables/tbl-models-likelihood-full.md"
-
-Table: Results for models predicting proportion of respondents who are likely to donate, demographic controls included {#tbl:models-likelihood-full}
-
-\elandscape
-
-![Comparison of posterior distributions of coefficients from Model 3 and Model 3 + demographics](output/figures/likely-coefs-full.pdf){#fig:likely-coefs-full}
-
-\newpage
-
-\blandscape
-
-## Full models: amount donated
-
-!INCLUDE "output/tables/tbl-models-amount-full.md"
-
-Table: Results for models predicting amount respondents are willing to donate, demographic controls included {#tbl:models-amount-full}
-
-\elandscape
-
-![Comparison of posterior distributions of coefficients from Model 3 and Model 3 + demographics](output/figures/amount-coefs-full.pdf){#fig:amount-coefs-full}
-
-\clearpage
-
 
 # Survey experiment
 
@@ -197,7 +132,7 @@ HIT description
 
 Payment
 
-:   Participants were paid $0.75 for successfully completing the experiment, commensurate with a $9/hour wage.
+:   Participants were paid \$0.75 for successfully completing the experiment, commensurate with a \$9/hour wage.
 
 !INCLUDE "../text/experiment_blind.md"
 
