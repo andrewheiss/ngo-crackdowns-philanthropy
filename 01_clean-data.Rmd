@@ -259,7 +259,7 @@ write_csv(completed_summary, here("data", "completion_summary.csv"))
 
 <div id="sessioninfo" class="collapse">
 
-```{r show-session-info, echo=TRUE}
+```{r show-session-info, echo=TRUE, width=90}
 writeLines(readLines(file.path(Sys.getenv("HOME"), ".R/Makevars")))
 
 devtools::session_info()

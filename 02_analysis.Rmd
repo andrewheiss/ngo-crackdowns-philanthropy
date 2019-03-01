@@ -908,7 +908,7 @@ ggplot(tidied_eff_size_amount, aes(x = .value, y = fct_rev(title))) +
 
 <div id="sessioninfo" class="collapse">
 
-```{r show-session-info, echo=TRUE}
+```{r show-session-info, echo=TRUE, width=100}
 writeLines(readLines(file.path(Sys.getenv("HOME"), ".R/Makevars")))
 
 devtools::session_info()

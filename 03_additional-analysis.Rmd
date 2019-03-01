@@ -675,7 +675,7 @@ likely_coefs_full %T>%
 
 <div id="sessioninfo" class="collapse">
 
-```{r show-session-info, echo=TRUE}
+```{r show-session-info, echo=TRUE, width=100}
 writeLines(readLines(file.path(Sys.getenv("HOME"), ".R/Makevars")))
 
 devtools::session_info()
