@@ -1,7 +1,7 @@
 # Put this Makefile in your project directory---i.e., the directory containing
 # the paper you are writing. You can use it to create .html, .docx, and .pdf
 # output files (complete with bibliography, if present) from your Markdown
-# file.
+# file. 
 #
 # Additional notes:
 # *	Change the paths at the top of the file as needed.
