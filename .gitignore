@@ -1,14 +1,15 @@
 # Temporarily ignore data and output
-output/*
-data/*
+analysis/output/*
+data/derived_data/*
+data/raw_data/*
 
 # Site output
-_site/*
-site_libs/*
+analysis/_site/*
+analysis/site_libs/*
 
 # knitr and caching stuff
-*_files/*
-*_cache/*
+*/*_files/*
+*/*_cache/*
 lib/*.rds
 
 # Manuscript output
@@ -20,13 +21,9 @@ manuscript/tex_out/*
 manuscript/vc*
 
 # Other folders
-manuscript/Papers/*
-sandbox/*
-misc/*
-private/*
-presentations/*
-submissions/*
 admin/*
+data/private_data/*
+manuscript/submissions/*
 
 # R stuff
 .Rproj.user

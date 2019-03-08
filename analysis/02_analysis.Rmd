@@ -13,6 +13,7 @@ editor_options:
 
 ```{r load-libraries-data, warning=FALSE, message=FALSE}
 library(tidyverse)
+library(crackdownsphilanthropy)
 library(rstan)
 library(tidybayes)
 library(broom)
@@ -22,99 +23,13 @@ library(patchwork)
 library(pander)
 library(scales)
 library(janitor)
-library(huxtable)
 library(here)
 
-source(here("lib", "graphics.R"))
-source(here("lib", "pander_options.R"))
-source(here("lib", "modeling.R"))
+source(here("analysis", "options.R"))
 
 # Load data
-results <- readRDS(here("data", "results_clean.rds"))
+results <- readRDS(here("data", "derived_data", "results_clean.rds"))
 # qwraps2::lazyload_cache_dir("02_analysis_cache/html")
-
-
-# Helpful functions
-safe_mean <- function(x, ...) suppressWarnings(mean(as.numeric(x), ...))
-safe_sd <- function(x, ...) suppressWarnings(sd(as.numeric(x), ...))
-
-my_as_numeric <- function(x) {
-  is_num <- suppressWarnings(!any(is.na(as.numeric(x))))
-  
-  if (is_num) {
-    as.numeric(x)
-  } else {
-    x
-  }
-}
-
-level_summary <- function(x, variable, df = results) {
-  variable <- as.character(variable)
-  if (is.factor(df[[variable]])) {
-    x_levels <- levels(df[[variable]])
-  } else {
-    x_levels <- unique(df[[variable]])
-  }
-  
-  factor_summary <- tibble(x) %>% 
-    count(x) %>%
-    mutate(pct = n / sum(n),
-           fancy = paste0(x, " (", n, "; ", percent(pct), ")"),
-           x = factor(x, levels = x_levels, ordered = TRUE)) 
-  
-  inline_summary <- factor_summary %>% arrange(x) %>% 
-    pull(fancy) %>% paste(collapse = " | ")
-  
-  fig_bar <- ggplot(factor_summary, aes(x = x, y = n)) +
-    geom_bar(stat = "identity", fill = "grey50") +
-    theme_spark()
-  
-  file_name <- gsub("\\.| ", "_", tolower(variable))
-  md_img <- paste0("![](output/figures/summary-table/", file_name, ")")
-
-  ggsave(fig_bar, filename = here("output", "figures", "summary-table",
-                                  paste0(file_name, ".pdf")), 
-         width = 1, height = 0.2, device = cairo_pdf)
-  ggsave(fig_bar, filename = here("output", "figures", "summary-table",
-                                  paste0(file_name, ".png")), 
-         width = 1, height = 0.2, type = "cairo", bg = "transparent", dpi = 300)
-
-  output <- tibble(spark = md_img, summary = inline_summary)
-  return(output)
-}
-
-numeric_summary <- function(x, variable) {
-  inline_summary <- paste0("Median: ", round(median(x, na.rm = TRUE), 2),
-                           " | Mean: ", round(mean(x, na.rm = TRUE), 2), 
-                           " | Std. Dev.: ", round(sd(x, na.rm = TRUE), 2))
-  
-  fig_hist <- ggplot(as.data.frame(x), aes(x = x)) +
-    geom_histogram(fill = "grey50", binwidth = 10) +
-    theme_spark()
-  
-  file_name <- gsub("\\.| ", "_", tolower(variable))
-  md_img <- paste0("![](output/figures/summary-table/", file_name, ")")
-
-  ggsave(fig_hist, filename = here("output", "figures", "summary-table",
-                                   paste0(file_name, ".pdf")), 
-         width = 1, height = 0.2, device = cairo_pdf)
-  ggsave(fig_hist, filename = here("output", "figures", "summary-table",
-                                   paste0(file_name, ".png")), 
-         width = 1, height = 0.2, type = "cairo", bg = "transparent", dpi = 300)
-  
-  output <- tibble(spark = md_img, summary = inline_summary)
-  return(output)
-}
-
-my_summary <- function(x, variable, df) {
-  x <- my_as_numeric(x)
-  
-  if (is.numeric(x)) {
-    numeric_summary(x, variable)
-  } else {
-    level_summary(x, variable, df)
-  }
-}
 ```
 
 
@@ -141,9 +56,9 @@ plot_dag <- ggplot(theory_dag, aes(x = x, y = y, xend = xend, yend = yend)) +
 
 plot_dag %T>% 
   print() %T>%
-  ggsave(., filename = here("output", "figures", "causal-path.pdf"),
+  ggsave(., filename = here("analysis", "output", "figures", "causal-path.pdf"),
          width = 4.5, height = 2.5, units = "in", device = cairo_pdf) %>% 
-  ggsave(., filename = here("output", "figures", "causal-path.png"),
+  ggsave(., filename = here("analysis", "output", "figures", "causal-path.png"),
          width = 4.5, height = 2.5, units = "in", type = "cairo", dpi = 300)
 ```
 
@@ -158,7 +73,7 @@ results %>% count(crackdown, issue, funding) %>%
   janitor::adorn_totals(., where = "row") %T>% 
   pandoc.table() %>% 
   pandoc.table.return(caption = "Balance of experimental conditions {#tbl:experimental-conditions}") %>% 
-  cat(file = here("output", "tables", "tbl-experimental-conditions.md"))
+  cat(file = here("analysis", "output", "tables", "tbl-experimental-conditions.md"))
 ```
 
 ## Descriptive statistics table
@@ -193,7 +108,7 @@ results_summary_stats <- results %>%
   group_by(variable) %>% 
   nest() %>% 
   mutate(N = data %>% map_int(~ nrow(.)),
-         summary = map2(.x = data, .y = variable, ~ my_summary(.x$value, .y, results))) %>% 
+         summary = map2(.x = data, .y = variable, ~ md_summary_row(.x$value, .y, results))) %>% 
   left_join(vars_to_summarize, by = "variable") %>% 
   mutate(variable = factor(variable, levels = vars_to_summarize$variable, ordered = TRUE)) %>% 
   arrange(variable) %>% 
@@ -205,7 +120,7 @@ results_summary_stats %>%
   select(-N) %>% 
   pandoc.table.return(caption = "Descriptive statistics {#tbl:descriptive-stats}",
                       split.cell = 80, split.table = Inf) %T>% 
-  cat(file = here("output", "tables", "tbl-descriptive-stats.md")) %>%
+  cat(file = here("analysis", "output", "tables", "tbl-descriptive-stats.md")) %>%
   cat()
 ```
 
@@ -241,7 +156,7 @@ conditions_summary_clean <- conditions_summary %>%
 conditions_summary_clean %T>% 
   pandoc.table() %>% 
   pandoc.table.return(caption = "Average likelihood and amount donated across experimental conditions {#tbl:avg-results}") %>% 
-  cat(file = here("output", "tables", "tbl-avg-results.md"))
+  cat(file = here("analysis", "output", "tables", "tbl-avg-results.md"))
 ```
 
 \
@@ -268,9 +183,9 @@ plot_donate_summary <- ggplot(donate_summary, aes(x = n, y = donate_likely,
 
 plot_donate_summary %T>% 
   print() %T>%
-  ggsave(., filename = here("output", "figures", "donate_summary.pdf"),
+  ggsave(., filename = here("analysis", "output", "figures", "donate_summary.pdf"),
          width = 9, height = 4, units = "in", device = cairo_pdf) %>% 
-  ggsave(., filename = here("output", "figures", "donate_summary.png"),
+  ggsave(., filename = here("analysis", "output", "figures", "donate_summary.png"),
          width = 9, height = 4, units = "in", type = "cairo", dpi = 300)
 ```
 
@@ -287,9 +202,9 @@ plot_amount_summary <- ggplot(results, aes(x = amount_donate)) +
 
 plot_amount_summary %T>% 
   print() %T>%
-  ggsave(., filename = here("output", "figures", "amount_summary.pdf"),
+  ggsave(., filename = here("analysis", "output", "figures", "amount_summary.pdf"),
          width = 9, height = 2.75, units = "in", device = cairo_pdf) %>% 
-  ggsave(., filename = here("output", "figures", "amount_summary.png"),
+  ggsave(., filename = here("analysis", "output", "figures", "amount_summary.png"),
          width = 9, height = 2.75, units = "in", type = "cairo", dpi = 300)
 ```
 
@@ -345,20 +260,16 @@ likely_theta <- ggplot(data = tibble(x = c(0, 1)), aes(x = x)) +
 likely_theta
 
 likely_theta %T>% 
-  ggsave(., filename = here("output", "figures", "prior-likely.pdf"),
+  ggsave(., filename = here("analysis", "output", "figures", "prior-likely.pdf"),
          width = 2.75, height = 1.5, units = "in", device = cairo_pdf) %>%
-  ggsave(., filename = here("output", "figures", "prior-likely.png"),
+  ggsave(., filename = here("analysis", "output", "figures", "prior-likely.png"),
          width = 2.75, height = 1.5, units = "in", type = "cairo", dpi = 300)
 ```
 
 ## Differences
 
 ```{r run-likely-models, results="hide", cache=TRUE}
-# This takes forever because of C++ compiling and actual MCMC sampling, so this
-# chunk is cached
-
-# Compile model
-donate_likely <- stan_model(here("lib", "donate_likely.stan"))
+# This takes forever because of MCMC sampling, so this chunk is cached
 
 # Sample from the compiled model
 all_models_likely_run <- all_models %>% 
@@ -379,7 +290,7 @@ all_models_likely_run <- all_models %>%
   })) %>% 
   # Run the actual model on the simplified data
   mutate(model = stan_data_counts %>% map(~ {
-    sampling(donate_likely, data = .x, control = list(max_treedepth = 15),
+    sampling(donate_likely(), data = .x, control = list(max_treedepth = 15),
              chains = CHAINS, iter = ITER, warmup = WARMUP, seed = BAYES_SEED)
   })) 
 
@@ -489,9 +400,9 @@ plot_diffs_likely_all <- plot_diff_likely_a /
 plot_diffs_likely_all
 
 plot_diffs_likely_all %T>% 
-  ggsave(., filename = here("output", "figures", "likely-diffs.pdf"),
+  ggsave(., filename = here("analysis", "output", "figures", "likely-diffs.pdf"),
          width = 4.5, height = 6.5, units = "in", device = cairo_pdf) %>%
-  ggsave(., filename = here("output", "figures", "likely-diffs.png"),
+  ggsave(., filename = here("analysis", "output", "figures", "likely-diffs.png"),
          width = 4.5, height = 6.5, units = "in", type = "cairo", dpi = 300)
 ```
 
@@ -591,7 +502,7 @@ bind_rows(tbl_likely_1,
   pandoc.table.return(caption = 'Likelihood of donation and differences in proportions in "crackdown" (treatment) and "no crackdown" (control) conditions; values represent posterior medians {#tbl:likely-diffs}',
                       justify = "lccccc") %T>%
   cat() %>%
-  cat(file = here("output", "tables", "tbl-likely-diffs.md"))
+  cat(file = here("analysis", "output", "tables", "tbl-likely-diffs.md"))
 ```
 
 \
@@ -645,9 +556,9 @@ amount_priors <- amount_nu + amount_mu + amount_sigma
 amount_priors
 
 amount_priors %T>% 
-  ggsave(., filename = here("output", "figures", "prior-amount.pdf"),
+  ggsave(., filename = here("analysis", "output", "figures", "prior-amount.pdf"),
          width = 8, height = 1.5, units = "in", device = cairo_pdf) %>%
-  ggsave(., filename = here("output", "figures", "prior-amount.png"),
+  ggsave(., filename = here("analysis", "output", "figures", "prior-amount.png"),
          width = 8, height = 1.5, units = "in", type = "cairo", dpi = 300)
 ```
 
@@ -655,12 +566,6 @@ amount_priors %T>%
 ## Differences
 
 ```{r run-amount-models, results="hide", cache=TRUE}
-# This takes forever because of C++ compiling and actual MCMC sampling, so this
-# chunk is cached
-
-# Compile model
-amount_donated_best <- stan_model(here("lib", "amount_donated_best.stan"))
-
 # Sample from the compiled model
 all_models_amount_run <- all_models %>% 
   # Simplify data for sending to Stan
@@ -669,7 +574,7 @@ all_models_amount_run <- all_models %>%
   })) %>% 
   # Run the actual model on the simplified data
   mutate(model = stan_data %>% map(~ {
-    sampling(amount_donated_best, data = compose_data(.x),
+    sampling(amount_donated_best(), data = compose_data(.x),
              chains = CHAINS, iter = ITER, warmup = WARMUP, seed = BAYES_SEED)
   })) 
 
@@ -788,9 +693,9 @@ plot_diffs_amounts_all <- plot_diff_amount_a /
 plot_diffs_amounts_all
 
 plot_diffs_amounts_all %T>% 
-  ggsave(., filename = here("output", "figures", "amount-diffs.pdf"),
+  ggsave(., filename = here("analysis", "output", "figures", "amount-diffs.pdf"),
          width = 4.5, height = 6.5, units = "in", device = cairo_pdf) %>%
-  ggsave(., filename = here("output", "figures", "amount-diffs.png"),
+  ggsave(., filename = here("analysis", "output", "figures", "amount-diffs.png"),
          width = 4.5, height = 6.5, units = "in", type = "cairo", dpi = 300)
 ```
 
@@ -893,7 +798,7 @@ bind_rows(tbl_amount_1,
   pandoc.table.return(caption = 'Mean values and differences in means for amount donated in "crackdown" (treatment) and "no crackdown" (control) conditions; values represent posterior medians {#tbl:amount-diffs}',
                       justify = "lccccc") %T>%
   cat() %>%
-  cat(file = here("output", "tables", "tbl-amount-diffs.md"))
+  cat(file = here("analysis", "output", "tables", "tbl-amount-diffs.md"))
 ```
 
 ## Effect size

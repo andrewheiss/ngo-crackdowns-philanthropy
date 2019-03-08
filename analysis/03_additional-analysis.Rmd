@@ -12,37 +12,29 @@ editor_options:
 ```{r load-libraries-data, warning=FALSE, message=FALSE}
 # Load libraries
 library(tidyverse)
+library(crackdownsphilanthropy)
 library(magrittr)
 library(rstan)
-library(rstanarm)
 library(broom)
 library(glue)
-library(ggstance)
-library(ggridges)
 library(grid)
 library(gridExtra)
 library(Gmisc)
-library(patchwork)
 library(pander)
 library(scales)
-library(huxtable)
-library(lubridate)
-library(modelr)
 library(ipumsr)
 library(here)
 
-source(here("lib", "graphics.R"))
-source(here("lib", "pander_options.R"))
-source(here("lib", "modeling.R"))
+source(here("analysis", "options.R"))
 
 # Load data
-results <- readRDS(here("data", "results_clean.rds"))
+results <- readRDS(here("data", "derived_data", "results_clean.rds"))
 ```
 
 # CONSORT flow
 
 ```{r build-consort}
-consort <- readRDS(here("data", "completion_summary.rds")) %>% 
+consort <- readRDS(here("data", "derived_data", "completion_summary.rds")) %>% 
   spread(reason, n) %>% 
   mutate(group = 1:n(),
          assigned = Approved + `Failed first attention check`,
@@ -174,14 +166,14 @@ full_chart <- list(total, randomized, ineligible, total_random_connect, total_in
 # See https://stackoverflow.com/a/17509770/120898 for a similar issue
 
 # Save as PDF
-cairo_pdf(filename = here("output", "figures", "consort.pdf"),
+cairo_pdf(filename = here("analysis", "output", "figures", "consort.pdf"),
           width = 10, height = 6)
 grid.newpage()
 walk(full_chart, ~ print(.))
 invisible(dev.off())
 
 # Save as PNG
-png(filename = here("output", "figures", "consort.png"), 
+png(filename = here("analysis", "output", "figures", "consort.png"), 
     width = 10, height = 6, units = "in",
     bg = "white", res = 300, type = "cairo")
 grid.newpage()
@@ -214,14 +206,14 @@ IPUMS requires that you manually generate a data extract through their website, 
 We do not show other respondent demographic details because we don't have good population-level data to compare our sample with. We could theoretically use Pew data for political preferences, but they collect data on party affiliation, while we collected data about respondent positions along a conservative–liberal spectrum, so the two variables aren't comparable.
 
 ```{r load-clean-cps, warning=FALSE, message=FALSE}
-cps_2015_ddi_file <- here("data", "ipums-cps", "cps_09_2015.xml")
-cps_2015_data_file <- here("data", "ipums-cps", "cps_09_2015.dat.gz")
+cps_2015_ddi_file <- here("data", "raw_data", "ipums-cps", "cps_09_2015.xml")
+cps_2015_data_file <- here("data", "raw_data", "ipums-cps", "cps_09_2015.dat.gz")
 
 cps_2015_ddi <- read_ipums_ddi(cps_2015_ddi_file)
 cps_2015_data <- read_ipums_micro(cps_2015_ddi_file, data_file = cps_2015_data_file, verbose = FALSE)
 
-cps_2017_ddi_file <- here("data", "ipums-cps", "cps_2017.xml")
-cps_2017_data_file <- here("data", "ipums-cps", "cps_2017.dat.gz")
+cps_2017_ddi_file <- here("data", "raw_data", "ipums-cps", "cps_2017.xml")
+cps_2017_data_file <- here("data", "raw_data", "ipums-cps", "cps_2017.dat.gz")
 
 cps_2017_ddi <- read_ipums_ddi(cps_2017_ddi_file)
 cps_2017_data <- read_ipums_micro(cps_2017_ddi_file, data_file = cps_2017_data_file, verbose = FALSE)
@@ -255,36 +247,14 @@ global_vol <- df_volunteering %>%
 global_stats <- c(global_vol, global_demographics)
 ```
 
-```{r sample-population-characteristics-freq, include=FALSE, eval=FALSE}
-# Demographic variables
-table(results$gender_bin) %>% prop.test(., p = global_stats$female)
-table(results$education_bin) %>% prop.test(., p = global_stats$college)
-table(results$income_bin) %>% prop.test(., p = global_stats$income)
-table(results$age_bin) %>% prop.test(., p = global_stats$age)
-
-# Volunteering
-table(results$volunteer) %>% prop.test(., p = global_stats$volunteering)
-table(results$give_charity_2) %>% prop.test(., p = global_stats$donating)
-```
-
-```{r compile-stan-model, warning=FALSE, message=FALSE, cache=TRUE}
-prop_test_bayes_saved <- here("lib", "bayes_prop_test.rds")
-
-if (file.exists(prop_test_bayes_saved)) {
-  prop_test_bayes <- readRDS(prop_test_bayes_saved)
-} else {
-  prop_test_bayes <- stan_model(here("lib", "bayes_prop_test.stan"))
-  saveRDS(prop_test_bayes, prop_test_bayes_saved)
-}
-```
-
 ```{r sample-population-characteristics, cache=TRUE}
-compare_sample_to_pop_bayes <- function(sample_value, population_value) {
-  mcmc_samples <- sampling(prop_test_bayes, list(x = table(sample_value)[1],
-                                                 total_n = length(sample_value),
-                                                 pop_prop = population_value),
-                           chains = CHAINS, iter = ITER, warmup = WARMUP, seed = BAYES_SEED)
-  
+compare_sample_to_pop <- function(sample_value, population_value) {
+  mcmc_samples <- pop_prop_stan(
+    x = table(sample_value)[1],
+    n_total = length(sample_value),
+    pop_prop = population_value,
+    chains = CHAINS, iter = ITER, warmup = WARMUP, seed = BAYES_SEED)
+
   tidied <- tidyMCMC(mcmc_samples, conf.int = TRUE, conf.level = 0.95, 
                      estimate.method = "median", conf.method = "HPDinterval") %>%
     mutate(in_hpdi = (population_value >= conf.low & population_value <= conf.high))
@@ -310,7 +280,7 @@ calc_sample_pop <- tribble(
 ) %>% 
   mutate(Sample = sample_value %>% map_dbl(~ prop.table(table(.))[1]),
          prop_test_bayes = map2(.x = sample_value, .y = National, 
-                                .f = ~ compare_sample_to_pop_bayes(.x, .y))) 
+                                .f = ~ compare_sample_to_pop(.x, .y))) 
 ```
 
 ```{r tbl-sample-characteristics, results="asis"}
@@ -340,7 +310,7 @@ note_row <- tibble(Variable = c("*^a^Annual CPS, March 2017*",
 bind_rows(tbl_sample_pop, note_row) %>% 
   pandoc.table.return(keep.line.breaks = TRUE, style = "multiline", justify = "lcccc", 
                       caption = "Characteristics of experimental sample {#tbl:exp-sample}") %T>% 
-  cat(file = here("output", "tables", "tbl-exp-sample.md")) %>% 
+  cat(file = here("analysis", "output", "tables", "tbl-exp-sample.md")) %>% 
   cat()
 ```
 
@@ -350,31 +320,11 @@ bind_rows(tbl_sample_pop, note_row) %>%
 ## Average time to complete survey
 
 ```{r avg-time, results="asis"}
-fmt_ms <- function(x) {
-  n_seconds <- seconds_to_period(x)
-  sprintf("%02.0f:%02.0f", minute(n_seconds), second(n_seconds))
-}
-
-theme_ngos_table <- ttheme_minimal(
-  core = 
-    list(fg_params = 
-           list(hjust = 0, x = 0.1,
-                fontsize = 7, fontface = "plain",
-                fontfamily = "Roboto Condensed Light"),
-         bg_params = list(fill = "white")),
-  colhead = 
-    list(fg_params = 
-           list(hjust = 0, x = 0.1, col = "white",
-                fontsize = 7, fontface = "plain",
-                fontfamily = "Roboto Condensed Bold"),
-         bg_params = list(fill = ngo_cols("blue"))),
-  padding = unit(c(4, 2), "mm"))
-
 time_summary <- results %>% 
   summarize_at(vars(duration), funs(Minimum = min, Maximum = max, Mean = mean, 
                                     `Standard deviation` = sd, Median = median)) %>% 
   gather(Statistic, value) %>% 
-  mutate(Minutes = fmt_ms(value)) %>% 
+  mutate(Minutes = fmt_seconds(value)) %>% 
   select(-value) 
 
 pandoc.table(time_summary)
@@ -387,7 +337,7 @@ summary_stats <- tableGrob(time_summary, rows = NULL, theme = theme_ngos_table) 
 
 plot_avg_time <- ggplot(results, aes(x = duration)) +
   geom_histogram(bins = 50, fill = ngo_cols("blue")) +
-  scale_x_time(labels = fmt_ms) +
+  scale_x_time(labels = fmt_seconds) +
   annotation_custom(summary_stats, xmin = 700, xmax = 900, ymin = 30, ymax = 60) +
   labs(x = "Minutes spent on experiment", y = "Count") +
   theme_ngos(base_size = 9.5) +
@@ -395,9 +345,9 @@ plot_avg_time <- ggplot(results, aes(x = duration)) +
 
 plot_avg_time %T>% 
   print() %T>%
-  ggsave(., filename = here("output", "figures", "avg-time.pdf"),
+  ggsave(., filename = here("analysis", "output", "figures", "avg-time.pdf"),
          width = 4, height = 2.25, units = "in", device = cairo_pdf) %>% 
-  ggsave(., filename = here("output", "figures", "avg-time.png"),
+  ggsave(., filename = here("analysis", "output", "figures", "avg-time.png"),
          width = 4, height = 2.25, units = "in", type = "cairo", dpi = 300)
 ```
 

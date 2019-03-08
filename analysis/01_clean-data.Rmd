@@ -13,30 +13,13 @@ editor_options:
 
 ```{r clean-data, warning=FALSE, message=FALSE}
 library(tidyverse)
-library(here)
+library(crackdownsphilanthropy)
 library(csvy)
-
-# Calculate the quantile (and median) of an ordered factor
-# Borrowed from @jrnold: https://gist.github.com/jrnold/6759254
-#
-# In the case of ties, the first in order will win. For instance, 
-# bloop <- factor(c("A", "A", "B", "B"), ordered = TRUE)
-# median(bloop)  # "A"
-quantile.ordered <- function(x, probs = seq(0, 1, 0.25)) {
-  tab <- table(x)
-  cdf <- cumsum(tab / sum(tab))
-  idx <- sapply(probs, function(p) min(which(cdf >= p)))
-  levels(x)[idx] 
-}
-
-quantile.factor <- quantile.ordered
-median.ordered <- function(x) quantile(x, 0.5)
-median.factor <- median.ordered
-
+library(here)
 
 # Load data
 # results_file <- file.path(here(), "data", "test_data.csv")
-results_file <- here("private", 
+results_file <- here("data", "private_data", 
                      "NGO Crackdowns and Philanthropy, March 2018 pilot_March 23, 2018_20.01.csv")
 
 # Possible answers
@@ -96,8 +79,9 @@ results_raw <- read_csv(results_file, skip = 16,
 #
 # The code for determining these is in a script that is excluded from the main
 # repository because of privacy issues (it deals directly with MTurk worker
-# IDs), called "private/approve_mturkers.R". It outputs this text list of codes.
-codes_to_exclude <- read_csv(here("data", "codes_to_exclude.csv"))
+# IDs), called "data/private_data/approve_mturkers.R". It outputs this text list
+# of codes.
+codes_to_exclude <- read_csv(here("data", "derived_data", "codes_to_exclude.csv"))
 
 # Clean everything
 results_check_attention <- results_raw %>%
@@ -229,9 +213,9 @@ results <- results_check_attention %>%
                                                     "Other", "Prefer not to say")))
 
 # Save final clean data
-saveRDS(results, here("data", "results_clean.rds"))
-write_csvy(results, file = here("data", "results_clean.csv"),
-           metadata = here("data", "results_clean.yaml"), na = "NA")
+saveRDS(results, here("data", "derived_data", "results_clean.rds"))
+write_csvy(results, file = here("data", "derived_data", "results_clean.csv"),
+           metadata = here("data", "derived_data", "results_clean.yaml"), na = "NA")
 ```
 
 ```{r completed-summary}
@@ -248,8 +232,8 @@ completed_summary <- results_check_attention %>%
   right_join(completed_skeleton, by = c("reason", "crackdown", "issue", "funding")) %>% 
   replace_na(list(n = 0))
 
-saveRDS(completed_summary, here("data", "completion_summary.rds"))
-write_csv(completed_summary, here("data", "completion_summary.csv"))
+saveRDS(completed_summary, here("data", "derived_data", "completion_summary.rds"))
+write_csv(completed_summary, here("data", "derived_data", "completion_summary.csv"))
 ```
 
 

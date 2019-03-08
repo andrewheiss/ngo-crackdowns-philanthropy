@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2017 Suparna Chaudhry and Andrew Heiss
+Copyright (c) 2017-2019 Suparna Chaudhry and Andrew Heiss
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

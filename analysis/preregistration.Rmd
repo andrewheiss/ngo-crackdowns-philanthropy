@@ -1,7 +1,7 @@
 ---
 title: "Preregistration, design, IRB"
 date: "Last run: `r format(Sys.time(), '%F')`"
-bibliography: manuscript/bibliography.bib
+bibliography: ../manuscript/bibliography.bib
 ---
 
 # Preregistration
