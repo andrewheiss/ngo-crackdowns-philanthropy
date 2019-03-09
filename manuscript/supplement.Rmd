@@ -10,7 +10,7 @@ author:
   affiliation: Brigham Young University
   email: andrew_heiss@byu.edu
   url: https://www.andrewheiss.com/
-date: March 1, 2019
+date: "`r format(Sys.time(), '%B %e, %Y')`"
 title-page: false
 published: 
 git-repo: https://github.com/andrewheiss/ngo-crackdowns-philanthropy
@@ -18,6 +18,8 @@ reference-section-title: References
 toc: true
 appendix: true
 ---
+
+<!-- supplement.md is generated from supplement.Rmd. Only edit the .Rmd file, *not* the .md file. -->
 
 # Sample
 
@@ -35,7 +37,8 @@ We used power analysis to determine our sample size: with the anticipation of fi
 
 MTurk has become an increasingly popular method for fielding survey experiments on cheap semi-representative national samples, though drawing definitive causal inference from convenience samples is not without issues. Previous research has found that MTurk workers tend to be more liberal, younger, and less racially diverse than the general US population [@CliffordJewellWaggoner:2015; @BerniskyHuberLenz:2012]. The results from our experiment generally mirror these findings. @tbl:exp-sample compares demographic characteristics of our sample with national averages from the US Census's Current Population Survey (CPS) [@IPUMS-CPS:2017]. For general demographic information, we use the 2017 Annual Social and Economic Supplement (ASEC) to the CPS. From 2002–2015, the CPS included a Volunteer Supplement every September, so we use 2015 data for data on volunteering and donating to charity. We do not show other respondent demographic details because we do not have good population-level data to compare our sample with. We could theoretically use Pew data to compare political preferences, but Pew collects data on party affiliation, while we collected data about respondents' ideological positions along a conservative–liberal spectrum, which makes the two variables incomparable.
 
-!INCLUDE "output/tables/tbl-exp-sample.md"
+```{r child = "output/tables/tbl-exp-sample.md"}
+```
 
 \newpage
 
@@ -47,7 +50,8 @@ As seen in @tbl:exp-sample, our sample is younger, wealthier, and more educated 
 
 \renewcommand*{\arraystretch}{1.75}
 
-!INCLUDE "output/tables/tbl-descriptive-stats.md"
+```{r child = "output/tables/tbl-descriptive-stats.md"}
+```
 
 \fingroup
 
@@ -134,6 +138,7 @@ Payment
 
 :   Participants were paid \$0.75 for successfully completing the experiment, commensurate with a \$9/hour wage.
 
-!INCLUDE "../text/experiment_blind.md"
+```{r child = "../analysis/text/experiment_blind.md"}
+```
 
 \newpage

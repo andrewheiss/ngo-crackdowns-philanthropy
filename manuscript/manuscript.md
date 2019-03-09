@@ -12,7 +12,7 @@ author:
   email: andrew_heiss@byu.edu
   url: https://www.andrewheiss.com/
   twitter: andrewheiss
-date: "`r format(Sys.time(), '%B %e, %Y')`"
+date: "March  9, 2019"
 published: Please do not cite without permission.
 git-repo: https://github.com/andrewheiss/ngo-crackdowns-philanthropy
 reference-section-title: References
@@ -133,8 +133,40 @@ Without looking within issue or funding conditions, we find that respondents are
 
 ![Difference in likelihood of donation across crackdown and no crackdown groups, conditioned by other experimental frames](output/figures/likely-diffs.pdf){#fig:likely-diffs}
 
-```{r child = "output/tables/tbl-likely-diffs.md"}
-```
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+H~1a~                                                   % likely~Treatment~          % likely~Control~          ∆        %∆       p(∆ ≠ 0)   
+---------------------------------------------------- ------------------------- ----------------------------- -------- -------- --------------
+Crackdown − No crackdown                                       46.8%                       42.8%               3.9%     9.2%        0.83     
+
+*Private − Government funding*                                 46.4%                       43.3%               3.1%     7.1%        0.76     
+
+*Humanitarian assistance − Human rights*                       45.9%                       43.8%               2.1%     4.7%        0.7      
+
+**H~2a~ and H~3a~**                                   **% likely~Crackdown~**   **% likely~No\ crackdown~**   **∆**    **%∆**   **p(∆ ≠ 0)** 
+
+Human rights issues                                            44.2%                       43.7%               0.6%     1.5%        0.54     
+
+Humanitarian assistance issues                                 49.4%                       42.7%               6.8%    15.9%        0.88     
+
+Government funding                                             41.3%                       45.9%              -4.6%    -10.1%       0.79     
+
+Private funding                                                52.5%                       40.2%              12.2%    30.3%        0.98     
+
+**H~2a~ and H~3a~ (nested)**                          **% likely~Crackdown~**   **% likely~No\ crackdown~**   **∆**    **%∆**   **p(∆ ≠ 0)** 
+
+Human rights issues, Government funding                        31.9%                       47.5%              -15.4%   -32.6%       0.98     
+
+Human rights issues, Private funding                           57.5%                       40.5%              17.0%    41.7%        0.98     
+
+Humanitarian assistance issues, Government funding             51.2%                       44.8%               6.4%    14.4%        0.8      
+
+Humanitarian assistance issues, Private funding                47.5%                       41.2%               6.2%    15.2%        0.79     
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+Table: Likelihood of donation and differences in proportions in "crackdown" (treatment) and "no crackdown" (control) conditions; values represent posterior medians {#tbl:likely-diffs}
+
 
 @fig:likely-diffs(B–C) show the difference in donation likelihood for both crackdown conditions across NGO issue areas (H~2a~) and funding sources (H~3a~). Crackdown has almost no effect on the likelihood of donating to human rights NGOs ($p(\Delta \neq 0) = 0.55$). We hypothesized that the positive crackdown effect would be stronger for humanitarian NGOs, and while crackdown does have a positive effect on under the humanitarian frame, the probability this difference is greater than zero is below our 95% threshold ($p(\Delta \neq 0) = 0.88$). We do find some evidence for H~3a~, however. Crackdown has little effect on the likelihood of donating to NGOs receiving government funding ($p(\Delta \neq 0) = 0.79$), but it does increase the likelihood of donating to privately funded NGOs by 30% ($\Delta = 12.2\%$; $p(\Delta \neq 0) = 0.98$).
 
@@ -150,8 +182,40 @@ Crackdowns do not substantially influence donors' *likelihood* to donate, but th
 
 ![Difference in amount donated across crackdown and no crackdown groups, conditioned by other experimental frames](output/figures/amount-diffs.pdf){#fig:amount-diffs}
 
-```{r child = "output/tables/tbl-amount-diffs.md"}
-```
+
+
+----------------------------------------------------------------------------------------------------------------------------------------
+H~1b~                                                   Amount~Treatment~          Amount~Control~          ∆       %∆       p(∆ ≠ 0)   
+---------------------------------------------------- ----------------------- --------------------------- ------- -------- --------------
+Crackdown − No crackdown                                      16.34                     12.93             3.39    26.3%        0.97     
+
+*Private − Government funding*                                15.13                     13.71             1.42    10.4%        0.79     
+
+*Humanitarian assistance − Human rights*                      14.06                     14.85             -0.82   -5.5%        0.67     
+
+**H~2b~ and H~3b~**                                   **Amount~Crackdown~**   **Amount~No\ crackdown~**   **∆**   **%∆**   **p(∆ ≠ 0)** 
+
+Human rights issues                                           17.4                      14.86             2.54    17.2%        0.83     
+
+Humanitarian assistance issues                                15.91                     11.68              4.3    36.9%        0.95     
+
+Government funding                                            13.83                     12.24             1.61    13.1%        0.74     
+
+Private funding                                               18.95                     14.23             4.62    32.4%        0.97     
+
+**H~2b~ and H~3b~ (nested)**                          **Amount~Crackdown~**   **Amount~No\ crackdown~**   **∆**   **%∆**   **p(∆ ≠ 0)** 
+
+Human rights issues, Government funding                       10.56                     15.15             -4.46   -29.5%       0.91     
+
+Human rights issues, Private funding                          23.76                     14.5              9.19    63.8%        0.99     
+
+Humanitarian assistance issues, Government funding            21.42                     11.89             9.35    77.9%        0.99     
+
+Humanitarian assistance issues, Private funding               15.69                     15.72             -0.05   -0.3%        0.51     
+----------------------------------------------------------------------------------------------------------------------------------------
+
+Table: Mean values and differences in means for amount donated in "crackdown" (treatment) and "no crackdown" (control) conditions; values represent posterior medians {#tbl:amount-diffs}
+
 
 This trend also holds true when accounting for the issue area of the NGO. As seen in @fig:amount-diffs(B–C), the crackdown condition elicits higher donations for both the human rights and humanitarian assistance conditions, though with varying levels of significance. Emphasizing legal crackdown increased donations to human rights NGOs by \$2.54 above the no crackdown condition, but with a lower probability of significance ($p(\Delta \neq 0) = 0.83$). In contrast, crackdowns significantly boosted donations to humanitarian assistance NGOs by \$4.30, a 37% increase beyond the control condition ($p(\Delta \neq 0) = 0.95$). We thus find support for H~2b~: donors give more to besieged humanitarian NGOs. In general, informing donors about crackdowns causes them to give more to humanitarian NGOs facing legal difficulties abroad. We also find evidence for H~3b~. Donors give \$4.62 more (a 32% increase) to legally besieged NGOs that are privately funded ($p(\Delta \neq 0) = 0.97$), while the crackdown condition has little effect on the amount donated to government-funded NGOs ($p(\Delta \neq 0) = 0.74$).
 
