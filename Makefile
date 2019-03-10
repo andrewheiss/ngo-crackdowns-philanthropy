@@ -1,7 +1,10 @@
-build:
-	Rscript -e "rmarkdown::render_site(input = 'analysis')"
+.PHONY: build serve html tex docx paper
 
-.PHONY: html docx paper
+build:
+	Rscript -e "rmarkdown::render_site(input = 'analysis', encoding = 'UTF-8')"
+
+serve:
+	$(MAKE) -C analysis serve
 
 html:
 	$(MAKE) -C manuscript html
