@@ -34,8 +34,8 @@ This repository contains the data and code for our paper. Our pre-print
 is online here:
 
 > Suparna Chaudhry and Andrew Heiss. (2019). *The effect of NGO
-> crackdowns on individual philanthropy*. Accessed March 9, 2019. Online
-> at <https://doi.org/xxx/xxx>
+> crackdowns on individual philanthropy*. Accessed March 10, 2019.
+> Online at \<dx.doi.org/10.17605/OSF.IO/FG53W\>
 
 ## How to cite
 
@@ -43,7 +43,8 @@ Please cite this compendium as:
 
 > Suparna Chaudhry and Andrew Heiss. (2019). *Compendium of R code and
 > data for The effect of NGO crackdowns on individual philanthropy*.
-> Accessed March 9, 2019. Online at <https://doi.org/xxx/xxx>
+> Accessed March 10, 2019. Online at
+> \<dx.doi.org/10.17605/OSF.IO/FG53W\>
 
 ## How to download and install
 

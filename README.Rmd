@@ -10,13 +10,13 @@ knitr::opts_chunk$set(
   comment = "#>",
   fig.path = "README-"
 )
-# Please put your title here to include it in the file below. 
+
 Title <- "The effect of NGO crackdowns on individual philanthropy"
 Authors <- "Suparna Chaudhry and Andrew Heiss"
 Year <- "2019"
 ```
 
-# The effect of NGO crackdowns on individual philanthropy
+# `r Title`
 
 [Suparna Chaudhry](http://www.suparnachaudhry.com/) • Department of Political Science • Christopher Newport University  
 [Andrew Heiss](https://www.andrewheiss.com/) • Romney Institute of Public Service and Ethics • Brigham Young University
@@ -31,14 +31,14 @@ State crackdown on non-governmental organizations (NGOs), particularly through l
 
 This repository contains the data and code for our paper. Our pre-print is online here:
 
-> `r Authors`. (`r Year`). *`r Title`*. Accessed `r format(Sys.time(), '%B %e, %Y')`. Online at <https://doi.org/xxx/xxx>
+> `r Authors`. (`r Year`). *`r Title`*. Accessed `r format(Sys.time(), '%B %e, %Y')`. Online at <dx.doi.org/10.17605/OSF.IO/FG53W>
 
 
 ## How to cite
 
 Please cite this compendium as:
 
-> `r Authors`. (`r format(Sys.Date(), "%Y")`). *Compendium of R code and data for `r Title`*. Accessed `r format(Sys.time(), '%B %e, %Y')`. Online at <https://doi.org/xxx/xxx>
+> `r Authors`. (`r format(Sys.Date(), "%Y")`). *Compendium of R code and data for `r Title`*. Accessed `r format(Sys.time(), '%B %e, %Y')`. Online at <dx.doi.org/10.17605/OSF.IO/FG53W>
 
 
 ## How to download and install
