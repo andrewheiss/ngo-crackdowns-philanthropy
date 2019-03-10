@@ -427,6 +427,11 @@ tbl_likely_probs <- all_models_likely %>%
             p.diff.not0 = ifelse(median(.value) > 0, p.greater0, p.less0)) %>% 
   ungroup()
 
+# Save combined table for later use in manuscript
+tbl_likely_tidy %>% 
+  left_join(tbl_likely_probs, by = "title") %>% 
+  saveRDS(here("data", "derived_data", "results_models_likely.rds"))
+  
 tbl_likely_1 <- tbl_likely_tidy %>% 
   left_join(tbl_likely_probs, by = "title") %>% 
   filter(category == "Level 1") %>%
@@ -726,6 +731,11 @@ tbl_amounts_probs <- all_models_amount %>%
             p.less0 = mean(.value < 0),
             p.diff.not0 = ifelse(median(.value) > 0, p.greater0, p.less0)) %>% 
   ungroup()
+
+# Save combined table for later use in manuscript
+tbl_amounts_tidy %>% 
+  left_join(tbl_amounts_probs, by = "title") %>% 
+  saveRDS(here("data", "derived_data", "results_models_amount.rds"))
 
 tbl_amount_1 <- tbl_amounts_tidy %>% 
   left_join(tbl_amounts_probs, by = "title") %>% 
