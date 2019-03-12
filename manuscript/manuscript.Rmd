@@ -77,7 +77,7 @@ results <- readRDS(here("data", "derived_data", "results_clean.rds"))
 ```
 
 
-In January 2011, the Egyptian uprisings presented an opportunity for domestic non-governmental organizations (NGOs) and civil society actors to transform Egypt into a democratic state. However, just as NGOs began to take advantage of new levels of civic freedoms, successive Egyptian governments passed laws restricting these groups from receiving foreign funding or engaging in political advocacy. Egypt is not alone in its non-violent crackdown on NGOs. India, Bolivia, Hungary, China, Russia, and others have mandated that funds cannot be used for political purposes, or prohibited NGOs from accepting any funds from foreign sources [@Carothers:2015; @DPR:2015].
+In January 2011, the Egyptian uprising presented an opportunity for domestic non-governmental organizations (NGOs) and civil society actors to transform Egypt into a democratic state. However, just as NGOs began to take advantage of new levels of civic freedoms, successive Egyptian governments passed laws restricting these groups from receiving foreign funding or engaging in political advocacy. Egypt is not alone in its non-violent crackdown on NGOs. India, Bolivia, Hungary, China, Russia, and others have mandated that funds cannot be used for political purposes and prohibited NGOs from accepting any funds from foreign sources [@Carothers:2015; @DPR:2015].
 
 These restrictive laws have tangible consequences for NGOs worldwide. Official aid flows have decreased substantially in countries that have imposed restrictive anti-NGO laws [@ChaudhryHeiss:2018; @DupuyPrakash:2018], and large foundations and government agencies have both reduced their contributions to NGOs in restrictive countries [@Brechenmacher:2017]. In response to this dramatic shift in the NGO funding landscape, organizations have increasingly turned to individual private donors to offset the loss of governmental and foundation funding [@BanksHulmeEdwards:2015]. In 2016, U.S. private philanthropy for international NGOs amounted to \$22.06 billion [@givingusa:2017].
 
@@ -104,7 +104,7 @@ The legal threats that NGOs face in their host countries serve as yet another do
 
 The *contentiousness of NGO issue areas*—or the degree to which an NGO's programming is compatible with government preferences—can influence donor behavior. Donors commonly support programs that have easily measurable goals and successes [@Bush:2015; @Kiai:2017]. NGOs working on regime-compatible issues such as service provision, health, education, and humanitarian relief rarely challenge the government. As such, their programmatic output is easily quantifiable and donors can see the results of their charity more readily. 
 
-In contrast, NGOs working on more contentious issues like human rights, election monitoring, anti-corruption, and youth movements can pose political challenges to regimes. Therefore, these INGOs are often viewed as politically motivated outsiders and they run a higher risk of getting shut down [@DPR:2015], increasing the possibility of donors' resources being wasted. Due to the nature of the political and social issues they work on, their programmatic effectiveness is also harder to measure and quantify [@Bush:2015]. Thus, donors may believe that it is more difficult to improve respect for human rights in the target country, which limits NGOs' ability to achieve their goals. 
+In contrast, NGOs working on more contentious issues like human rights, election monitoring, anti-corruption, and youth movements can pose political challenges to regimes. Therefore, these NGOs are often viewed as politically motivated outsiders and run a higher risk of getting shut down [@DPR:2015], increasing the possibility of donors' resources being wasted. Due to the nature of the political and social issues they work on, their programmatic effectiveness is also harder to measure and quantify [@Bush:2015]. Thus, donors may believe that it is more difficult to improve respect for human rights in the target country, which limits NGOs' ability to achieve their goals. 
 
 We thus hypothesize that donors will be more likely to donate to less contentious NGOs because these are seen as uncontroversial, apolitical, and directed towards the most deserving of need, and are more capable of producing short-term quantifiable results. As shorthand, we use humanitarian NGOs as a proxy for NGOs working on non-contentious issues and human rights NGOs as a proxy for contentious issues:
 
@@ -177,6 +177,7 @@ Without looking within issue or funding conditions, we find that respondents are
 ![Difference in likelihood of donation across crackdown and no crackdown groups, conditioned by other experimental frames](output/figures/likely-diffs.pdf){#fig:likely-diffs}
 
 ```{r child = "output/tables/tbl-likely-diffs.md"}
+
 ```
 
 @fig:likely-diffs(B–C) shows the difference in donation likelihood for both crackdown conditions across NGO issue areas (H~2a~) and funding sources (H~3a~). Crackdown has almost no effect on the likelihood of donating to human rights NGOs (`r filter(likely, title == "Human rights")$p_neq0`). We hypothesized that the positive crackdown effect would be stronger for humanitarian NGOs, and while crackdown does have a positive effect on under the humanitarian frame, the probability this difference is greater than zero is below our 95% threshold (`r filter(likely, title == "Humanitarian assistance")$p_neq0`). We do find some evidence for H~3a~, however. Crackdown has little effect on the likelihood of donating to NGOs receiving government funding (`r filter(likely, title == "Government")$p_neq0`), but it does increase the likelihood of donating to privately funded NGOs by `r percent_0(filter(likely, title == "Private")$pct_change)` (`r filter(likely, title == "Private")$delta`; `r filter(likely, title == "Private")$p_neq0`).
@@ -192,6 +193,7 @@ Crackdowns do not substantially influence donors' *likelihood* to donate, but th
 ![Difference in amount donated across crackdown and no crackdown groups, conditioned by other experimental frames](output/figures/amount-diffs.pdf){#fig:amount-diffs}
 
 ```{r child = "output/tables/tbl-amount-diffs.md"}
+
 ```
 
 This trend also holds true when accounting for NGO issue area. As seen in @fig:amount-diffs(B–C), the crackdown condition elicits higher donations for both the human rights and humanitarian NGOs, though with varying levels of significance. Emphasizing legal crackdown increased donations to human rights NGOs by `r md_dollar(filter(amount, title == "Human rights")$mu_diff)` above the no crackdown condition, but with a lower probability of significance (`r filter(amount, title == "Human rights")$p_neq0`). In contrast, crackdowns significantly boosted donations to humanitarian NGOs by `r md_dollar(filter(amount, title == "Humanitarian assistance")$mu_diff)`, a `r percent_0(filter(amount, title == "Humanitarian assistance")$pct_change)` increase beyond the control condition (`r filter(amount, title == "Humanitarian assistance")$p_neq0`). We thus find support for H~2b~: donors give more to besieged humanitarian NGOs. We also find evidence for H~3b~. Donors give `r md_dollar(filter(amount, title == "Private")$mu_diff)` more (a `r percent_0(filter(amount, title == "Private")$pct_change)` increase) to legally besieged NGOs that are privately funded (`r filter(amount, title == "Private")$p_neq0`), while the crackdown condition has little effect on the amount donated to government-funded NGOs (`r filter(amount, title == "Government")$p_neq0`).
@@ -218,12 +220,6 @@ Our results have several implications for policy and future research. NGOs may b
 [^priors]: The "Priors" section in the supplement provides complete details about our prior choices and computational choices.
 
 [^3154467]: Response 3154467.
-
-[^8425616]: Response 8425616.
-
-[^6009603]: Response 6009603.
-
-[^9526638]: Response 9526638.
 
 [^13685]: Response 13685.
 
