@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# The effect of NGO crackdowns on individual philanthropy
+# Charity During Crackdown: Analyzing the Impact of State Repression of NGOs on Philanthropy
 
 [Suparna Chaudhry](http://www.suparnachaudhry.com/) • Department of
 Political Science • Christopher Newport University  
@@ -13,38 +13,43 @@ Public Service and Ethics • Brigham Young University
 ## Abstract
 
 State crackdown on non-governmental organizations (NGOs), particularly
-through legal restrictions on funding, has become increasingly common.
-How do legal restrictions on NGOs impact patterns of private
-philanthropic giving and individual donor decision-making? With reduced
-funding for NGOs working on contentious issues, and an absence of
-philanthropic culture in many developing countries, many NGOs rely on
-funds from private donors in Western countries. Using a survey
+through legal restrictions on funding and advocacy, has become
+increasingly pervasive across the globe. How do legal restrictions on
+NGOs impact patterns of private philanthropic giving and individual
+donor decision-making? With reduced funding for NGOs working on
+contentious issues, and an absence of philanthropic culture in various
+developing countries, many NGOs rely on funds from private donors in
+Western countries. Existing research has predominantly focused on
+individual-level determinants of philanthropy. However, we argue that
+domestic political environments of NGO host countries can also influence
+preferences of foreign private donors, and that crackdown on NGOs serve
+as a heuristic to donors of organizational deservingness. Using a survey
 experiment, we explore how this crackdown changes donors’ preferences
 based on the issue area and funding sources of the NGO. We find that
-private donors are responsive to the legal difficulties international
-NGOs face abroad and are more likely to donate to legally besieged
-privately funded human rights NGOs. Additionally, already-likely donors
-give substantially more to legally restricted NGOs working on
-humanitarian issues. We conclude by discussing the implications for the
-sustainability of NGOs working abroad.
+while crackdowns do not directly influence the likelihood of donation on
+their own, donors are willing to donate substantially more to legally
+besieged NGOs abroad. We conclude by discussing the implications of our
+results on the sustainability of civil society organizations working in
+repressive countries.
 
 -----
 
 This repository contains the data and code for our paper. Our pre-print
 is online here:
 
-> Suparna Chaudhry and Andrew Heiss. (2019). *The effect of NGO
-> crackdowns on individual philanthropy*. Accessed March 10, 2019.
-> Online at \<dx.doi.org/10.17605/OSF.IO/FG53W\>
+> Suparna Chaudhry and Andrew Heiss. (2019). *Charity During Crackdown:
+> Analyzing the Impact of State Repression of NGOs on Philanthropy*.
+> Accessed March 13, 2019. Online at
+> \<dx.doi.org/10.17605/OSF.IO/FG53W\>
 
 ## How to cite
 
 Please cite this compendium as:
 
 > Suparna Chaudhry and Andrew Heiss. (2019). *Compendium of R code and
-> data for The effect of NGO crackdowns on individual philanthropy*.
-> Accessed March 10, 2019. Online at
-> \<dx.doi.org/10.17605/OSF.IO/FG53W\>
+> data for Charity During Crackdown: Analyzing the Impact of State
+> Repression of NGOs on Philanthropy*. Accessed March 13, 2019. Online
+> at \<dx.doi.org/10.17605/OSF.IO/FG53W\>
 
 ## How to download and install
 
