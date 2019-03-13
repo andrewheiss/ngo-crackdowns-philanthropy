@@ -4,13 +4,13 @@
 \alias{theme_ngos}
 \title{theme_ngos}
 \usage{
-theme_ngos(base_size = 11, base_family = "Roboto Condensed Light",
+theme_ngos(base_size = 11, base_family = "Roboto Condensed",
   density = FALSE)
 }
 \arguments{
 \item{base_size}{base font size}
 
-\item{base_family}{base font family (default is Roboto Condensed Light)}
+\item{base_family}{base font family (default is Roboto Condensed)}
 
 \item{density}{Binary indicator to remove the panel grid and make a few other adjustments}
 }

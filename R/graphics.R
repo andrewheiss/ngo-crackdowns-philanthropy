@@ -133,7 +133,7 @@ theme_spark <- function() {
 #' A custom ggplot2 theme used throughout this project
 #'
 #' @param base_size base font size
-#' @param base_family base font family (default is Roboto Condensed Light)
+#' @param base_family base font family (default is Roboto Condensed)
 #' @param density Binary indicator to remove the panel grid and make a few other adjustments
 #'
 #' @export
@@ -150,27 +150,27 @@ theme_spark <- function() {
 #' ggplot(mtcars, aes(x = mpg)) +
 #'   geom_density(fill = "grey80") +
 #'   theme_ngos(density = TRUE)
-theme_ngos <- function(base_size = 11, base_family = "Roboto Condensed Light", density = FALSE) {
-  update_geom_defaults("label", list(family = "Roboto Condensed Light", face = "plain"))
-  update_geom_defaults("text", list(family = "Roboto Condensed Light", face = "plain"))
+theme_ngos <- function(base_size = 11, base_family = "Roboto Condensed", density = FALSE) {
+  update_geom_defaults("label", list(family = "Roboto Condensed", face = "plain"))
+  update_geom_defaults("text", list(family = "Roboto Condensed", face = "plain"))
   
   ret <- theme_bw(base_size, base_family) +
     theme(plot.title = element_text(size = rel(1.4), face = "plain",
-                                    family = "Roboto Condensed Bold"),
+                                    family = "Roboto Condensed"),
           plot.subtitle = element_text(size = rel(1), face = "plain",
-                                       family = "Roboto Condensed Light"),
+                                       family = "Roboto Condensed"),
           plot.caption = element_text(size = rel(0.8), color = "grey50", face = "plain",
-                                      family = "Roboto Condensed Light",
+                                      family = "Roboto Condensed",
                                       margin = margin(t = 10)),
           plot.tag = element_text(size = rel(1), face = "plain", color = "grey50",
-                                  family = "Roboto Condensed Bold"),
+                                  family = "Roboto Condensed"),
           strip.text = element_text(size = rel(0.8), face = "plain",
-                                    family = "Roboto Condensed Bold"),
+                                    family = "Roboto Condensed"),
           strip.text.x = element_text(margin = margin(t = 1, b = 1)),
           panel.border = element_blank(), 
           strip.background = element_rect(fill = "#ffffff", colour = NA),
           axis.ticks = element_blank(),
-          axis.title.x = element_text(margin = margin(t = 10)),
+          axis.title.x = element_text(margin = margin(t = 5), size = rel(0.8)),
           legend.margin = margin(t = 0),
           legend.title = element_text(size = rel(0.8)),
           legend.position = "bottom")
@@ -204,13 +204,13 @@ theme_ngos_table <- gridExtra::ttheme_minimal(
     list(fg_params = 
            list(hjust = 0, x = 0.1,
                 fontsize = 7, fontface = "plain",
-                fontfamily = "Roboto Condensed Light"),
+                fontfamily = "Roboto Condensed"),
          bg_params = list(fill = "white")),
   colhead = 
     list(fg_params = 
            list(hjust = 0, x = 0.1, col = "white",
-                fontsize = 7, fontface = "plain",
-                fontfamily = "Roboto Condensed Bold"),
+                fontsize = 7, fontface = "bold",
+                fontfamily = "Roboto Condensed"),
          bg_params = list(fill = ngo_cols("blue"))),
   padding = grid::unit(c(4, 2), "mm"))
 
