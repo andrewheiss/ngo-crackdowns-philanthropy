@@ -39,7 +39,7 @@ def clean(text):
     text = re.sub(r"(\\\\)\nHuman rights issues, Government", "\\1\\\\midrule\nHuman rights issues, Government", text)
 
     # Simplify figure path
-    text = re.sub(r"\\includegraphics{output/figures/", "\\\includegraphics{figures/", text)
+    text = re.sub(r"\\includegraphics{output/figures/", "\\\includegraphics{", text)
     
     return(text)
 
