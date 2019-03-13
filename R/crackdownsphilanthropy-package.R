@@ -1,6 +1,6 @@
 #' The 'crackdownsphilanthropy' package.
 #' 
-#' @description A DESCRIPTION OF THE PACKAGE
+#' @description Research on how anti-NGO crackdowns influence donor behavior
 #' 
 #' @docType package
 #' @name crackdownsphilanthropy-package
