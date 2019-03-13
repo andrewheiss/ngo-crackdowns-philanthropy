@@ -117,7 +117,6 @@ $$
 
 ![Prior $\nu$, $\mu$, and $\sigma$ for amount models](output/figures/prior-amount.pdf){#fig:prior-amount}
 
-
 We obtain the posterior distribution of each dependent variable with Markov Chain Monte Carlo (MCMC) sampling and simulate values from the joint posterior distribution of the coefficient parameters. We use Stan [@stan; @rstan; @r-project] to generate 4 MCMC chains with 4,000 iterations in each chain, 2,000 of which are used for warmup. We use the median values from the posterior distributions as point estimates and calculate credible intervals using the 95% highest posterior density.
 
 \newpage
@@ -140,5 +139,3 @@ Payment
 
 ```{r child = "../analysis/text/experiment_blind.md"}
 ```
-
-\newpage

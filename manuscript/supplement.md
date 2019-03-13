@@ -10,7 +10,7 @@ author:
   affiliation: Brigham Young University
   email: andrew_heiss@byu.edu
   url: https://www.andrewheiss.com/
-date: "March  9, 2019"
+date: "March 13, 2019"
 title-page: false
 published: 
 git-repo: https://github.com/andrewheiss/ngo-crackdowns-philanthropy
@@ -206,7 +206,6 @@ x &: \text{Mean amount donated} \\
 $$
 
 ![Prior $\nu$, $\mu$, and $\sigma$ for amount models](output/figures/prior-amount.pdf){#fig:prior-amount}
-
 
 We obtain the posterior distribution of each dependent variable with Markov Chain Monte Carlo (MCMC) sampling and simulate values from the joint posterior distribution of the coefficient parameters. We use Stan [@stan; @rstan; @r-project] to generate 4 MCMC chains with 4,000 iterations in each chain, 2,000 of which are used for warmup. We use the median values from the posterior distributions as point estimates and calculate credible intervals using the 95% highest posterior density.
 
@@ -429,5 +428,3 @@ A substantial proportion of IRC’s funding comes from {FUNDING SOURCE: governme
     - 65 - 74
     - 75 - 84
     - 85 or older
-
-\newpage
