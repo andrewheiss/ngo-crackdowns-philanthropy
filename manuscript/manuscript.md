@@ -12,7 +12,7 @@ author:
   email: andrew_heiss@byu.edu
   url: https://www.andrewheiss.com/
   twitter: andrewheiss
-date: "March 12, 2019"
+date: "March 13, 2019"
 published: Please do not cite without permission.
 git-repo: https://github.com/andrewheiss/ngo-crackdowns-philanthropy
 reference-section-title: References
@@ -93,6 +93,8 @@ We test our first hypothesis by calculating the differences in the average likel
 
 We use two Bayesian models to estimate the effect of crackdown on the likelihood of donating and the amount hypothetically donated.[^priors] We model the proportion of respondents indicating they would likely donate as a binomial distribution:
 
+\footnotesize
+
 $$
 \begin{aligned}
 n_{\text{group 1, group 2}} &\sim \text{Binomial}(n_{\text{group total}}, \theta_{\text{group}}) &\text{[likelihood]}\\
@@ -103,7 +105,11 @@ n &: \text{Number likely to donate} \\
 \end{aligned}
 $$
 
+\normalsize
+
 We estimate the mean amount donated in each condition using a *t* distribution [@Kruschke:2013]:
+
+\footnotesize
 
 $$
 \begin{aligned}
@@ -116,6 +122,8 @@ x &: \text{Mean amount donated} \\
 \sigma_{\text{group 1, group 2}} &\sim \text{Cauchy}(0, 1)&\text{[prior donation sd per group]}
 \end{aligned}
 $$
+
+\normalsize
 
 We use median values from the posterior distributions as point estimates and calculate credible intervals using the 95% highest posterior density. We declare an effect statistically significant if the posterior probability of being different from zero exceeds 0.95. Because differences can be either positive or negative (i.e. in some frames, the crackdown condition causes larger donations; in others it causes smaller donations), we report the probability that the difference is not equal to zero: when the median value is negative we report the proportion of predicted values that are negative, and vice versa.
 
