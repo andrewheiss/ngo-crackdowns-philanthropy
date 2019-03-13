@@ -445,7 +445,8 @@ tbl_likely_1 <- tbl_likely_tidy %>%
             funs(percent_format(accuracy = 0.1)(.))) %>% 
   mutate(p.diff.not0 = as.character(round(p.diff.not0, 2))) %>%
   select(Frame = title, `% likely~Treatment~` = theta_2, `% likely~Control~` = theta_1,
-         `∆` = theta_diff, `%∆` = pct_change, `p(∆ ≠ 0)` = p.diff.not0)
+         `$\\Delta$` = theta_diff, `$\\%\\Delta$` = pct_change, 
+         `$p(\\Delta \\neq 0)$` = p.diff.not0)
 ```
 
 ```{r tbl-likely-diffs-level2, warning=FALSE, message=FALSE}
@@ -468,7 +469,8 @@ tbl_likely_2 <- tbl_likely_tidy %>%
   mutate(title_clean = as.character(title_clean)) %>% 
   select(`H~2a~ and H~3a~` = title_clean, 
          `% likely~Crackdown~` = theta_2, `% likely~No\\ crackdown~` = theta_1,
-         `∆` = theta_diff, `%∆` = pct_change, `p(∆ ≠ 0)` = p.diff.not0)
+         `$\\Delta$` = theta_diff, `$\\%\\Delta$` = pct_change, 
+         `$p(\\Delta \\neq 0)$` = p.diff.not0)
 ```
 
 ```{r tbl-likely-diffs-level3, warning=FALSE, message=FALSE}
@@ -486,7 +488,8 @@ tbl_likely_3 <- tbl_likely_tidy %>%
   mutate(Frame = paste0(Issue, " issues, ", Funding, " funding")) %>% 
   select(`H~2a~ and H~3a~ (nested)` = Frame,
          `% likely~Crackdown~` = theta_2, `% likely~No\\ crackdown~` = theta_1,
-         `∆` = theta_diff, `%∆` = pct_change, `p(∆ ≠ 0)` = p.diff.not0)
+         `$\\Delta$` = theta_diff, `$\\%\\Delta$` = pct_change, 
+         `$p(\\Delta \\neq 0)$` = p.diff.not0)
 ```
 
 ```{r combine-likely-tables, results="asis"}
@@ -749,7 +752,8 @@ tbl_amount_1 <- tbl_amounts_tidy %>%
   mutate_at(vars(mu_1, mu_2, mu_diff, p.diff.not0), funs(as.character(round(., 2)))) %>% 
   mutate(pct_change = percent_format(accuracy = 0.1)(pct_change)) %>%
   select(`Frame` = title, `Amount~Treatment~` = mu_2, `Amount~Control~` = mu_1,
-         `∆` = mu_diff, `%∆` = pct_change, `p(∆ ≠ 0)` = p.diff.not0)
+         `$\\Delta$` = mu_diff, `$\\%\\Delta$` = pct_change, 
+         `$p(\\Delta \\neq 0)$` = p.diff.not0)
 ```
 
 ```{r tbl-amount-diffs-level2, warning=FALSE, message=FALSE}
@@ -770,7 +774,8 @@ tbl_amount_2 <- tbl_amounts_tidy %>%
   mutate(pct_change = percent_format(accuracy = 0.1)(pct_change)) %>%
   mutate(title_clean = as.character(title_clean)) %>% 
   select(`H~2b~ and H~3b~` = title_clean, `Amount~Crackdown~` = mu_2, `Amount~No\\ crackdown~` = mu_1,
-         `∆` = mu_diff, `%∆` = pct_change, `p(∆ ≠ 0)` = p.diff.not0)
+         `$\\Delta$` = mu_diff, `$\\%\\Delta$` = pct_change, 
+         `$p(\\Delta \\neq 0)$` = p.diff.not0)
 ```
 
 ```{r tbl-amount-diffs-level3, warning=FALSE, message=FALSE}
@@ -787,7 +792,8 @@ tbl_amount_3 <- tbl_amounts_tidy %>%
   mutate(pct_change = percent_format(accuracy = 0.1)(pct_change)) %>%
   select(`H~2b~ and H~3b~ (nested)` = Frame,
          `Amount~Crackdown~` = mu_2, `Amount~No\\ crackdown~` = mu_1,
-         `∆` = mu_diff, `%∆` = pct_change, `p(∆ ≠ 0)` = p.diff.not0)
+         `$\\Delta$` = mu_diff, `$\\%\\Delta$` = pct_change, 
+         `$p(\\Delta \\neq 0)$` = p.diff.not0)
 ```
 
 ```{r combine-amount-tables, results="asis"}

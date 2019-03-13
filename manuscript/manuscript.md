@@ -95,11 +95,11 @@ We use two Bayesian models to estimate the effect of crackdown on the likelihood
 
 $$
 \begin{aligned}
-n_{\text{group 1, group 2}} &\sim \text{Binomial}(n_{\text{total in group}}, \theta_{\text{group}}) &\text{[likelihood]}\\
+n_{\text{group 1, group 2}} &\sim \text{Binomial}(n_{\text{group total}}, \theta_{\text{group}}) &\text{[likelihood]}\\
 \Delta_n &= n_{\text{group 2}} - n_{\text{group 1}} &\text{[difference in proportions]} \\
 n &: \text{Number likely to donate} \\
 \\
-\theta_{\text{group 1, group 2}} &\sim \text{Beta}(5, 5) &\text{[prior prob. of being likely to donate]}
+\theta_{\text{group 1, group 2}} &\sim \text{Beta}(5, 5) &\text{[prior prob. of likelihood]}
 \end{aligned}
 $$
 
@@ -130,35 +130,35 @@ Without considering issue or funding, we find that respondents are not more like
 
 
 
----------------------------------------------------------------------------------------------------------------------------------------------
-H~1a~                                                   % likely~Treatment~          % likely~Control~          ∆        %∆       p(∆ ≠ 0)   
----------------------------------------------------- ------------------------- ----------------------------- -------- -------- --------------
-Crackdown − No crackdown                                       46.8%                       42.8%               3.9%     9.2%        0.83     
+-------------------------------------------------------------------------------------------------------------------------------------------------
+H~1a~                                                 % likely~Treatment~      % likely~Control~      $\Delta$   $\%\Delta$   $p(\Delta \neq 0)$ 
+---------------------------------------------------- --------------------- ------------------------- ---------- ------------ --------------------
+Crackdown − No crackdown                                     46.8%                   42.8%              3.9%        9.2%             0.83        
 
-*Private − Government funding*                                 46.4%                       43.3%               3.1%     7.1%        0.76     
+*Private − Government funding*                               46.4%                   43.3%              3.1%        7.1%             0.76        
 
-*Humanitarian assistance − Human rights*                       45.9%                       43.8%               2.1%     4.7%        0.7      
+*Humanitarian assistance − Human rights*                     45.9%                   43.8%              2.1%        4.7%             0.7         
 
-**H~2a~ and H~3a~**                                   **% likely~Crackdown~**   **% likely~No\ crackdown~**   **∆**    **%∆**   **p(∆ ≠ 0)** 
+H~2a~ and H~3a~                                       % likely~Crackdown~   % likely~No\ crackdown~   $\Delta$   $\%\Delta$   $p(\Delta \neq 0)$ 
 
-Human rights issues                                            44.2%                       43.7%               0.6%     1.5%        0.54     
+Human rights issues                                          44.2%                   43.7%              0.6%        1.5%             0.54        
 
-Humanitarian assistance issues                                 49.4%                       42.7%               6.8%    15.9%        0.88     
+Humanitarian assistance issues                               49.4%                   42.7%              6.8%       15.9%             0.88        
 
-Government funding                                             41.3%                       45.9%              -4.6%    -10.1%       0.79     
+Government funding                                           41.3%                   45.9%             -4.6%       -10.1%            0.79        
 
-Private funding                                                52.5%                       40.2%              12.2%    30.3%        0.98     
+Private funding                                              52.5%                   40.2%             12.2%       30.3%             0.98        
 
-**H~2a~ and H~3a~ (nested)**                          **% likely~Crackdown~**   **% likely~No\ crackdown~**   **∆**    **%∆**   **p(∆ ≠ 0)** 
+H~2a~ and H~3a~ (nested)                              % likely~Crackdown~   % likely~No\ crackdown~   $\Delta$   $\%\Delta$   $p(\Delta \neq 0)$ 
 
-Human rights issues, Government funding                        31.9%                       47.5%              -15.4%   -32.6%       0.98     
+Human rights issues, Government funding                      31.9%                   47.5%             -15.4%      -32.6%            0.98        
 
-Human rights issues, Private funding                           57.5%                       40.5%              17.0%    41.7%        0.98     
+Human rights issues, Private funding                         57.5%                   40.5%             17.0%       41.7%             0.98        
 
-Humanitarian assistance issues, Government funding             51.2%                       44.8%               6.4%    14.4%        0.8      
+Humanitarian assistance issues, Government funding           51.2%                   44.8%              6.4%       14.4%             0.8         
 
-Humanitarian assistance issues, Private funding                47.5%                       41.2%               6.2%    15.2%        0.79     
----------------------------------------------------------------------------------------------------------------------------------------------
+Humanitarian assistance issues, Private funding              47.5%                   41.2%              6.2%       15.2%             0.79        
+-------------------------------------------------------------------------------------------------------------------------------------------------
 
 Table: Likelihood of donation and differences in proportions in "crackdown" (treatment) and "no crackdown" (control) conditions; values represent posterior medians {#tbl:likely-diffs}
 
@@ -177,35 +177,35 @@ Crackdowns do not substantially influence donors' *likelihood* to donate, but th
 
 
 
-----------------------------------------------------------------------------------------------------------------------------------------
-H~1b~                                                   Amount~Treatment~          Amount~Control~          ∆       %∆       p(∆ ≠ 0)   
----------------------------------------------------- ----------------------- --------------------------- ------- -------- --------------
-Crackdown − No crackdown                                      16.34                     12.93             3.39    26.3%        0.97     
+---------------------------------------------------------------------------------------------------------------------------------------------
+H~1b~                                                 Amount~Treatment~      Amount~Control~      $\Delta$   $\%\Delta$   $p(\Delta \neq 0)$ 
+---------------------------------------------------- ------------------- ----------------------- ---------- ------------ --------------------
+Crackdown − No crackdown                                    16.34                 12.93             3.39       26.3%             0.97        
 
-*Private − Government funding*                                15.13                     13.71             1.42    10.4%        0.79     
+*Private − Government funding*                              15.13                 13.71             1.42       10.4%             0.79        
 
-*Humanitarian assistance − Human rights*                      14.06                     14.85             -0.82   -5.5%        0.67     
+*Humanitarian assistance − Human rights*                    14.06                 14.85            -0.82       -5.5%             0.67        
 
-**H~2b~ and H~3b~**                                   **Amount~Crackdown~**   **Amount~No\ crackdown~**   **∆**   **%∆**   **p(∆ ≠ 0)** 
+H~2b~ and H~3b~                                       Amount~Crackdown~   Amount~No\ crackdown~   $\Delta$   $\%\Delta$   $p(\Delta \neq 0)$ 
 
-Human rights issues                                           17.4                      14.86             2.54    17.2%        0.83     
+Human rights issues                                         17.4                  14.86             2.54       17.2%             0.83        
 
-Humanitarian assistance issues                                15.91                     11.68              4.3    36.9%        0.95     
+Humanitarian assistance issues                              15.91                 11.68             4.3        36.9%             0.95        
 
-Government funding                                            13.83                     12.24             1.61    13.1%        0.74     
+Government funding                                          13.83                 12.24             1.61       13.1%             0.74        
 
-Private funding                                               18.95                     14.23             4.62    32.4%        0.97     
+Private funding                                             18.95                 14.23             4.62       32.4%             0.97        
 
-**H~2b~ and H~3b~ (nested)**                          **Amount~Crackdown~**   **Amount~No\ crackdown~**   **∆**   **%∆**   **p(∆ ≠ 0)** 
+H~2b~ and H~3b~ (nested)                              Amount~Crackdown~   Amount~No\ crackdown~   $\Delta$   $\%\Delta$   $p(\Delta \neq 0)$ 
 
-Human rights issues, Government funding                       10.56                     15.15             -4.46   -29.5%       0.91     
+Human rights issues, Government funding                     10.56                 15.15            -4.46       -29.5%            0.91        
 
-Human rights issues, Private funding                          23.76                     14.5              9.19    63.8%        0.99     
+Human rights issues, Private funding                        23.76                 14.5              9.19       63.8%             0.99        
 
-Humanitarian assistance issues, Government funding            21.42                     11.89             9.35    77.9%        0.99     
+Humanitarian assistance issues, Government funding          21.42                 11.89             9.35       77.9%             0.99        
 
-Humanitarian assistance issues, Private funding               15.69                     15.72             -0.05   -0.3%        0.51     
-----------------------------------------------------------------------------------------------------------------------------------------
+Humanitarian assistance issues, Private funding             15.69                 15.72            -0.05       -0.3%             0.51        
+---------------------------------------------------------------------------------------------------------------------------------------------
 
 Table: Mean values and differences in means for amount donated in "crackdown" (treatment) and "no crackdown" (control) conditions; values represent posterior medians {#tbl:amount-diffs}
 

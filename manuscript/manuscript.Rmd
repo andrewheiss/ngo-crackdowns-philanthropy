@@ -137,11 +137,11 @@ We use two Bayesian models to estimate the effect of crackdown on the likelihood
 
 $$
 \begin{aligned}
-n_{\text{group 1, group 2}} &\sim \text{Binomial}(n_{\text{total in group}}, \theta_{\text{group}}) &\text{[likelihood]}\\
+n_{\text{group 1, group 2}} &\sim \text{Binomial}(n_{\text{group total}}, \theta_{\text{group}}) &\text{[likelihood]}\\
 \Delta_n &= n_{\text{group 2}} - n_{\text{group 1}} &\text{[difference in proportions]} \\
 n &: \text{Number likely to donate} \\
 \\
-\theta_{\text{group 1, group 2}} &\sim \text{Beta}(5, 5) &\text{[prior prob. of being likely to donate]}
+\theta_{\text{group 1, group 2}} &\sim \text{Beta}(5, 5) &\text{[prior prob. of likelihood]}
 \end{aligned}
 $$
 
