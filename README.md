@@ -89,6 +89,46 @@ To repdocuce the paper, run `make html` or `make tex` or `make docx` or
 `make paper` (for all three output formats) from the terminal. Open
 `manuscript/` (or `manuscript/tex_out/` for PDFs) to see the results.
 
+## Data
+
+This project includes the following data
+    files:
+
+  - [`data/raw_data/crackdowns-philanthropy-raw.csv`](data/raw_data/crackdowns-philanthropy-raw.csv):
+    Original results from the Qualtrics
+    survey
+  - [`data/derived_data/results_clean.csv`](data/derived_data/results_clean.csv):
+    Final version of the data, cleaned with
+    [`analysis/01_clean-data.Rmd`](analysis/01_clean-data.Rmd)
+  - [`data/derived_data/results_clean.yaml`](data/derived_data/results_clean.yaml):
+    [YAML metadata](https://csvy.org/) describing the syntax of the
+    cleaned
+    data
+  - [`data/derived_data/results_clean.rds`](data/derived_data/results_clean.rds):
+    `.rds` version of cleaned
+    data
+  - [`data/derived_data/codes_to_exclude.csv`](data/derived_data/codes_to_exclude.csv):
+    Unique IDs of participants who failed the attention checks or took
+    the survey outside of Mechanical Turk. These are excluded from the
+    final data in
+    [`analysis/01_clean-data.Rmd`](analysis/01_clean-data.Rmd)
+  - [`raw_data/ipums-cps/`](raw_data/ipums-cps/): Data extracts from the
+    US Census’s Current Population Survey (CPS) via the [Minnesota
+    Population Center’s Integrated Public Use Microdata Series
+    (IPUMS)](https://cps.ipums.org/cps/):
+      - `cps_2017.dat.gz`: 2017 ASEC, with the following variables
+        selected (in addition to whatever IPUMS preselects by default)
+        (and weighted by `ASECWT`):
+          - `AGE`
+          - `SEX`
+          - `EDUC`
+          - `INCTOT`
+      - `cps_09_2015.dat.gz`: September 2015 basic monthly CPS (which
+        includes the Volunteer Supplement), with the following variables
+        selected (and weighted by `VLSUPPWT`):
+          - `VLSTATUS`
+          - `VLDONATE`
+
 ## Licenses
 
 **Text and figures:** All prose and images are licensed under Creative

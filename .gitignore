@@ -1,7 +1,3 @@
-# Temporarily ignore data
-data/derived_data/*
-data/raw_data/*
-
 # Site output
 analysis/_site/*
 analysis/site_libs/*

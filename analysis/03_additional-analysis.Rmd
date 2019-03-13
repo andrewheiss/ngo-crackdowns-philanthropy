@@ -194,12 +194,12 @@ For general demographic information, we use data from the 2017 [Annual Social an
 
 IPUMS requires that you manually generate a data extract through their website, so downloading data from them is not entirely automated or reproducible. We created two extracts (though this could have been combined into one), with the following variables
 
--  `"data/ipums-cps/cps_2017.dat.gz"`: 2017 ASEC, with the following variables selected (in addition to whatever IPUMS preselects by default) (and weighted by `ASECWT`):
+-  `"data/raw_data/ipums-cps/cps_2017.dat.gz"`: 2017 ASEC, with the following variables selected (in addition to whatever IPUMS preselects by default) (and weighted by `ASECWT`):
     - `AGE`
     - `SEX`
     - `EDUC`
     - `INCTOT`
--  `"data/ipums-cps/cps_09_2015.dat.gz"`: September 2015 basic monthly CPS (which includes the Volunteer Supplement), with the following variables selected (and weighted by `VLSUPPWT`):
+-  `"data/raw_data/ipums-cps/cps_09_2015.dat.gz"`: September 2015 basic monthly CPS (which includes the Volunteer Supplement), with the following variables selected (and weighted by `VLSUPPWT`):
     - `VLSTATUS`
     - `VLDONATE`
 

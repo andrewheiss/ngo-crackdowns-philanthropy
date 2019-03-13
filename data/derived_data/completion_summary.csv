@@ -1,0 +1,25 @@
+reason,crackdown,issue,funding,n
+Approved,No crackdown,Human rights,Government,68
+Approved,No crackdown,Human rights,Private,64
+Approved,No crackdown,Humanitarian assistance,Government,68
+Approved,No crackdown,Humanitarian assistance,Private,65
+Approved,Crackdown,Human rights,Government,65
+Approved,Crackdown,Human rights,Private,67
+Approved,Crackdown,Humanitarian assistance,Government,68
+Approved,Crackdown,Humanitarian assistance,Private,68
+Failed first attention check,No crackdown,Human rights,Government,1
+Failed first attention check,No crackdown,Human rights,Private,3
+Failed first attention check,No crackdown,Humanitarian assistance,Government,2
+Failed first attention check,No crackdown,Humanitarian assistance,Private,3
+Failed first attention check,Crackdown,Human rights,Government,1
+Failed first attention check,Crackdown,Human rights,Private,1
+Failed first attention check,Crackdown,Humanitarian assistance,Government,1
+Failed first attention check,Crackdown,Humanitarian assistance,Private,0
+Took survey outisde of MTurk,No crackdown,Human rights,Government,0
+Took survey outisde of MTurk,No crackdown,Human rights,Private,0
+Took survey outisde of MTurk,No crackdown,Humanitarian assistance,Government,0
+Took survey outisde of MTurk,No crackdown,Humanitarian assistance,Private,1
+Took survey outisde of MTurk,Crackdown,Human rights,Government,1
+Took survey outisde of MTurk,Crackdown,Human rights,Private,1
+Took survey outisde of MTurk,Crackdown,Humanitarian assistance,Government,0
+Took survey outisde of MTurk,Crackdown,Humanitarian assistance,Private,0

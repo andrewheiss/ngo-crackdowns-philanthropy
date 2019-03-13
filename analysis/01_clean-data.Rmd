@@ -19,8 +19,7 @@ library(here)
 
 # Load data
 # results_file <- file.path(here(), "data", "test_data.csv")
-results_file <- here("data", "private_data", 
-                     "NGO Crackdowns and Philanthropy, March 2018 pilot_March 23, 2018_20.01.csv")
+results_file <- here("data", "raw_data", "crackdowns_philanthropy_raw.csv")
 
 # Possible answers
 favorability <- c("Very unfavorable", "Unfavorable", "Neutral", 
