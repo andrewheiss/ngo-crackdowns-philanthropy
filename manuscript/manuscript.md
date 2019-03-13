@@ -28,6 +28,7 @@ additional-info: Figures should appear in color online only, not in print.
 correspondence: >-
   Correspondence concerning this article should be addressed to Suparna Chaudhry, PhD, Department of Political Science, Christopher Newport University, Newport News, VA 23606, 757-594-7821. Contact: suparna.chaudhry@cnu.edu
 word-count: "4,081"
+keywords: international NGOs, donor behavior, philanthropy, human rights, repression
 ---
 
 <!-- manuscript.md is generated from manuscript.Rmd. Only edit the .Rmd file, *not* the .md file. -->
