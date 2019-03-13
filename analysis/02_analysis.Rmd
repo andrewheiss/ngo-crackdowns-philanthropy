@@ -19,6 +19,7 @@ library(tidybayes)
 library(broom)
 library(ggstance)
 library(ggdag)
+library(ggraph)
 library(patchwork)
 library(pander)
 library(scales)
@@ -37,17 +38,18 @@ results <- readRDS(here("data", "derived_data", "results_clean.rds"))
 
 Our theory and hypotheses are laid out in the causal pathway below. Our outcomes (Y: % likely to donate and amount donated) "listen to" or respond to C (crackdown), which is our main treatment or exposure. Funding (F) and issue (I) serve as heuristics for donation and influence a government's decision to crack down on NGOs, hence the dual arrows to C and Y. 
 
-```{r causal-dag, fig.width=4.5, fig.height=2.5}
+```{r causal-dag, fig.width=10/3, fig.height=2}
 theory_dag <- dagify(Y ~ I + C + F,
                      C ~ I + F,
-                     outcome = "F",
+                     outcome = "Y",
                      exposure = "C") %>% 
   tidy_dagitty(layout = "sugiyama")
 
 plot_dag <- ggplot(theory_dag, aes(x = x, y = y, xend = xend, yend = yend)) +
-  geom_dag_node(size = 12) +
-  geom_dag_edges() +
-  geom_dag_text(size = pts(9), family = "Roboto Condensed Bold") +
+  geom_dag_point(size = 6) +
+  geom_dag_edges(start_cap = circle(4, "mm"),
+                 end_cap = circle(4, "mm")) +
+  geom_dag_text(size = pts(6), family = "Roboto Condensed", fontface = "bold") +
   scale_dag() +
   theme_ngos() +
   theme(panel.grid = element_blank(),
@@ -57,9 +59,9 @@ plot_dag <- ggplot(theory_dag, aes(x = x, y = y, xend = xend, yend = yend)) +
 plot_dag %T>% 
   print() %T>%
   ggsave(., filename = here("analysis", "output", "figures", "causal-path.pdf"),
-         width = 4.5, height = 2.5, units = "in", device = cairo_pdf) %>% 
+         width = 10/3, height = 2, units = "in", device = cairo_pdf) %>% 
   ggsave(., filename = here("analysis", "output", "figures", "causal-path.png"),
-         width = 4.5, height = 2.5, units = "in", type = "cairo", dpi = 300)
+         width = 10/3, height = 2, units = "in", type = "cairo", dpi = 300)
 ```
 
 
@@ -309,7 +311,7 @@ all_models_likely <- all_models_likely_run %>%
   }))
 ```
 
-```{r plot-likely-diffs, warning=FALSE, fig.width=4.5, fig.height=6.5}
+```{r plot-likely-diffs, warning=FALSE, fig.width=10/3, fig.height=5.5}
 tidied_diffs_likely <- all_models_likely %>% 
   unnest(posterior_chains_long) %>% 
   filter(.variable == "theta_diff") %>% 
@@ -334,7 +336,7 @@ plot_diff_likely_a <- ggplot(level1_likely, aes(x = .value, y = fct_rev(title), 
   scale_x_continuous(labels = percent_format(accuracy = 1)) +
   scale_fill_manual(values = ngo_cols(c("blue", "red", "orange"), name = FALSE), guide = FALSE) +
   labs(x = "Difference in donation likelihood", y = NULL, tag = "A") +
-  theme_ngos(base_size = 9) +
+  theme_ngos(base_size = 8) +
   theme(panel.grid.major.y = element_blank())
 
 level2_likely <- tidied_diffs_likely %>% 
@@ -359,7 +361,7 @@ plot_diff_likely_b <- ggplot(filter(level2_likely, condition == "Issue"),
   scale_x_continuous(labels = percent_format(accuracy = 1)) +
   labs(x = NULL, y = NULL, tag = "B") +
   facet_wrap(~ facet_title, scales = "free_y") +
-  theme_ngos(base_size = 9) +
+  theme_ngos(base_size = 8) +
   theme(panel.grid.major.y = element_blank())
 
 plot_diff_likely_c <- ggplot(filter(level2_likely, condition == "Funding"), 
@@ -369,7 +371,7 @@ plot_diff_likely_c <- ggplot(filter(level2_likely, condition == "Funding"),
   scale_x_continuous(labels = percent_format(accuracy = 1)) +
   labs(x = "Difference in donation likelihood", y = NULL, tag = "C") +
   facet_wrap(~ facet_title, scales = "free_y") +
-  theme_ngos(base_size = 9) +
+  theme_ngos(base_size = 8) +
   theme(panel.grid.major.y = element_blank())
 
 level3_likely <- tidied_diffs_likely %>% 
@@ -390,7 +392,7 @@ plot_diff_likely_d <- ggplot(level3_likely, aes(x = .value, y = fct_rev(title)))
   labs(x = "Difference in donation likelihood", y = NULL, tag = "D",
        caption = "Point shows posterior median; thick black lines show 80% credible interval;\nthin black lines show 95% credible interval") +
   facet_wrap(~ facet_title, scales = "free_y") +
-  theme_ngos(base_size = 9) +
+  theme_ngos(base_size = 8) +
   theme(panel.grid.major.y = element_blank())
 
 plot_diffs_likely_all <- plot_diff_likely_a / 
@@ -401,9 +403,9 @@ plot_diffs_likely_all
 
 plot_diffs_likely_all %T>% 
   ggsave(., filename = here("analysis", "output", "figures", "likely-diffs.pdf"),
-         width = 4.5, height = 6.5, units = "in", device = cairo_pdf) %>%
+         width = 10/3, height = 5.5, units = "in", device = cairo_pdf) %>%
   ggsave(., filename = here("analysis", "output", "figures", "likely-diffs.png"),
-         width = 4.5, height = 6.5, units = "in", type = "cairo", dpi = 300)
+         width = 10/3, height = 5.5, units = "in", type = "cairo", dpi = 300)
 ```
 
 ```{r tbl-likely-diffs-level1, warning=FALSE, message=FALSE}
@@ -602,7 +604,7 @@ all_models_amount <- all_models_amount_run %>%
   }))
 ```
 
-```{r plot-amount-diffs, warning=FALSE, fig.width=4.5, fig.height=6.5}
+```{r plot-amount-diffs, warning=FALSE, fig.width=10/3, fig.height=5.5}
 # This will generate a warning because unnest() puts the crackdown values into
 # one column and we cheated by renaming issue and funding as crackdown, so it
 # gets mad when combining the factors in crackdown with those in issue and
@@ -632,7 +634,7 @@ plot_diff_amount_a <- ggplot(level1_amount, aes(x = .value, y = fct_rev(title), 
   scale_x_continuous(labels = dollar) +
   scale_fill_manual(values = ngo_cols(c("blue", "red", "orange"), name = FALSE), guide = FALSE) +
   labs(x = "Difference in amount donated", y = NULL, tag = "A") +
-  theme_ngos(base_size = 9) +
+  theme_ngos(base_size = 8) +
   theme(panel.grid.major.y = element_blank())
 
 level2_amount <- tidied_diffs_amount %>% 
@@ -657,7 +659,7 @@ plot_diff_amount_b <- ggplot(filter(level2_amount, condition == "Issue"),
   scale_x_continuous(labels = dollar) +
   labs(x = NULL, y = NULL, tag = "B") +
   facet_wrap(~ facet_title, scales = "free_y") +
-  theme_ngos(base_size = 9) +
+  theme_ngos(base_size = 8) +
   theme(panel.grid.major.y = element_blank())
 
 plot_diff_amount_c <- ggplot(filter(level2_amount, condition == "Funding"), 
@@ -667,7 +669,7 @@ plot_diff_amount_c <- ggplot(filter(level2_amount, condition == "Funding"),
   scale_x_continuous(labels = dollar) +
   labs(x = "Difference in amount donated", y = NULL, tag = "C") +
   facet_wrap(~ facet_title, scales = "free_y") +
-  theme_ngos(base_size = 9) +
+  theme_ngos(base_size = 8) +
   theme(panel.grid.major.y = element_blank())
 
 level3_amount <- tidied_diffs_amount %>% 
@@ -688,7 +690,7 @@ plot_diff_amount_d <- ggplot(level3_amount, aes(x = .value, y = fct_rev(title)))
   labs(x = "Difference in amount donated", y = NULL, tag = "D",
        caption = "Point shows posterior median; thick black lines show 80% credible interval;\nthin black lines show 95% credible interval") +
   facet_wrap(~ facet_title, scales = "free_y") +
-  theme_ngos(base_size = 9) +
+  theme_ngos(base_size = 8) +
   theme(panel.grid.major.y = element_blank())
 
 plot_diffs_amounts_all <- plot_diff_amount_a / 
@@ -699,9 +701,9 @@ plot_diffs_amounts_all
 
 plot_diffs_amounts_all %T>% 
   ggsave(., filename = here("analysis", "output", "figures", "amount-diffs.pdf"),
-         width = 4.5, height = 6.5, units = "in", device = cairo_pdf) %>%
+         width = 10/3, height = 5.5, units = "in", device = cairo_pdf) %>%
   ggsave(., filename = here("analysis", "output", "figures", "amount-diffs.png"),
-         width = 4.5, height = 6.5, units = "in", type = "cairo", dpi = 300)
+         width = 10/3, height = 5.5, units = "in", type = "cairo", dpi = 300)
 ```
 
 ```{r tbl-amount-diffs-level1, warning=FALSE, message=FALSE}
