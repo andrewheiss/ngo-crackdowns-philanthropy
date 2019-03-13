@@ -71,8 +71,8 @@ VC_ENABLE = TRUE
 
 # Blindify stuff if needed
 ifeq ($(BLINDED), TRUE)
-	# BLINDIFY = | ../lib/accecare.py ../lib/replacements.csv
-	BLINDIFY = 
+	BLINDIFY = | $(PREFIX)/bin/accecare.py $(PREFIX)/bin/replacements.csv
+	# BLINDIFY = 
 	VC_ENABLE = FALSE
 else
 	BLINDIFY = 
@@ -261,7 +261,7 @@ sage_tex:	manuscript.md
 	pandoc -r markdown+simple_tables+table_captions+yaml_metadata_block+smart+raw_tex -w latex -s \
 		--filter pandoc-crossref -M crossrefYaml=$(PREFIX)/yamls/pandoc-crossref.yml \
 		--default-image-extension=pdf \
-		--template=$(PREFIX)/templates/sage.tex \
+		--template=$(PREFIX)/templates/sage-blind.tex \
 		--natbib \
 		--filter ./pandoc/bin/tabularize.py \
 		--bibliography=$(BIB_FILE) \
