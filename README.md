@@ -94,7 +94,7 @@ To repdocuce the paper, run `make html` or `make tex` or `make docx` or
 This project includes the following data
     files:
 
-  - [`data/raw_data/crackdowns-philanthropy-raw.csv`](data/raw_data/crackdowns-philanthropy-raw.csv):
+  - [`data/raw_data/crackdowns_philanthropy_raw.csv`](data/raw_data/crackdowns_philanthropy_raw.csv):
     Original results from the Qualtrics
     survey
   - [`data/derived_data/results_clean.csv`](data/derived_data/results_clean.csv):

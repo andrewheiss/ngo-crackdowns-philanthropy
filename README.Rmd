@@ -63,7 +63,7 @@ To repdocuce the paper, run `make html` or `make tex` or `make docx` or `make pa
 
 This project includes the following data files:
 
-- [`data/raw_data/crackdowns-philanthropy-raw.csv`](data/raw_data/crackdowns-philanthropy-raw.csv): Original results from the Qualtrics survey
+- [`data/raw_data/crackdowns_philanthropy_raw.csv`](data/raw_data/crackdowns_philanthropy_raw.csv): Original results from the Qualtrics survey
 - [`data/derived_data/results_clean.csv`](data/derived_data/results_clean.csv): Final version of the data, cleaned with [`analysis/01_clean-data.Rmd`](analysis/01_clean-data.Rmd)
 - [`data/derived_data/results_clean.yaml`](data/derived_data/results_clean.yaml): [YAML metadata](https://csvy.org/) describing the syntax of the cleaned data
 - [`data/derived_data/results_clean.rds`](data/derived_data/results_clean.rds): `.rds` version of cleaned data
