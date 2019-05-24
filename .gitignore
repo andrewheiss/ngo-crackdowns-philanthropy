@@ -3,7 +3,7 @@ analysis/_site/*
 analysis/site_libs/*
 
 # knitr and caching stuff
-*/*_files/*
+analysis/*_files/*
 */*_cache/*
 lib/*.rds
 
