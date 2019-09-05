@@ -66,8 +66,8 @@ TEX_DIR = tex_out
 SAGE_DIR = submissions/R\&P_out
 
 # Blinding and version control
-BLINDED = TRUE
-VC_ENABLE = TRUE
+BLINDED = FALSE
+VC_ENABLE = FALSE
 
 # Blindify stuff if needed
 ifeq ($(BLINDED), TRUE)
@@ -261,7 +261,7 @@ sage_tex:	manuscript.md
 	pandoc -r markdown+simple_tables+table_captions+yaml_metadata_block+smart+raw_tex -w latex -s \
 		--filter pandoc-crossref -M crossrefYaml=$(PREFIX)/yamls/pandoc-crossref.yml \
 		--default-image-extension=pdf \
-		--template=$(PREFIX)/templates/sage-blind.tex \
+		--template=$(PREFIX)/templates/sage.tex \
 		--natbib \
 		--filter ./pandoc/bin/tabularize.py \
 		--bibliography=$(BIB_FILE) \

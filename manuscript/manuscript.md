@@ -12,8 +12,7 @@ author:
   email: andrew_heiss@byu.edu
   url: https://www.andrewheiss.com/
   twitter: andrewheiss
-date: "March 13, 2019"
-published: Please do not cite without permission.
+date: "September  4, 2019"
 git-repo: https://github.com/andrewheiss/ngo-crackdowns-philanthropy
 reference-section-title: References
 toc: false

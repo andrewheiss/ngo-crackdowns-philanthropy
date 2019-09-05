@@ -13,7 +13,6 @@ author:
   url: https://www.andrewheiss.com/
   twitter: andrewheiss
 date: "`r format(Sys.time(), '%B %e, %Y')`"
-published: Please do not cite without permission.
 git-repo: https://github.com/andrewheiss/ngo-crackdowns-philanthropy
 reference-section-title: References
 toc: false

@@ -494,12 +494,12 @@ tbl_likely_3 <- tbl_likely_tidy %>%
 
 ```{r combine-likely-tables, results="asis"}
 tbl_likely_2_header <- enframe(colnames(tbl_likely_2)) %>% 
-  mutate(value = pandoc.strong.return(value)) %>% 
+  mutate(value = (value)) %>% 
   spread(name, value) %>% 
   set_names(colnames(tbl_likely_1))
 
 tbl_likely_3_header <- enframe(colnames(tbl_likely_3)) %>% 
-  mutate(value = pandoc.strong.return(value)) %>% 
+  mutate(value = (value)) %>% 
   spread(name, value) %>% 
   set_names(colnames(tbl_likely_1))
 
@@ -798,12 +798,12 @@ tbl_amount_3 <- tbl_amounts_tidy %>%
 
 ```{r combine-amount-tables, results="asis"}
 tbl_amount_2_header <- enframe(colnames(tbl_amount_2)) %>% 
-  mutate(value = pandoc.strong.return(value)) %>% 
+  mutate(value = (value)) %>% 
   spread(name, value) %>% 
   set_names(colnames(tbl_amount_1))
 
 tbl_amount_3_header <- enframe(colnames(tbl_amount_3)) %>% 
-  mutate(value = pandoc.strong.return(value)) %>% 
+  mutate(value = (value)) %>% 
   spread(name, value) %>% 
   set_names(colnames(tbl_amount_1))
 
