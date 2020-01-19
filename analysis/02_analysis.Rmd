@@ -50,7 +50,6 @@ plot_dag <- ggplot(theory_dag, aes(x = x, y = y, xend = xend, yend = yend)) +
   geom_dag_edges(start_cap = circle(4, "mm"),
                  end_cap = circle(4, "mm")) +
   geom_dag_text(size = pts(6), family = "Roboto Condensed", fontface = "bold") +
-  scale_dag() +
   theme_ngos() +
   theme(panel.grid = element_blank(),
         axis.title = element_blank(),
@@ -80,9 +79,9 @@ results %>% count(crackdown, issue, funding) %>%
 
 ## Descriptive statistics table
 
-```{r tbl-descriptive-statistics, results="asis", warning=FALSE}
+```{r tbl-descriptive-statistics, results="asis"}
 vars_to_summarize <- tribble(
-  ~variable, ~clean_name,
+  ~variable_name, ~clean_name,
   "donate_likely", "Likelihood of donation",
   "donate_likely_bin", "Likelihood of donation (binary)",
   "amount_donate", "Amount hypothetically donated ($)",
@@ -105,16 +104,17 @@ vars_to_summarize <- tribble(
 )
 
 results_summary_stats <- results %>% 
-  select(one_of(vars_to_summarize$variable)) %>% 
-  gather(variable, value) %>% 
-  group_by(variable) %>% 
-  nest() %>% 
-  mutate(N = data %>% map_int(~ nrow(.)),
-         summary = map2(.x = data, .y = variable, ~ md_summary_row(.x$value, .y, results))) %>% 
-  left_join(vars_to_summarize, by = "variable") %>% 
-  mutate(variable = factor(variable, levels = vars_to_summarize$variable, ordered = TRUE)) %>% 
-  arrange(variable) %>% 
-  select(-data, -variable) %>% 
+  select(one_of(vars_to_summarize$variable_name)) %>% 
+  summarise_all(~list(.)) %>% 
+  pivot_longer(everything(), names_to = "variable_name", values_to = "value") %>% 
+  mutate(N = value %>% map_int(~ length(na.omit(.))),
+         summary = map2(.x = value, .y = variable_name, ~ md_summary_row(.x, .y))) %>% 
+  left_join(vars_to_summarize, by = "variable_name") %>% 
+  mutate(variable_name = factor(variable_name, 
+                                levels = vars_to_summarize$variable_name, 
+                                ordered = TRUE)) %>% 
+  arrange(variable_name) %>% 
+  select(-value, -variable_name) %>% 
   unnest(summary) %>% 
   select(Variable = clean_name, N, ` ` = spark, Details = summary)
 
@@ -128,11 +128,11 @@ results_summary_stats %>%
 
 ## Average likelihood and amount donated across conditions
 
-```{r tbl-results-conditions, results="asis"}
+```{r tbl-results-conditions, warning=FALSE, results="asis"}
 conditions_summary <- bind_rows(group_by(results, crackdown, issue, funding) %>% nest(),
                                 group_by(results, crackdown, issue) %>% nest(),
                                 group_by(results, crackdown) %>% nest(),
-                                results %>% nest()) %>% 
+                                results %>% nest(data = everything())) %>% 
   arrange(crackdown, issue, funding) %>% 
   mutate(summary = data %>%
            map(~ summarize(., pct_likely = table(donate_likely_bin)[["Likely"]] /
@@ -140,7 +140,7 @@ conditions_summary <- bind_rows(group_by(results, crackdown, issue, funding) %>%
                            mean_donation = mean(amount_donate, na.rm = TRUE),
                            sd_donation = sd(amount_donate, na.rm = TRUE),
                            N = nrow(.)))) %>% 
-  unnest(summary) %>% select(-data)
+  unnest(summary) %>% select(-data) %>% ungroup()
 
 conditions_summary_clean <- conditions_summary %>% 
   mutate(funding = ifelse(is.na(funding) & !is.na(issue) , "*Total*", as.character(funding)),
@@ -292,12 +292,14 @@ all_models_likely_run <- all_models %>%
   })) %>% 
   # Run the actual model on the simplified data
   mutate(model = stan_data_counts %>% map(~ {
-    sampling(donate_likely(), data = .x, control = list(max_treedepth = 15),
-             chains = CHAINS, iter = ITER, warmup = WARMUP, seed = BAYES_SEED)
+    donate_likely(n_total_1 = .x$n_total_1, n_total_2 = .x$n_total_2,
+                  n_likely_1 = .x$n_likely_1, n_likely_2 = .x$n_likely_2,
+                  control = list(max_treedepth = 15),
+                  chains = CHAINS, iter = ITER, warmup = WARMUP, seed = BAYES_SEED)
   })) 
 
 # Extract stuff
-all_models_likely <- all_models_likely_run %>% 
+all_models_likely <- all_models_likely_run %>%
   # Extract posterior chains
   mutate(posterior_chains_long = map(model, ~ {
       .x %>% gather_draws(theta_1, theta_2, theta_diff, pct_change)
@@ -442,7 +444,7 @@ tbl_likely_1 <- tbl_likely_tidy %>%
                         Issue = "*Humanitarian assistance − Human rights*",
                         Funding = "*Private − Government funding*")) %>% 
   mutate_at(vars(theta_1, theta_2, theta_diff, pct_change), 
-            funs(percent_format(accuracy = 0.1)(.))) %>% 
+            list(~percent_format(accuracy = 0.1)(.))) %>% 
   mutate(p.diff.not0 = as.character(round(p.diff.not0, 2))) %>%
   select(Frame = title, `% likely~Treatment~` = theta_2, `% likely~Control~` = theta_1,
          `$\\Delta$` = theta_diff, `$\\%\\Delta$` = pct_change, 
@@ -464,7 +466,7 @@ tbl_likely_2 <- tbl_likely_tidy %>%
                                          "Government funding", "Private funding"))) %>% 
   arrange(title_clean) %>% 
   mutate_at(vars(theta_1, theta_2, theta_diff, pct_change), 
-            funs(percent_format(accuracy = 0.1)(.))) %>% 
+            list(~percent_format(accuracy = 0.1)(.))) %>% 
   mutate(p.diff.not0 = as.character(round(p.diff.not0, 2))) %>% 
   mutate(title_clean = as.character(title_clean)) %>% 
   select(`H~2a~ and H~3a~` = title_clean, 
@@ -483,7 +485,7 @@ tbl_likely_3 <- tbl_likely_tidy %>%
          Funding = factor(Funding, levels = c("Government", "Private"))) %>% 
   arrange(Issue, Funding) %>% 
   mutate_at(vars(theta_1, theta_2, theta_diff, pct_change), 
-            funs(percent_format(accuracy = 0.1)(.))) %>% 
+            list(~percent_format(accuracy = 0.1)(.))) %>% 
   mutate(p.diff.not0 = as.character(round(p.diff.not0, 2))) %>%
   mutate(Frame = paste0(Issue, " issues, ", Funding, " funding")) %>% 
   select(`H~2a~ and H~3a~ (nested)` = Frame,
@@ -575,7 +577,7 @@ amount_priors %T>%
 
 ## Differences
 
-```{r run-amount-models, results="hide", cache=TRUE}
+```{r run-amount-models, results="hide", cache=TRUE, warning=FALSE}
 # Sample from the compiled model
 all_models_amount_run <- all_models %>% 
   # Simplify data for sending to Stan
@@ -584,8 +586,8 @@ all_models_amount_run <- all_models %>%
   })) %>% 
   # Run the actual model on the simplified data
   mutate(model = stan_data %>% map(~ {
-    sampling(amount_donated_best(), data = compose_data(.x),
-             chains = CHAINS, iter = ITER, warmup = WARMUP, seed = BAYES_SEED)
+    amount_donated_best(df = .x, chains = CHAINS, iter = ITER, 
+                        warmup = WARMUP, seed = BAYES_SEED)
   })) 
 
 # Extract stuff
@@ -749,7 +751,7 @@ tbl_amount_1 <- tbl_amounts_tidy %>%
                         Crackdown = "Crackdown − No crackdown",
                         Issue = "*Humanitarian assistance − Human rights*",
                         Funding = "*Private − Government funding*")) %>% 
-  mutate_at(vars(mu_1, mu_2, mu_diff, p.diff.not0), funs(as.character(round(., 2)))) %>% 
+  mutate_at(vars(mu_1, mu_2, mu_diff, p.diff.not0), list(~as.character(round(., 2)))) %>% 
   mutate(pct_change = percent_format(accuracy = 0.1)(pct_change)) %>%
   select(`Frame` = title, `Amount~Treatment~` = mu_2, `Amount~Control~` = mu_1,
          `$\\Delta$` = mu_diff, `$\\%\\Delta$` = pct_change, 
@@ -770,7 +772,7 @@ tbl_amount_2 <- tbl_amounts_tidy %>%
                                          "Humanitarian assistance issues", 
                                          "Government funding", "Private funding"))) %>% 
   arrange(title_clean) %>% 
-  mutate_at(vars(mu_1, mu_2, mu_diff, p.diff.not0), funs(as.character(round(., 2)))) %>% 
+  mutate_at(vars(mu_1, mu_2, mu_diff, p.diff.not0), list(~as.character(round(., 2)))) %>% 
   mutate(pct_change = percent_format(accuracy = 0.1)(pct_change)) %>%
   mutate(title_clean = as.character(title_clean)) %>% 
   select(`H~2b~ and H~3b~` = title_clean, `Amount~Crackdown~` = mu_2, `Amount~No\\ crackdown~` = mu_1,
@@ -788,7 +790,7 @@ tbl_amount_3 <- tbl_amounts_tidy %>%
          Funding = factor(Funding, levels = c("Government", "Private"))) %>% 
   arrange(Issue, Funding) %>% 
   mutate(Frame = paste0(Issue, " issues, ", Funding, " funding")) %>% 
-  mutate_at(vars(mu_1, mu_2, mu_diff, p.diff.not0), funs(as.character(round(., 2)))) %>% 
+  mutate_at(vars(mu_1, mu_2, mu_diff, p.diff.not0), list(~as.character(round(., 2)))) %>% 
   mutate(pct_change = percent_format(accuracy = 0.1)(pct_change)) %>%
   select(`H~2b~ and H~3b~ (nested)` = Frame,
          `Amount~Crackdown~` = mu_2, `Amount~No\\ crackdown~` = mu_1,
