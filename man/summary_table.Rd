@@ -5,14 +5,12 @@
 \alias{md_summary_row}
 \title{Generate a summary table with sparkgraphs}
 \usage{
-md_summary_row(x, variable, df)
+md_summary_row(value, variable_name)
 }
 \arguments{
-\item{x}{a one-column data frame}
+\item{value}{a numeric or factor vector}
 
-\item{variable}{name of the variable to summarize (generally the column name of x)}
-
-\item{df}{the data frame that x comes from}
+\item{variable_name}{name of the variable to summarize (generally the column name of value)}
 }
 \description{
 Create a fancy summary Markdown table for numeric and factor variables with tiny ggplot sparkgraphs
@@ -21,28 +19,28 @@ Create a fancy summary Markdown table for numeric and factor variables with tiny
 \dontrun{
 set.seed(1234)
 example_data <- tibble(numeric_thing = 1:100,
-                       factor_thing = factor(sample(LETTERS[1:4], 100, replace = TRUE)))
+                       factor_thing = factor(sample(LETTERS[1:4], 100, 
+                                                    replace = TRUE)))
 
 # Single rows
-md_summary_row(example_data[[1]], "numeric_thing", example_data)
+md_summary_row(example_data[[1]], "numeric_thing")
 #> # A tibble: 1 x 2
-#>   spark                                           summary                                     
-#>   <chr>                                           <chr>                                       
+#>   spark                                           summary
+#>   <chr>                                           <chr>
 #> 1 ![](output/figures/summary-table/numeric_thing) Median: 50.5 | Mean: 50.5…
 
 # Make a summary for all rows
 example_data \%>\% 
-  gather(variable, value) \%>\% 
-  group_by(variable) \%>\% 
-  nest() \%>\% 
-  mutate(summary = map2(.x = data, .y = variable, 
-                        ~ md_summary_row(.x$value, .y, example_data))) \%>\% 
-  select(-data) \%>\% 
+  summarise_all(~list(.)) \%>\% # Collapse each column into a nested cell
+  pivot_longer(everything(), names_to = "variable_name", values_to = "value") \%>\% 
+  mutate(summary = map2(.x = value, .y = variable_name, 
+                        ~ md_summary_row(.x, .y))) \%>\% 
+  select(-value) \%>\% 
   unnest(summary)
 #> # A tibble: 2 x 3
-#>   variable      spark                                   summary             
-#>   <chr>         <chr>                                   <chr>               
+#>   variable      spark                                   summary
+#>   <chr>         <chr>                                   <chr>
 #> 1 numeric_thing ![](output/figures/summary-table/numer… Median: 50.5 | Mean…
-#> 2 factor_thing  ![](output/figures/summary-table/facto… A (31; 31.0\%) | B (…
+#> 2 factor_thing  ![](output/figures/summary-table/facto… A (19; 19.0\%) | B (…
 }
 }
