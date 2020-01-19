@@ -25,6 +25,16 @@ manuscript/submissions/*
 .Rhistory
 .RData
 .Ruserdata
+*.Rapp.history
+
+# Stan stuff
+src/*.o
+src/*.so
+src/*.cc
+src/*.h
+src/*.cpp
+src/*.hpp
+src/RcppExports.cpp
 
 # Miscellaneous
 *.~lock.*
