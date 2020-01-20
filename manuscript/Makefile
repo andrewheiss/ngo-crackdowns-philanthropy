@@ -116,16 +116,38 @@ MS_ODT=$(SRC:.Rmd=-manuscript.odt)
 MS_DOCX=$(SRC:.Rmd=-manuscript.docx)
 BIB=$(SRC:.Rmd=.bib)
 
+.PHONY: all md html odt docx ms msdoc tex mstex bib
+
+## all	:	Convert manuscript to Markdown, HTML, .odt, .docx, manuscripty .odt, 
+## 		manuscripty .docx, and PDF *and* extract all citations into a standalone 
+## 		.bib file
 all:	clean $(MD) $(HTML) $(ODT) $(DOCX) $(MS_ODT) $(MS_DOCX) $(TEX) $(BIB)
 
+## md	:	Convert manuscript to Markdown
 md: 	clean $(MD)
+
+## html	:	Convert manuscript to HTML
 html:	clean $(HTML)
+
+## odt	:	Convert manuscript to .odt
 odt:	clean $(ODT)
+
+## docx	:	Convert manuscript to .docx (through .odt)
 docx:	clean $(DOCX)
+
+## ms	:	Convert manuscript to manuscripty .odt
 ms: 	clean $(MS_ODT)
+
+## msdocx	:	Convert manuscript to manuscripty .docx (through .odt)
 msdocx:	clean $(MS_DOCX)
+
+## tex	:	Convert manuscript to PDF (through XeLaTeX)
 tex:	clean $(TEX)
+
+## mstex	:	Convert manuscript to manuscripty PDF (through XeLaTeX)
 mstex:	clean $(MS_TEX)
+
+## bib	:	Extract bibliography to standalone .bib file
 bib:	$(BIB)
 
 %.md: %.Rmd
@@ -230,12 +252,21 @@ bib:	$(BIB)
 	@echo "$(WARN_COLOR)Extracing all citations into a standalone .bib file...$(NO_COLOR)"
 	bib_extract --bibtex_file $(BIB_FILE) $< $@
 
+## count	:	Get Word-like word count
 count: 
 	Rscript "pandoc/bin/word_count.R"
 
+## clean	:	Delete all manuscript-related targets
 clean:
 	@echo "$(WARN_COLOR)Deleting all existing targets...$(NO_COLOR)"
 	rm -f $(addsuffix .md, $(BASE)) $(addsuffix .html, $(BASE)) \
 		$(addsuffix .odt, $(BASE)) $(addsuffix .docx, $(BASE)) \
 		$(addsuffix -manuscript.odt, $(BASE)) $(addsuffix -manuscript.docx, $(BASE)) \
 		$(addsuffix .tex, $(BASE)) $(addsuffix -manuscript.tex, $(BASE)) $(addsuffix .bib, $(BASE))
+
+# Self-documenting Makefiles from The Carpentries
+# https://swcarpentry.github.io/make-novice/08-self-doc/index.html
+## help	:	Show possible targets
+.PHONY: help
+help: Makefile
+	@sed -n 's/^##//p' $<
