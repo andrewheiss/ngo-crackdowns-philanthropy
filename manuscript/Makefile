@@ -239,37 +239,3 @@ clean:
 		$(addsuffix .odt, $(BASE)) $(addsuffix .docx, $(BASE)) \
 		$(addsuffix -manuscript.odt, $(BASE)) $(addsuffix -manuscript.docx, $(BASE)) \
 		$(addsuffix .tex, $(BASE)) $(addsuffix -manuscript.tex, $(BASE)) $(addsuffix .bib, $(BASE))
-
-# Sage-specific compilation
-sage:	sage_clean sage_knit sage_bib sage_figs sage_tex
-
-sage_clean:
-	rm -f sage.tex
-	
-sage_knit: manuscript.Rmd
-	R --slave -e "set.seed(1234);knitr::knit('$<')"
-
-sage_bib: manuscript.md
-	bib_extract --bibtex_file $(BIB_FILE) $< $(SAGE_DIR)/$(BIB_FILE)
-
-sage_figs:
-	cp -r output/figures $(SAGE_DIR)/figures
-
-sage_tex:	manuscript.md
-	@echo "$(WARN_COLOR)Converting Markdown to vanilla TeX Sage template...$(NO_COLOR)"
-	cat $< $(BLINDIFY) | \
-	pandoc -r markdown+simple_tables+table_captions+yaml_metadata_block+smart+raw_tex -w latex -s \
-		--filter pandoc-crossref -M crossrefYaml=$(PREFIX)/yamls/pandoc-crossref.yml \
-		--default-image-extension=pdf \
-		--template=$(PREFIX)/templates/sage.tex \
-		--natbib \
-		--filter ./pandoc/bin/tabularize.py \
-		--bibliography=$(BIB_FILE) \
-		--base-header-level=1 \
-	-o $@.tex
-	./pandoc/bin/clean.py $@.tex $(SAGE_DIR)/manuscript.tex
-	@echo "$(WARN_COLOR)...converting TeX to PDF with latexmk (prepare for lots of output)...$(NO_COLOR)"
-	cp $(PREFIX)/templates/sagej.cls $(SAGE_DIR)/sagej.cls
-	cp $(PREFIX)/templates/SageH.bst $(SAGE_DIR)/SageH.bst
-	cd $(SAGE_DIR) && latexmk -pdf -quiet manuscript.tex
-	@echo "$(OK_COLOR)Sage-ready PDF created!$(NO_COLOR)"
