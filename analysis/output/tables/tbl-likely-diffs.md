@@ -4,9 +4,9 @@ H~1a~                                                 % likely~Treatment~      %
 ---------------------------------------------------- --------------------- ------------------------- ---------- ------------ --------------------
 Crackdown − No crackdown                                     46.8%                   42.8%              3.9%        9.2%             0.83        
 
-*Private − Government funding*                               46.4%                   43.3%              3.1%        7.1%             0.76        
-
 *Humanitarian assistance − Human rights*                     45.9%                   43.8%              2.1%        4.7%             0.7         
+
+*Private − Government funding*                               46.4%                   43.3%              3.1%        7.1%             0.76        
 
 H~2a~ and H~3a~                                       % likely~Crackdown~   % likely~No\ crackdown~   $\Delta$   $\%\Delta$   $p(\Delta \neq 0)$ 
 

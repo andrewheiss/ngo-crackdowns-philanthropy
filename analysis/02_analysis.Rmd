@@ -415,7 +415,7 @@ tbl_likely_tidy <- all_models_likely %>%
   unnest(tidy) %>% 
   filter(term %in% c("theta_1", "theta_2", "theta_diff", "pct_change")) %>% 
   select(title, term, estimate) %>% 
-  spread(term, estimate) %>% 
+  pivot_wider(names_from = term, values_from = estimate) %>%
   mutate(category = case_when(
     str_count(title, "\\|") == 0 ~ "Level 1",
     str_count(title, "\\|") == 1 ~ "Level 2",
@@ -497,12 +497,12 @@ tbl_likely_3 <- tbl_likely_tidy %>%
 ```{r combine-likely-tables, results="asis"}
 tbl_likely_2_header <- enframe(colnames(tbl_likely_2)) %>% 
   mutate(value = (value)) %>% 
-  spread(name, value) %>% 
+  pivot_wider(names_from = name, values_from = value) %>% 
   set_names(colnames(tbl_likely_1))
 
 tbl_likely_3_header <- enframe(colnames(tbl_likely_3)) %>% 
   mutate(value = (value)) %>% 
-  spread(name, value) %>% 
+  pivot_wider(names_from = name, values_from = value) %>% 
   set_names(colnames(tbl_likely_1))
 
 bind_rows(tbl_likely_1, 
@@ -722,7 +722,7 @@ tbl_amounts_tidy <- all_models_amount %>%
     TRUE ~ term
   )) %>% 
   select(title, term, estimate) %>% 
-  spread(term, estimate) %>% 
+  pivot_wider(names_from = term, values_from = estimate) %>% 
   mutate(category = case_when(
     str_count(title, "\\|") == 0 ~ "Level 1",
     str_count(title, "\\|") == 1 ~ "Level 2",
@@ -801,12 +801,12 @@ tbl_amount_3 <- tbl_amounts_tidy %>%
 ```{r combine-amount-tables, results="asis"}
 tbl_amount_2_header <- enframe(colnames(tbl_amount_2)) %>% 
   mutate(value = (value)) %>% 
-  spread(name, value) %>% 
+  pivot_wider(names_from = name, values_from = value) %>% 
   set_names(colnames(tbl_amount_1))
 
 tbl_amount_3_header <- enframe(colnames(tbl_amount_3)) %>% 
   mutate(value = (value)) %>% 
-  spread(name, value) %>% 
+  pivot_wider(names_from = name, values_from = value) %>% 
   set_names(colnames(tbl_amount_1))
 
 bind_rows(tbl_amount_1, 

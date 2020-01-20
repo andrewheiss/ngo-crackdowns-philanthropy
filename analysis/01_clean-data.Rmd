@@ -122,7 +122,7 @@ results <- results_check_attention %>%
   # Factorize variables
   mutate(donate_likely = factor(donate_likely, levels = likelihood, ordered = TRUE)) %>% 
   mutate_at(vars(favor_humanitarian, favor_human_rights, favor_development),
-            funs(factor(., levels = favorability, ordered = TRUE))) %>% 
+            list(~factor(., levels = favorability, ordered = TRUE))) %>% 
   mutate(give_charity = factor(give_charity, 
                                levels = frequency_charity, ordered = TRUE),
          volunteer = factor(volunteer, levels = c("No", "Yes"), ordered = TRUE),
@@ -147,12 +147,12 @@ results <- results_check_attention %>%
                                         Likely = "Somewhat likely",
                                         Likely = "Extremely likely")) %>% 
   mutate_at(vars(favor_humanitarian, favor_human_rights, favor_development),
-            funs(bin = fct_recode(., 
-                                  `Not favorable` = "Very unfavorable",
-                                  `Not favorable` = "Unfavorable",
-                                  `Not favorable` = "Neutral",
-                                  Favorable = "Favorable",
-                                  Favorable = "Very favorable"))) %>% 
+            list(bin = ~fct_recode(., 
+                                   `Not favorable` = "Very unfavorable",
+                                   `Not favorable` = "Unfavorable",
+                                   `Not favorable` = "Neutral",
+                                   Favorable = "Favorable",
+                                   Favorable = "Very favorable"))) %>% 
   mutate(give_charity_3 = fct_recode(give_charity,
                                      `At least once a month` = "Once a week",
                                      `At least once a month` = "Once a month",

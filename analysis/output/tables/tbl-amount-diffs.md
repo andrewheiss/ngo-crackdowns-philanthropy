@@ -4,9 +4,9 @@ H~1b~                                                 Amount~Treatment~      Amo
 ---------------------------------------------------- ------------------- ----------------------- ---------- ------------ --------------------
 Crackdown − No crackdown                                    16.34                 12.93             3.39       26.3%             0.97        
 
-*Private − Government funding*                              15.13                 13.71             1.42       10.4%             0.79        
-
 *Humanitarian assistance − Human rights*                    14.06                 14.85            -0.82       -5.5%             0.67        
+
+*Private − Government funding*                              15.13                 13.71             1.42       10.4%             0.79        
 
 H~2b~ and H~3b~                                       Amount~Crackdown~   Amount~No\ crackdown~   $\Delta$   $\%\Delta$   $p(\Delta \neq 0)$ 
 

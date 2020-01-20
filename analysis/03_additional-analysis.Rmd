@@ -35,7 +35,7 @@ results <- readRDS(here("data", "derived_data", "results_clean.rds"))
 
 ```{r build-consort}
 consort <- readRDS(here("data", "derived_data", "completion_summary.rds")) %>% 
-  spread(reason, n) %>% 
+  pivot_wider(names_from = reason, values_from = n) %>% 
   mutate(group = 1:n(),
          assigned = Approved + `Failed first attention check`,
          issue = str_replace_all(issue, "assistance", "assist.")) %>% 
@@ -221,7 +221,7 @@ cps_2017_data <- read_ipums_micro(cps_2017_ddi_file, data_file = cps_2017_data_f
 # Volunteering data from September 2015 only
 df_volunteering <- cps_2015_data %>% 
   # Remove values not in the universe
-  mutate_at(vars(VLSTATUS, VLDONATE), funs(ifelse(. == 99, NA, .)))
+  mutate_at(vars(VLSTATUS, VLDONATE), list(~ifelse(. == 99, NA, .)))
 
 # All other data from annual March 2017 survey
 df_demographics <- cps_2017_data %>% 
@@ -298,7 +298,7 @@ tbl_sample_pop <- calc_sample_pop %>%
          diffs_hpdi_fancy = diffs_tidy %>%
            map2_chr(.x = diffs_tidy, .y = not_hpdi_symbol, 
                     .f = ~ format_hpdi(.x$conf.low, .x$conf.high, .y))) %>% 
-  mutate_at(vars(National, Sample, diffs_median), funs(percent)) %>% 
+  mutate_at(vars(National, Sample, diffs_median), list(percent)) %>% 
   select(Variable, Sample, National, 
          `∆~median~` = diffs_median,
          `95% HPDI` = diffs_hpdi_fancy)
@@ -321,9 +321,9 @@ bind_rows(tbl_sample_pop, note_row) %>%
 
 ```{r avg-time, results="asis"}
 time_summary <- results %>% 
-  summarize_at(vars(duration), funs(Minimum = min, Maximum = max, Mean = mean, 
+  summarize_at(vars(duration), list(Minimum = min, Maximum = max, Mean = mean, 
                                     `Standard deviation` = sd, Median = median)) %>% 
-  gather(Statistic, value) %>% 
+  pivot_longer(everything(), names_to = "Statistic", values_to = "value") %>% 
   mutate(Minutes = fmt_seconds(value)) %>% 
   select(-value) 
 
