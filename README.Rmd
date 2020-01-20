@@ -13,13 +13,13 @@ knitr::opts_chunk$set(
 
 Title <- "Charity During Crackdown: Analyzing the Impact of State Repression of NGOs on Philanthropy"
 Authors <- "Suparna Chaudhry and Andrew Heiss"
-Year <- "2019"
+Year <- "2020"
 ```
 
 # `r Title`
 
 [Suparna Chaudhry](http://www.suparnachaudhry.com/) • Department of Political Science • Christopher Newport University  
-[Andrew Heiss](https://www.andrewheiss.com/) • Romney Institute of Public Service and Ethics • Brigham Young University
+[Andrew Heiss](https://www.andrewheiss.com/) • Andrew Young School of Policy Studies • Georgia State University
 
 ---
 
@@ -48,9 +48,21 @@ You can either [download the compendium as a ZIP file](/archive/master.zip) or u
 In order to reproduce this project, you'll need to install the compendium as an R package. After downloading the compendium, do the following:
 
 1. Open the compendium as a project in RStudio (double click on `crackdownsphilanthropy.proj`).
+
 2. Install the **pkgbuild**, **devtools**, **rstan**, and **rstantools** packages, either with RStudio's "Packages" panel or by running `install.packages(c("pkgbuild", "devtools", "rstan", "rstantools"))`
-3. Due to [strange](https://github.com/stan-dev/rstantools/issues/52) [incompatibilties](https://github.com/klutometis/roxygen/issues/822#issuecomment-441425591) with **roxygen2** and **rstantools**, you need to compile the Stan C++ binary DLLs before building the actual **crackdownsphilanthropy** compendium package. Run `pkgbuild::compile_dll()` and wait a few minutes while the Stan models are built.
-4. Finally, build the compendium package by clicking on the "Install and Restart" button in RStudio's "Build" panel.
+
+3. You need to compile the Stan c++ binary DLLs before building and installing the actual  **crackdownsphilanthropy** compendium package ([see here for details about why](https://mc-stan.org/rstantools/articles/minimal-rstan-package.html#documentation)). Run these two lines in R:
+
+    ```r
+    pkgbuild::compile_dll()  # This will probably take a few minutes
+    roxygen2::roxygenize()
+    ```
+
+4. Finally, build the compendium package by running this in R:
+
+    ```r
+    devtools::install(".")
+    ```
 
 You should now be able to run `library(crackdownsphilanthropy)` and reproduce all the findings in the paper (as well as the paper itself).
 

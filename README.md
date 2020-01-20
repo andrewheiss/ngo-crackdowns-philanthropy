@@ -5,8 +5,8 @@
 
 [Suparna Chaudhry](http://www.suparnachaudhry.com/) • Department of
 Political Science • Christopher Newport University  
-[Andrew Heiss](https://www.andrewheiss.com/) • Romney Institute of
-Public Service and Ethics • Brigham Young University
+[Andrew Heiss](https://www.andrewheiss.com/) • Andrew Young School of
+Policy Studies • Georgia State University
 
 -----
 
@@ -37,18 +37,18 @@ repressive countries.
 This repository contains the data and code for our paper. Our pre-print
 is online here:
 
-> Suparna Chaudhry and Andrew Heiss. (2019). *Charity During Crackdown:
+> Suparna Chaudhry and Andrew Heiss. (2020). *Charity During Crackdown:
 > Analyzing the Impact of State Repression of NGOs on Philanthropy*.
-> Accessed March 13, 2019. Online at
+> Accessed January 19, 2020. Online at
 > \<dx.doi.org/10.17605/OSF.IO/FG53W\>
 
 ## How to cite
 
 Please cite this compendium as:
 
-> Suparna Chaudhry and Andrew Heiss. (2019). *Compendium of R code and
+> Suparna Chaudhry and Andrew Heiss. (2020). *Compendium of R code and
 > data for Charity During Crackdown: Analyzing the Impact of State
-> Repression of NGOs on Philanthropy*. Accessed March 13, 2019. Online
+> Repression of NGOs on Philanthropy*. Accessed January 19, 2020. Online
 > at \<dx.doi.org/10.17605/OSF.IO/FG53W\>
 
 ## How to download and install
@@ -64,19 +64,28 @@ following:
 
 1.  Open the compendium as a project in RStudio (double click on
     `crackdownsphilanthropy.proj`).
+
 2.  Install the **pkgbuild**, **devtools**, **rstan**, and
     **rstantools** packages, either with RStudio’s “Packages” panel or
     by running `install.packages(c("pkgbuild", "devtools", "rstan",
     "rstantools"))`
-3.  Due to [strange](https://github.com/stan-dev/rstantools/issues/52)
-    [incompatibilties](https://github.com/klutometis/roxygen/issues/822#issuecomment-441425591)
-    with **roxygen2** and **rstantools**, you need to compile the Stan
-    C++ binary DLLs before building the actual
-    **crackdownsphilanthropy** compendium package. Run
-    `pkgbuild::compile_dll()` and wait a few minutes while the Stan
-    models are built.
-4.  Finally, build the compendium package by clicking on the “Install
-    and Restart” button in RStudio’s “Build” panel.
+
+3.  You need to compile the Stan c++ binary DLLs before building and
+    installing the actual **crackdownsphilanthropy** compendium package
+    ([see here for details about
+    why](https://mc-stan.org/rstantools/articles/minimal-rstan-package.html#documentation)).
+    Run these two lines in R:
+    
+    ``` r
+    pkgbuild::compile_dll()  # This will probably take a few minutes
+    roxygen2::roxygenize()
+    ```
+
+4.  Finally, build the compendium package by running this in R:
+    
+    ``` r
+    devtools::install(".")
+    ```
 
 You should now be able to run `library(crackdownsphilanthropy)` and
 reproduce all the findings in the paper (as well as the paper itself).
@@ -91,22 +100,18 @@ To repdocuce the paper, run `make html` or `make tex` or `make docx` or
 
 ## Data
 
-This project includes the following data
-    files:
+This project includes the following data files:
 
   - [`data/raw_data/crackdowns_philanthropy_raw.csv`](data/raw_data/crackdowns_philanthropy_raw.csv):
-    Original results from the Qualtrics
-    survey
+    Original results from the Qualtrics survey
   - [`data/derived_data/results_clean.csv`](data/derived_data/results_clean.csv):
     Final version of the data, cleaned with
     [`analysis/01_clean-data.Rmd`](analysis/01_clean-data.Rmd)
   - [`data/derived_data/results_clean.yaml`](data/derived_data/results_clean.yaml):
     [YAML metadata](https://csvy.org/) describing the syntax of the
-    cleaned
-    data
+    cleaned data
   - [`data/derived_data/results_clean.rds`](data/derived_data/results_clean.rds):
-    `.rds` version of cleaned
-    data
+    `.rds` version of cleaned data
   - [`data/derived_data/codes_to_exclude.csv`](data/derived_data/codes_to_exclude.csv):
     Unique IDs of participants who failed the attention checks or took
     the survey outside of Mechanical Turk. These are excluded from the
