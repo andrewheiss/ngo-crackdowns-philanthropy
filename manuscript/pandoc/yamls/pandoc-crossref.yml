@@ -14,4 +14,4 @@ eqnPrefix:
   - ""
 loftitle: "# List of figures"
 lotTitle: "# List of tables"
-autoSectionLabels: yes  # Prepend sec: to section titles
+autoSectionLabels: True  # Prepend sec: to section titles
