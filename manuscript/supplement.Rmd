@@ -7,8 +7,8 @@ author:
   email: suparna.chaudhry@cnu.edu
   url: http://www.suparnachaudhry.com/
 - name: Andrew Heiss
-  affiliation: Brigham Young University
-  email: andrew_heiss@byu.edu
+  affiliation: Georgia State University
+  email: aheiss@gsu.edu
   url: https://www.andrewheiss.com/
 date: "`r format(Sys.time(), '%B %e, %Y')`"
 title-page: false

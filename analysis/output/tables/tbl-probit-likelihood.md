@@ -1,25 +1,25 @@
 --------------------------------------------------------------------
                                                             (1)     
 -------------------------------------------------------- -----------
- Crackdown                                                 0.087    
+ Crackdown                                                 0.088    
                                                                     
-                                                          (0.091)   
+                                                          (0.090)   
                                                                     
- Cutpoint: Extremely unlikely|Somewhat unlikely            -1.315   
+ Cutpoint: Extremely unlikely|Somewhat unlikely            -1.316   
                                                                     
-                                                          (0.089)   
+                                                          (0.090)   
                                                                     
  Cutpoint: Somewhat unlikely|Neither likely nor unlikely   -0.497   
                                                                     
-                                                          (0.073)   
+                                                          (0.069)   
                                                                     
  Cutpoint: Neither likely nor unlikely|Somewhat likely     0.178    
                                                                     
-                                                          (0.069)   
+                                                          (0.067)   
                                                                     
- Cutpoint: Somewhat likely|Extremely likely                1.414    
+ Cutpoint: Somewhat likely|Extremely likely                1.418    
                                                                     
-                                                          (0.086)   
+                                                          (0.092)   
                                                                     
  Observations                                               531     
                                                                     
