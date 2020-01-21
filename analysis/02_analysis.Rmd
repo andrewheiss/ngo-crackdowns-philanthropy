@@ -42,7 +42,11 @@ Our theory and hypotheses are laid out in the causal pathway below. Our outcomes
 theory_dag <- dagify(Y ~ I + C + F,
                      C ~ I + F,
                      outcome = "Y",
-                     exposure = "C") %>% 
+                     exposure = "C",
+                     labels = c("Y" = "Outcome (Likelihood of donation & amount donated)", 
+                                "C" = "Anti-NGO legal crackdown", 
+                                "I" = "NGO issue area", 
+                                "F" = "NGO funding source")) %>% 
   tidy_dagitty(layout = "sugiyama")
 
 plot_dag <- ggplot(theory_dag, aes(x = x, y = y, xend = xend, yend = yend)) +
@@ -50,6 +54,9 @@ plot_dag <- ggplot(theory_dag, aes(x = x, y = y, xend = xend, yend = yend)) +
   geom_dag_edges(start_cap = circle(4, "mm"),
                  end_cap = circle(4, "mm")) +
   geom_dag_text(size = pts(6), family = "Roboto Condensed", fontface = "bold") +
+  geom_dag_label_repel(aes(label = label), size = pts(6), box.padding = 0.1, 
+                       direction = "x", seed = 12345,
+                       family = "Roboto Condensed", fontface = "plain") +
   theme_ngos() +
   theme(panel.grid = element_blank(),
         axis.title = element_blank(),
