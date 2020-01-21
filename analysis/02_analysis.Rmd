@@ -38,7 +38,7 @@ results <- readRDS(here("data", "derived_data", "results_clean.rds"))
 
 Our theory and hypotheses are laid out in the causal pathway below. Our outcomes (Y: % likely to donate and amount donated) "listen to" or respond to C (crackdown), which is our main treatment or exposure. Funding (F) and issue (I) serve as heuristics for donation and influence a government's decision to crack down on NGOs, hence the dual arrows to C and Y. 
 
-```{r causal-dag, fig.width=10/3, fig.height=2}
+```{r causal-dag, fig.width=4.75, fig.height=2}
 theory_dag <- dagify(Y ~ I + C + F,
                      C ~ I + F,
                      outcome = "Y",
@@ -58,9 +58,9 @@ plot_dag <- ggplot(theory_dag, aes(x = x, y = y, xend = xend, yend = yend)) +
 plot_dag %T>% 
   print() %T>%
   ggsave(., filename = here("analysis", "output", "figures", "causal-path.pdf"),
-         width = 10/3, height = 2, units = "in", device = cairo_pdf) %>% 
+         width = 4.75, height = 2, units = "in", device = cairo_pdf) %>% 
   ggsave(., filename = here("analysis", "output", "figures", "causal-path.png"),
-         width = 10/3, height = 2, units = "in", type = "cairo", dpi = 300)
+         width = 4.75, height = 2, units = "in", type = "cairo", dpi = 300)
 ```
 
 
@@ -313,7 +313,7 @@ all_models_likely <- all_models_likely_run %>%
   }))
 ```
 
-```{r plot-likely-diffs, warning=FALSE, fig.width=10/3, fig.height=5.5}
+```{r plot-likely-diffs, warning=FALSE, fig.width=4.75, fig.height=5.5}
 tidied_diffs_likely <- all_models_likely %>% 
   unnest(posterior_chains_long) %>% 
   filter(.variable == "theta_diff") %>% 
@@ -405,9 +405,9 @@ plot_diffs_likely_all
 
 plot_diffs_likely_all %T>% 
   ggsave(., filename = here("analysis", "output", "figures", "likely-diffs.pdf"),
-         width = 10/3, height = 5.5, units = "in", device = cairo_pdf) %>%
+         width = 4.75, height = 5.5, units = "in", device = cairo_pdf) %>%
   ggsave(., filename = here("analysis", "output", "figures", "likely-diffs.png"),
-         width = 10/3, height = 5.5, units = "in", type = "cairo", dpi = 300)
+         width = 4.75, height = 5.5, units = "in", type = "cairo", dpi = 300)
 ```
 
 ```{r tbl-likely-diffs-level1, warning=FALSE, message=FALSE}
@@ -609,7 +609,7 @@ all_models_amount <- all_models_amount_run %>%
   }))
 ```
 
-```{r plot-amount-diffs, warning=FALSE, fig.width=10/3, fig.height=5.5}
+```{r plot-amount-diffs, warning=FALSE, fig.width=4.75, fig.height=5.5}
 # This will generate a warning because unnest() puts the crackdown values into
 # one column and we cheated by renaming issue and funding as crackdown, so it
 # gets mad when combining the factors in crackdown with those in issue and
@@ -706,9 +706,9 @@ plot_diffs_amounts_all
 
 plot_diffs_amounts_all %T>% 
   ggsave(., filename = here("analysis", "output", "figures", "amount-diffs.pdf"),
-         width = 10/3, height = 5.5, units = "in", device = cairo_pdf) %>%
+         width = 4.75, height = 5.5, units = "in", device = cairo_pdf) %>%
   ggsave(., filename = here("analysis", "output", "figures", "amount-diffs.png"),
-         width = 10/3, height = 5.5, units = "in", type = "cairo", dpi = 300)
+         width = 4.75, height = 5.5, units = "in", type = "cairo", dpi = 300)
 ```
 
 ```{r tbl-amount-diffs-level1, warning=FALSE, message=FALSE}
