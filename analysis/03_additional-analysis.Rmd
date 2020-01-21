@@ -213,13 +213,6 @@ walk(full_chart, ~ print(.))
 ```
 
 
-# Balance
-
-```{r}
-
-```
-
-
 # Characteristics of experiment samples
 
 We compare our sample with demographic characteristics of the general population. Since there is no nationally representative sample for each of our demographic variables, we use two waves of the US Census's Current Population Survey (CPS), with data from the [Minnesota Population Center's Integrated Public Use Microdata Series (IPUMS)](https://cps.ipums.org/cps/).
