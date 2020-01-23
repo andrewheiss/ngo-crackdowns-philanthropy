@@ -10,7 +10,7 @@ author:
   affiliation: Georgia State University
   email: aheiss@gsu.edu
   url: https://www.andrewheiss.com/
-date: "January 20, 2020"
+date: "January 23, 2020"
 title-page: false
 published: 
 git-repo: https://github.com/andrewheiss/ngo-crackdowns-philanthropy
@@ -35,7 +35,7 @@ We used power analysis to determine our sample size: with the anticipation of fi
 
 ## Demographics and representativeness
 
-Amazon's Mechanical Turk (MTurk) has become an increasingly popular method for fielding survey experiments on cheap semi-representative national samples, though drawing definitive causal inference from convenience samples is not without issues. Previous research has found that MTurk workers tend to be more liberal, younger, and less racially diverse than the general US population [@CliffordJewellWaggoner:2015; @BerniskyHuberLenz:2012]. The results from our experiment generally mirror these findings, as seen in @tbl:exp-sample, which compares demographic characteristics of our sample with national averages from the US Census's Current Population Survey (CPS) [@IPUMS-CPS:2017]. For general demographic information, we use the 2017 Annual Social and Economic Supplement (ASEC) to the CPS. From 2002–2015, the CPS included a Volunteer Supplement every September, so we use 2015 data for data on volunteering and donating to charity. We do not show other respondent demographic details because we do not have good population-level data to compare our sample with. We could theoretically use Pew data to compare political preferences, but Pew collects data on party affiliation, while we collected data about respondents' ideological positions along a conservative–liberal spectrum, which makes the two variables incomparable.
+Amazon's Mechanical Turk (MTurk) has become an increasingly popular method for fielding survey experiments on semi-representative national samples in an inexpensive manner, though drawing definitive causal inference from convenience samples is not without issues. Previous research has found that MTurk workers tend to be more liberal, younger, and less racially diverse than the general US population [@CliffordJewellWaggoner:2015; @BerniskyHuberLenz:2012]. The results from our experiment generally mirror these findings, as seen in @tbl:exp-sample, which compares demographic characteristics of our sample with national averages from the US Census's Current Population Survey (CPS) [@IPUMS-CPS:2017]. For general demographic information, we use the 2017 Annual Social and Economic Supplement (ASEC) to the CPS. From 2002–2015, the CPS included a Volunteer Supplement every September, so we use 2015 data for data on volunteering and donating to charity. We do not show other respondent demographic details because we do not have good population-level data to compare our sample with. We could theoretically use Pew data to compare political preferences, but Pew collects data on party affiliation, while we collected data about respondents' ideological positions along a conservative–liberal spectrum, which makes the two variables incomparable.
 
 
 
