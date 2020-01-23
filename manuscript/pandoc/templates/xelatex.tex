@@ -2,7 +2,7 @@
 % \documentclass[11pt,article,oneside]{memoir}
 \documentclass[$if(fontsize)$$fontsize$,$else$11pt,$endif$article,oneside]{memoir}
 
-\usepackage{hikma-preamble-xelatex}
+\usepackage{pandoc/templates/hikma-preamble-xelatex}
 
 % For custom math fonts
 \usepackage{unicode-math}
@@ -83,7 +83,7 @@ $endif$
 \renewcommand*{\footnoterule}{\kern-3pt\hrule width 0.3\columnwidth\kern 4pt}
 
 $if(vc)$
-\input{vc}
+\input{pandoc/bin/vc}
 $if(git-repo)$
 \gdef\GITURL{$git-repo$}
 $endif$

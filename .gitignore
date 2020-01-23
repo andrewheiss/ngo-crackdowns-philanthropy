@@ -13,7 +13,7 @@ manuscript/*.html
 manuscript/*.pdf
 manuscript/*.tex
 manuscript/tex_out/*
-manuscript/vc*
+manuscript/pandoc/bin/vc*
 
 # Other folders
 admin/*

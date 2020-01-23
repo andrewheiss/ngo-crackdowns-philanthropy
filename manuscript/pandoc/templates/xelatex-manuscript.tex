@@ -50,9 +50,9 @@
 \providecommand{\keywords}[1]{\textbf{\textit{Keywords:}} #1}
 
 
-% ------------------
-% PAGE LAYOUT STFF
-% ------------------
+% -------------------
+% PAGE LAYOUT SUTFF
+% -------------------
 % For landscape PDF pages
 \usepackage{pdflscape}
 
@@ -122,8 +122,9 @@
 \usepackage{pbox}  % For multi-line table cells
 
 % Single spacing in longtables
-\BeforeBeginEnvironment{longtable}{\begin{singlespacing}}%
-\AfterEndEnvironment{longtable}{\end{singlespacing}}%
+% This doesn't work with endfloat though
+% \BeforeBeginEnvironment{longtable}{\begin{singlespacing}}
+% \AfterEndEnvironment{longtable}{\end{singlespacing}}
 
 % Remove left margin in lists inside longtables
 % https://tex.stackexchange.com/a/378190/11851
@@ -144,6 +145,10 @@
 \let\Oldincludegraphics\includegraphics
 \renewcommand{\includegraphics}[1]{\Oldincludegraphics[width=\maxwidth]{#1}}
 
+$if(endfloat)$
+\usepackage[nolists]{endfloat}
+\DeclareDelayedFloatFlavour*{longtable}{table}
+$endif$
 
 % ------------
 % REFERENCES
@@ -175,7 +180,6 @@
 
 \addtolength{\skip\footins}{12pt}    % vertical space between rule and main text
 \setlength{\footnotesep}{16pt}  % vertical space between footnotes
-
 
 \begin{document}
 
@@ -271,9 +275,7 @@ $endif$
 }
 $endif$
 
-$if(appendix)$
 \doublespacing
-$endif$
 
 $body$
 
