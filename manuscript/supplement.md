@@ -1,6 +1,6 @@
 ---
-title: "Supplement to Charity During Crackdown: Analyzing the Impact of State Repression of NGOs on Philanthropy"
-short-title: Supplement to Charity During Crackdown
+title: "Online appendix for Charity During Crackdown: Analyzing the Impact of State Repression of NGOs on Philanthropy"
+short-title: Online appendix for Charity During Crackdown
 author:
 - name: Suparna Chaudhry
   affiliation: Christopher Newport University
@@ -144,6 +144,62 @@ Table: Descriptive statistics {#tbl:descriptive-stats}
 
 
 \fingroup
+
+
+# Collapsing likelihood variable
+
+To simplify our analysis, we collapse our likelihood scale from a 1-5 Likert scale to a binary variable:
+
+
+
+------------------------------------------------
+Original answer               Collapsed answer  
+----------------------------- ------------------
+Extremely likely              Likely            
+
+Somewhat likely               Likely            
+
+Neither likely nor unlikely   Unlikely          
+
+Somewhat unlikely             Unlikely          
+
+Extremely unlikely            Unlikely          
+------------------------------------------------
+
+
+To check that the results are internally consistent when collapsed, we ran an ordered probit model 
+(using Stan) to see if the cutpoints follow the distribution of answers, and they do. "Somewhat likely" and above has a cutpoint of > 0.18, meaning that the likelihood is positive on average for both "Somewhat likely" and "Extremely likely."
+
+
+--------------------------------------------------------------------
+                                                            (1)     
+-------------------------------------------------------- -----------
+ Crackdown                                                 0.088    
+                                                                    
+                                                          (0.090)   
+                                                                    
+ Cutpoint: Extremely unlikely|Somewhat unlikely            -1.316   
+                                                                    
+                                                          (0.090)   
+                                                                    
+ Cutpoint: Somewhat unlikely|Neither likely nor unlikely   -0.497   
+                                                                    
+                                                          (0.069)   
+                                                                    
+ Cutpoint: Neither likely nor unlikely|Somewhat likely     0.178    
+                                                                    
+                                                          (0.067)   
+                                                                    
+ Cutpoint: Somewhat likely|Extremely likely                1.418    
+                                                                    
+                                                          (0.092)   
+                                                                    
+ Observations                                               531     
+                                                                    
+ Posterior sample size                                    4000.000  
+--------------------------------------------------------------------
+
+Table: Ordered probit regression with donation likelihood as outcome variable {#tbl:probit-likelihood}
 
 
 # Experiment

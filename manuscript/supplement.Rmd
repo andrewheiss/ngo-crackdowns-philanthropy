@@ -1,6 +1,6 @@
 ---
-title: "Supplement to Charity During Crackdown: Analyzing the Impact of State Repression of NGOs on Philanthropy"
-short-title: Supplement to Charity During Crackdown
+title: "Online appendix for Charity During Crackdown: Analyzing the Impact of State Repression of NGOs on Philanthropy"
+short-title: Online appendix for Charity During Crackdown
 author:
 - name: Suparna Chaudhry
   affiliation: Christopher Newport University
@@ -54,6 +54,20 @@ We are not overly concerned with these discrepancies, since we aimed our study a
 ```
 
 \fingroup
+
+
+# Collapsing likelihood variable
+
+To simplify our analysis, we collapse our likelihood scale from a 1-5 Likert scale to a binary variable:
+
+```{r child = "output/tables/tbl-collapsed-likelihood.md"}
+```
+
+To check that the results are internally consistent when collapsed, we ran an ordered probit model 
+(using Stan) to see if the cutpoints follow the distribution of answers, and they do. "Somewhat likely" and above has a cutpoint of > 0.18, meaning that the likelihood is positive on average for both "Somewhat likely" and "Extremely likely."
+
+```{r child = "output/tables/tbl-probit-likelihood.md"}
+```
 
 
 # Experiment
