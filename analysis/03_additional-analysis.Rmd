@@ -513,7 +513,9 @@ collapsed_likelihood <- tribble(
 )
     
 collapsed_likelihood %>% 
-  pandoc.table(justify = "ll")
+  pandoc.table.return(justify = "ll") %T>%
+  cat(file = here("analysis", "output", "tables", "tbl-collapsed-likelihood.md")) %>% 
+  cat()
 ```
 
 To check that the results are internally consistent when collapsed, we ran an ordered probit model 
@@ -522,7 +524,8 @@ To check that the results are internally consistent when collapsed, we ran an or
 ```{r collapsed-probit, warning=FALSE, message=FALSE, results="hide", cache=TRUE}
 collapsed_oprobit <- stan_polr(donate_likely ~ crackdown, data = results,
                                prior = R2(0.25, what = "mean"), prior_counts = dirichlet(1),
-                               method = "probit")
+                               method = "probit",
+                               chains = CHAINS, iter = ITER, warmup = WARMUP, seed = BAYES_SEED)
 ```
 
 ```{r show-collapsed-probit, results="asis"}
