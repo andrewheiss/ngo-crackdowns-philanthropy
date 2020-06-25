@@ -1,5 +1,5 @@
 ---
-title: "Dynamics of international giving: Exploring individual donor preferences"
+title: "Dynamics of International Giving: How Heuristics Shape Individual Donor Preferences"
 short-title: Charity During Crackdown
 author:
 - name: Suparna Chaudhry
