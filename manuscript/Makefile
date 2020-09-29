@@ -55,7 +55,7 @@ ENDFLOAT = FALSE
 
 # Remove identifying information (only happens in mstex and msdocx targets)
 # Use pandoc/bin/replacements.csv to map identifying information to anonymous output
-BLINDED = FALSE
+BLINDED = TRUE
 
 # Add version control information in footer (only happens in tex target)
 VC_ENABLE = FALSE
@@ -185,7 +185,7 @@ mstex:	clean $(MS_TEX)
 bib:	$(BIB)
 
 %.md: %.Rmd
-	R --slave -e "set.seed(1234);knitr::knit('$<')"
+	R --no-echo -e "set.seed(1234); knitr::knit('$<')"
 
 %.html:	%.md
 	@echo "$(WARN_COLOR)Converting Markdown to HTML...$(NO_COLOR)"
@@ -211,6 +211,7 @@ bib:	$(BIB)
 	@echo "$(WARN_COLOR)Converting Markdown to TeX using hikma-article template...$(NO_COLOR)"
 	pandoc -r $(OPTIONS)+raw_tex -w latex -s \
 		--filter pandoc-include \
+		--filter pandoc-latex-environment \
 		$(CROSSREF) \
 		--default-image-extension=pdf \
 		--pdf-engine=xelatex \

@@ -1,0 +1,18 @@
+﻿Hypothesis,Expectation,Results: Likelihood of donation,Results: Amount donated
+Crackdown,↑,No effect,Increase
+Humanitarian assistance,↑,No effect,No effect
+Government funding,↓,No effect,No effect
+,,,
+**Crackdown + issue area**,,,
+Crackdown + zzzhumanitarian assistance,↑ (crackdown) + zzz↑ (humanitarian),Increase,Increase
+Crackdown + zzzhuman rights,↑ (crackdown) + zzz↓ (human rights),No effect,No effect
+,,,
+**Crackdown + funding**,,,
+Crackdown + zzzgovernment funding,↑ (crackdown) + zzz↓ (government),No effect,No effect
+Crackdown + zzzprivate funding,↑ (crackdown) + zzz↑ (private),Increase,Increase
+,,,
+**Crackdown + issue + funding**,,,
+Crackdown + zzzhumanitarian assistance + zzzgovernment funding,↑ (crackdown) + zzz↑ (humanitarian) + zzz↓ (government),No effect,Increase
+Crackdown + zzzhumanitarian assistance + zzzprivate funding,↑ (crackdown) + zzz↑ (humanitarian) + zzz↑ (private),No effect,No effect
+Crackdown + zzzhuman rights + zzzgovernment funding,↑ (crackdown) + zzz↓ (human rights) + zzz↓ (government),Decrease,Decrease
+Crackdown + zzzhuman rights + zzzprivate funding,↑ (crackdown) + zzz↓ (human rights) + zzz↑ (private),Increase,Increase

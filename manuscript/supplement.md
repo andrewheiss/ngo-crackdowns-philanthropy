@@ -1,16 +1,16 @@
 ---
-title: "Online appendix for Charity During Crackdown: Analyzing the Impact of State Repression of NGOs on Philanthropy"
-short-title: Online appendix for Charity During Crackdown
+title: 'Online appendix for "Dynamics of International Giving: How Heuristics Shape Individual Donor Preferences"'
+short-title: 'Online appendix for "Dynamics of International Giving"'
 author:
 - name: Suparna Chaudhry
-  affiliation: Christopher Newport University
-  email: suparna.chaudhry@cnu.edu
+  affiliation: "Lewis & Clark College"
+  email: schaudhry@lclark.edu
   url: http://www.suparnachaudhry.com/
 - name: Andrew Heiss
   affiliation: Georgia State University
   email: aheiss@gsu.edu
   url: https://www.andrewheiss.com/
-date: "January 23, 2020"
+date: "June 26, 2020"
 title-page: false
 published: 
 git-repo: https://github.com/andrewheiss/ngo-crackdowns-philanthropy
@@ -174,29 +174,29 @@ To check that the results are internally consistent when collapsed, we ran an or
 --------------------------------------------------------------------
                                                             (1)     
 -------------------------------------------------------- -----------
- Crackdown                                                 0.088    
+ Crackdown                                                 0.086    
                                                                     
                                                           (0.090)   
                                                                     
- Cutpoint: Extremely unlikely|Somewhat unlikely            -1.316   
+ Cutpoint: Extremely unlikely|Somewhat unlikely            -1.317   
                                                                     
-                                                          (0.090)   
+                                                          (0.089)   
                                                                     
  Cutpoint: Somewhat unlikely|Neither likely nor unlikely   -0.497   
                                                                     
+                                                          (0.071)   
+                                                                    
+ Cutpoint: Neither likely nor unlikely|Somewhat likely     0.179    
+                                                                    
                                                           (0.069)   
                                                                     
- Cutpoint: Neither likely nor unlikely|Somewhat likely     0.178    
+ Cutpoint: Somewhat likely|Extremely likely                1.415    
                                                                     
-                                                          (0.067)   
-                                                                    
- Cutpoint: Somewhat likely|Extremely likely                1.418    
-                                                                    
-                                                          (0.092)   
+                                                          (0.089)   
                                                                     
  Observations                                               531     
                                                                     
- Posterior sample size                                    4000.000  
+ Posterior sample size                                    8000.000  
 --------------------------------------------------------------------
 
 Table: Ordered probit regression with donation likelihood as outcome variable {#tbl:probit-likelihood}
@@ -206,13 +206,13 @@ Table: Ordered probit regression with donation likelihood as outcome variable {#
 
 ## Preregistration
 
-Prior to launching the survey, we preregistered our hypotheses and research design at the Open Science Framework, and our preregistration protocol is available at [https://osf.io/dx973/](https://osf.io/dx973/). We made two minor deviations from the original preregistration. First, in the *text* of our preregistration, we only specified the non-nested versions of our hypotheses:
+Prior to launching the survey, we preregistered our hypotheses and research design at the Open Science Framework, and our preregistration protocol is available at [https://osf.io/dx973/](https://osf.io/dx973/). We made two minor deviations from the original preregistration. First, in the *text* of our preregistration, we inadvertently only specified the non-nested versions of our hypotheses:
 
 1. Donors will give more/be more likely to give to NGOs that face legal crackdowns abroad
 2. Donors will give more/be more likely to give to NGOs working on humanitarian issues
 3. Donors will give more/be more likely to give to NGOs that do not receive substantial funding from government sources
 
-In our preregistered data analysis *plan*, however, we explained that we will test the interacted versions of the hypotheses (i.e. donors will give more to humanitarian NGOs facing legal crackdowns, etc.). This was an oversight—we inadvertently used overly simple (and incorrect) textual hypotheses, but correctly described the full analysis plan (using the correct, unstated, unstated hypotheses). 
+In our preregistered data analysis *plan*, however, we describe the nested and interacted versions of the hypotheses (i.e. donors will give more to humanitarian NGOs facing legal crackdowns, etc.). This was an oversight—we inadvertently used overly simple (and incorrect) textual hypotheses, but correctly described the full analysis plan (using the correct, unstated, unstated hypotheses). 
 
 Second, in our preregistration plan, we declared that we would analyze our data with a series of three Bayesian linear regression models with increasing numbers of interaction terms. To find the effect of crackdown within issue area, for instance, we used a $\text{crackdown} × \text{issue}$ term, and to find the effect of crackdown conditioned on issue and funding we used a three-way $\text{crackdown} \times \text{issue} \times \text{funding}$ term. We then planned on reassembling the different coefficient and intercept terms to approximate the mean values in each combination of conditions. To simplify our analyses in this version of the paper, we estimated group means directly with Stan [@stan; @rstan; @r-project]. This approach provides the same results as the regression models with 2- and 3-way interaction terms, but is far simpler to interpret.
 
