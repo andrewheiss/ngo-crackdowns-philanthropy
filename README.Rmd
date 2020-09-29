@@ -11,34 +11,42 @@ knitr::opts_chunk$set(
   fig.path = "README-"
 )
 
-Title <- "Charity During Crackdown: Analyzing the Impact of State Repression of NGOs on Philanthropy"
+Title <- "Dynamics of International Giving: How Heuristics Shape Individual Donor Preferences"
 Authors <- "Suparna Chaudhry and Andrew Heiss"
 Year <- "2020"
 ```
 
 # `r Title`
 
-[Suparna Chaudhry](http://www.suparnachaudhry.com/) • Department of Political Science • Christopher Newport University  
+[Suparna Chaudhry](http://www.suparnachaudhry.com/) • Department of International Affairs • Lewis & Clark College  
 [Andrew Heiss](https://www.andrewheiss.com/) • Andrew Young School of Policy Studies • Georgia State University
+
+---
+
+> `r Authors`. `r Year`. "`r Title`," *Nonprofit and Voluntary Sector Quarterly* (forthcoming).
 
 ---
 
 ## Abstract
 
-Government restrictions on NGOs have become increasingly pervasive across the globe. With reduced official aid and foundation funding available for NGOs, and an absence of philanthropic culture in many countries across the Global South, various NGOs are seeking funds from individual private donors in Western countries. How do legal restrictions on NGOs impact patterns of private philanthropic giving and individual donor decision-making? While existing research has shown that donors rely on various heuristics from social networks and organization-level attributes, we argue that domestic political environments of NGO host countries can also serve as an important structural-level heuristic that can influence donor behavior. Using a survey experiment, we find that while crackdowns do not directly influence the likelihood of donation on their own, donors are willing to donate substantially more to legally besieged NGOs abroad. We discuss the implications of our results on the sustainability of organizations working in repressive countries.
+State restrictions on non-governmental organizations (NGOs) have become increasingly pervasive across the globe. While this crackdown has been shown to have a negative impact on public funding flows, we know little about how it impacts private philanthropy. How does information about crackdown abroad, as well as organizational attributes of nonprofits affect individual donors’ willingness to donate internationally? Using a survey experiment, we find that learning about repressive NGO environments increases generosity in that already-likely donors are willing to donate substantially more to legally besieged nonprofits. This generosity persists when mediated by two organizational-level heuristics: NGO issue areas and main funding sources. We discuss the implications of our results on how nonprofits can use different framing appeals to increase fundraising at a time when traditional public donor funding to such organizations is decreasing.
 
 ---
 
 This repository contains the data and code for our paper. Our pre-print is online here:
 
-> `r Authors`. (`r Year`). *`r Title`*. Accessed `r format(Sys.time(), '%B %e, %Y')`. Online at <dx.doi.org/10.17605/OSF.IO/FG53W>
+> `r Authors`. `r Year`. "`r Title`"". Accessed `r format(Sys.time(), '%B %e, %Y')`. Online at <https://dx.doi.org/10.17605/OSF.IO/FG53W>
+
+The paper is published at *Nonprofit and Voluntary Sector Quarterly*:
+
+> `r Authors`. `r Year`. "`r Title`," *Nonprofit and Voluntary Sector Quarterly* (forthcoming).
 
 
 ## How to cite
 
 Please cite this compendium as:
 
-> `r Authors`. (`r format(Sys.Date(), "%Y")`). *Compendium of R code and data for `r Title`*. Accessed `r format(Sys.time(), '%B %e, %Y')`. Online at <dx.doi.org/10.17605/OSF.IO/FG53W>
+> `r Authors`. `r format(Sys.Date(), "%Y")`. *Compendium of R code and data for "`r Title`"*. Accessed `r format(Sys.time(), '%B %e, %Y')`. Online at <https://dx.doi.org/10.17605/OSF.IO/FG53W>
 
 
 ## How to download and install

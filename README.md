@@ -1,55 +1,62 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# Charity During Crackdown: Analyzing the Impact of State Repression of NGOs on Philanthropy
+# Dynamics of International Giving: How Heuristics Shape Individual Donor Preferences
 
 [Suparna Chaudhry](http://www.suparnachaudhry.com/) • Department of
-Political Science • Christopher Newport University  
+International Affairs • Lewis & Clark College  
 [Andrew Heiss](https://www.andrewheiss.com/) • Andrew Young School of
 Policy Studies • Georgia State University
 
 -----
 
+> Suparna Chaudhry and Andrew Heiss. 2020. “Dynamics of International
+> Giving: How Heuristics Shape Individual Donor Preferences,” *Nonprofit
+> and Voluntary Sector Quarterly* (forthcoming).
+
+-----
+
 ## Abstract
 
-State crackdown on non-governmental organizations (NGOs), particularly
-through legal restrictions on funding and advocacy, has become
-increasingly pervasive across the globe. How do legal restrictions on
-NGOs impact patterns of private philanthropic giving and individual
-donor decision-making? With reduced funding for NGOs working on
-contentious issues, and an absence of philanthropic culture in various
-developing countries, many NGOs rely on funds from private donors in
-Western countries. Existing research has predominantly focused on
-individual-level determinants of philanthropy. However, we argue that
-domestic political environments of NGO host countries can also influence
-preferences of foreign private donors, and that crackdown on NGOs serve
-as a heuristic to donors of organizational deservingness. Using a survey
-experiment, we explore how this crackdown changes donors’ preferences
-based on the issue area and funding sources of the NGO. We find that
-while crackdowns do not directly influence the likelihood of donation on
-their own, donors are willing to donate substantially more to legally
-besieged NGOs abroad. We conclude by discussing the implications of our
-results on the sustainability of civil society organizations working in
-repressive countries.
+State restrictions on non-governmental organizations (NGOs) have become
+increasingly pervasive across the globe. While this crackdown has been
+shown to have a negative impact on public funding flows, we know little
+about how it impacts private philanthropy. How does information about
+crackdown abroad, as well as organizational attributes of nonprofits
+affect individual donors’ willingness to donate internationally? Using a
+survey experiment, we find that learning about repressive NGO
+environments increases generosity in that already-likely donors are
+willing to donate substantially more to legally besieged nonprofits.
+This generosity persists when mediated by two organizational-level
+heuristics: NGO issue areas and main funding sources. We discuss the
+implications of our results on how nonprofits can use different framing
+appeals to increase fundraising at a time when traditional public donor
+funding to such organizations is decreasing.
 
 -----
 
 This repository contains the data and code for our paper. Our pre-print
 is online here:
 
-> Suparna Chaudhry and Andrew Heiss. (2020). *Charity During Crackdown:
-> Analyzing the Impact of State Repression of NGOs on Philanthropy*.
-> Accessed January 19, 2020. Online at
-> \<dx.doi.org/10.17605/OSF.IO/FG53W\>
+> Suparna Chaudhry and Andrew Heiss. 2020. “Dynamics of International
+> Giving: How Heuristics Shape Individual Donor Preferences”". Accessed
+> September 29, 2020. Online at
+> <https://dx.doi.org/10.17605/OSF.IO/FG53W>
+
+The paper is published at *Nonprofit and Voluntary Sector Quarterly*:
+
+> Suparna Chaudhry and Andrew Heiss. 2020. “Dynamics of International
+> Giving: How Heuristics Shape Individual Donor Preferences,” *Nonprofit
+> and Voluntary Sector Quarterly* (forthcoming).
 
 ## How to cite
 
 Please cite this compendium as:
 
-> Suparna Chaudhry and Andrew Heiss. (2020). *Compendium of R code and
-> data for Charity During Crackdown: Analyzing the Impact of State
-> Repression of NGOs on Philanthropy*. Accessed January 19, 2020. Online
-> at \<dx.doi.org/10.17605/OSF.IO/FG53W\>
+> Suparna Chaudhry and Andrew Heiss. 2020. *Compendium of R code and
+> data for “Dynamics of International Giving: How Heuristics Shape
+> Individual Donor Preferences”*. Accessed September 29, 2020. Online at
+> <https://dx.doi.org/10.17605/OSF.IO/FG53W>
 
 ## How to download and install
 
@@ -70,7 +77,7 @@ following:
     by running `install.packages(c("pkgbuild", "devtools", "rstan",
     "rstantools"))`
 
-3.  You need to compile the Stan c++ binary DLLs before building and
+3.  You need to compile the Stan C++ binary DLLs before building and
     installing the actual **crackdownsphilanthropy** compendium package
     ([see here for details about
     why](https://mc-stan.org/rstantools/articles/minimal-rstan-package.html#documentation)).
