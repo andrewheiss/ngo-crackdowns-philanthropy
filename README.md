@@ -14,6 +14,15 @@ Policy Studies • Georgia State University
 > Giving: How Heuristics Shape Individual Donor Preferences,” *Nonprofit
 > and Voluntary Sector Quarterly* (forthcoming).
 
+[![NVSQ
+DOI](https://img.shields.io/badge/NVSQ%20DOI-Forthcoming-brightgreen)](#)
+[![OSF
+DOI](https://img.shields.io/badge/OSF-10.17605%2FOSF.IO%2FFG53W-blue)](https://dx.doi.org/10.17605/OSF.IO/FG53W)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4058987.svg)](https://doi.org/10.5281/zenodo.4058987)
+
+![Preregistered](img/preregistered_large_color.png)   ![Open
+data](img/data_large_color.png)   ![Open](img/materials_large_color.png)
+
 -----
 
 ## Abstract
