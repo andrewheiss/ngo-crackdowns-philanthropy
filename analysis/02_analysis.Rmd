@@ -11,6 +11,10 @@ editor_options:
   chunk_output_type: console
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.retina = 3, fig.align = "center")
+```
+
 ```{r load-libraries-data, warning=FALSE, message=FALSE}
 library(tidyverse)
 library(crackdownsphilanthropy)
@@ -38,7 +42,7 @@ results <- readRDS(here("data", "derived_data", "results_clean.rds"))
 
 Our theory and hypotheses are laid out in the causal pathway below. Our outcomes (Y: % likely to donate and amount donated) "listen to" or respond to C (crackdown), which is our main treatment or exposure. Funding (F) and issue (I) serve as heuristics for donation and influence a government's decision to crack down on NGOs, hence the dual arrows to C and Y. 
 
-```{r causal-dag, fig.width=4.75, fig.height=2}
+```{r causal-dag, fig.width=4.75, fig.height=2, out.width="70%"}
 theory_dag <- dagify(Y ~ I + C + F,
                      C ~ I + F,
                      outcome = "Y",
@@ -57,6 +61,7 @@ plot_dag <- ggplot(theory_dag, aes(x = x, y = y, xend = xend, yend = yend)) +
   geom_dag_label_repel(aes(label = label), size = pts(6), box.padding = 0.1, 
                        direction = "x", seed = 12345,
                        family = "Roboto Condensed", fontface = "plain") +
+  labs(x = NULL) +
   theme_ngos() +
   theme(panel.grid = element_blank(),
         axis.title = element_blank(),
@@ -174,7 +179,7 @@ conditions_summary_clean %T>%
 
 ## Likelihood of donation
 
-```{r fig-likelihood-bars, fig.width=9, fig.height=4}
+```{r fig-likelihood-bars, fig.width=9, fig.height=4, out.width="80%"}
 donate_summary <- results %>% 
   count(donate_likely) %>% 
   mutate(perc = n / sum(n)) %>% 
@@ -200,7 +205,7 @@ plot_donate_summary %T>%
 
 ## Amount donated
 
-```{r fig-amount-bars, fig.width=9, fig.height=2.75}
+```{r fig-amount-bars, fig.width=9, fig.height=2.75, out.width="80%"}
 plot_amount_summary <- ggplot(results, aes(x = amount_donate)) +
   geom_histogram(bins = 20, fill = ngo_cols("blue")) +
   scale_x_continuous(labels = dollar) +
@@ -259,7 +264,7 @@ n &: \text{Number likely to donate} \\
 \end{aligned}
 $$
 
-```{r priors-likely, fig.width=2.75, fig.height=1.5, fig.align="center"}
+```{r priors-likely, fig.width=2.75, fig.height=1.5, out.width="50%"}
 likely_theta <- ggplot(data = tibble(x = c(0, 1)), aes(x = x)) +
   geom_area(stat = "function", fun = dbeta, args = list(shape1 = 5, shape2 = 5), 
             fill = "grey80", color = "black") +
@@ -320,7 +325,7 @@ all_models_likely <- all_models_likely_run %>%
   }))
 ```
 
-```{r plot-likely-diffs, warning=FALSE, fig.width=4.75, fig.height=5.5}
+```{r plot-likely-diffs, warning=FALSE, fig.width=4.75, fig.height=5.5, out.width="90%"}
 tidied_diffs_likely <- all_models_likely %>% 
   unnest(posterior_chains_long) %>% 
   filter(.variable == "theta_diff") %>% 
@@ -340,7 +345,7 @@ level1_likely <- tidied_diffs_likely %>%
   mutate(title = fct_inorder(title))
 
 plot_diff_likely_a <- ggplot(level1_likely, aes(x = .value, y = fct_rev(title), fill = title)) +
-  geom_halfeyeh(.width = c(0.8, 0.95)) +
+  stat_halfeye(.width = c(0.8, 0.95)) +
   geom_vline(xintercept = 0) +
   scale_x_continuous(labels = percent_format(accuracy = 1)) +
   scale_fill_manual(values = ngo_cols(c("blue", "red", "orange"), name = FALSE), guide = FALSE) +
@@ -365,7 +370,7 @@ level2_likely <- tidied_diffs_likely %>%
 
 plot_diff_likely_b <- ggplot(filter(level2_likely, condition == "Issue"), 
                              aes(x = .value, y = fct_rev(title))) +
-  geom_halfeyeh(.width = c(0.8, 0.95), fill = ngo_cols("red", name = FALSE)) +
+  stat_halfeye(.width = c(0.8, 0.95), fill = ngo_cols("red", name = FALSE)) +
   geom_vline(xintercept = 0) +
   scale_x_continuous(labels = percent_format(accuracy = 1)) +
   labs(x = NULL, y = NULL, tag = "B") +
@@ -375,7 +380,7 @@ plot_diff_likely_b <- ggplot(filter(level2_likely, condition == "Issue"),
 
 plot_diff_likely_c <- ggplot(filter(level2_likely, condition == "Funding"), 
                              aes(x = .value, y = fct_rev(title))) +
-  geom_halfeyeh(.width = c(0.8, 0.95), fill = ngo_cols("orange", name = FALSE)) +
+  stat_halfeye(.width = c(0.8, 0.95), fill = ngo_cols("orange", name = FALSE)) +
   geom_vline(xintercept = 0) +
   scale_x_continuous(labels = percent_format(accuracy = 1)) +
   labs(x = "Difference in donation likelihood", y = NULL, tag = "C") +
@@ -395,7 +400,7 @@ level3_likely <- tidied_diffs_likely %>%
   )
 
 plot_diff_likely_d <- ggplot(level3_likely, aes(x = .value, y = fct_rev(title))) +
-  geom_halfeyeh(.width = c(0.8, 0.95), fill = ngo_cols("green", name = FALSE)) +
+  stat_halfeye(.width = c(0.8, 0.95), fill = ngo_cols("green", name = FALSE)) +
   geom_vline(xintercept = 0) +
   scale_x_continuous(labels = percent_format(accuracy = 1)) +
   labs(x = "Difference in donation likelihood", y = NULL, tag = "D",
@@ -544,7 +549,7 @@ x &: \text{Mean amount donated} \\
 \end{aligned}
 $$
 
-```{r priors-amounts, fig.width=8, fig.height=1.5}
+```{r priors-amounts, fig.width=8, fig.height=1.5, out.width="100%"}
 amount_nu <- ggplot(data = tibble(x = c(0, 200)), aes(x = x)) +
   geom_area(stat = "function", fun = dexp, args = list(rate = 1/29), 
             fill = "grey80", color = "black") +
@@ -616,12 +621,19 @@ all_models_amount <- all_models_amount_run %>%
   }))
 ```
 
-```{r plot-amount-diffs, warning=FALSE, fig.width=4.75, fig.height=5.5}
-# This will generate a warning because unnest() puts the crackdown values into
-# one column and we cheated by renaming issue and funding as crackdown, so it
-# gets mad when combining the factors in crackdown with those in issue and
-# funding. But because we only care about the diffs, we don't actually need the
-# category labels here, so it's all good.
+```{r plot-amount-diffs, warning=FALSE, fig.width=4.75, fig.height=5.5, out.width="90%"}
+all_models_amount <- all_models_amount %>% 
+  # The `group` and `tidy` columns in each of these nested models contain
+  # ordered factors, but we can't combine them with unnest() directly because
+  # they have different levels (crackdown, issue, and funding), so we need to
+  # make them unordered factors before unnesting
+  mutate(posterior_chains_long = map(
+    posterior_chains_long, ~mutate(., group = factor(group, ordered = FALSE)))
+  ) %>% 
+  mutate(tidy = map(
+    tidy, ~mutate(., group = factor(group, ordered = FALSE)))
+  )
+
 tidied_diffs_amount <- all_models_amount %>% 
   unnest(posterior_chains_long) %>% 
   filter(.variable == "mu_diff") %>% 
@@ -642,7 +654,7 @@ level1_amount <- tidied_diffs_amount %>%
 
 plot_diff_amount_a <- ggplot(level1_amount, aes(x = .value, y = fct_rev(title), fill = title)) +
   geom_vline(xintercept = 0) +
-  geom_halfeyeh(.width = c(0.8, 0.95)) +
+  stat_halfeye(.width = c(0.8, 0.95)) +
   scale_x_continuous(labels = dollar) +
   scale_fill_manual(values = ngo_cols(c("blue", "red", "orange"), name = FALSE), guide = FALSE) +
   labs(x = "Difference in amount donated", y = NULL, tag = "A") +
@@ -666,7 +678,7 @@ level2_amount <- tidied_diffs_amount %>%
 
 plot_diff_amount_b <- ggplot(filter(level2_amount, condition == "Issue"), 
                              aes(x = .value, y = fct_rev(title))) +
-  geom_halfeyeh(.width = c(0.8, 0.95), fill = ngo_cols("red", name = FALSE)) +
+  stat_halfeye(.width = c(0.8, 0.95), fill = ngo_cols("red", name = FALSE)) +
   geom_vline(xintercept = 0) +
   scale_x_continuous(labels = dollar) +
   labs(x = NULL, y = NULL, tag = "B") +
@@ -676,7 +688,7 @@ plot_diff_amount_b <- ggplot(filter(level2_amount, condition == "Issue"),
 
 plot_diff_amount_c <- ggplot(filter(level2_amount, condition == "Funding"), 
                              aes(x = .value, y = fct_rev(title))) +
-  geom_halfeyeh(.width = c(0.8, 0.95), fill = ngo_cols("orange", name = FALSE)) +
+  stat_halfeye(.width = c(0.8, 0.95), fill = ngo_cols("orange", name = FALSE)) +
   geom_vline(xintercept = 0) +
   scale_x_continuous(labels = dollar) +
   labs(x = "Difference in amount donated", y = NULL, tag = "C") +
@@ -696,7 +708,7 @@ level3_amount <- tidied_diffs_amount %>%
   )
 
 plot_diff_amount_d <- ggplot(level3_amount, aes(x = .value, y = fct_rev(title))) +
-  geom_halfeyeh(.width = c(0.8, 0.95), fill = ngo_cols("green", name = FALSE)) +
+  stat_halfeye(.width = c(0.8, 0.95), fill = ngo_cols("green", name = FALSE)) +
   geom_vline(xintercept = 0) +
   scale_x_continuous(labels = dollar) +
   labs(x = "Difference in amount donated", y = NULL, tag = "D",
@@ -830,7 +842,7 @@ bind_rows(tbl_amount_1,
 
 ## Effect size
 
-```{r amount-effect-size, warning=FALSE}
+```{r amount-effect-size, warning=FALSE, out.width="80%"}
 # Effect size
 # (μ₁ - μ₂) / sqrt( (σ₁² + σ₂²) / 2)
 tidied_eff_size_amount <- all_models_amount %>% 
@@ -853,12 +865,12 @@ effect_sizes <- tribble(
   mutate(x_start = -x_end)
 
 ggplot(tidied_eff_size_amount, aes(x = .value, y = fct_rev(title))) +
-  geom_halfeyeh(.width = c(0.8, 0.95)) +
+  stat_halfeye(.width = c(0.8, 0.95)) +
   geom_vline(xintercept = 0, size = 1) +
   geom_vline(xintercept = c(0.2, -0.2), linetype = "dotted", size = 0.5) +
   geom_vline(xintercept = c(0.5, -0.5), linetype = "dotted", size = 0.5) +
   geom_vline(xintercept = c(0.5, -0.5), linetype = "dotted", size = 0.5) +
-  coord_cartesian(xlim = c(-0.6, 0.6)) +
+  coord_cartesian(xlim = c(-1, 1)) +
   labs(x = "Cohen's d (effect size)", y = NULL) +
   theme_ngos()
 ```

@@ -1,3 +1,6 @@
+# Turn off summarize messages from dplyr 1.0+
+options(dplyr.summarise.inform = FALSE)
+
 # Universal pandoc options ------------------------------------------------
 
 panderOptions("table.split.table", Inf)

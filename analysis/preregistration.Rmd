@@ -1,5 +1,6 @@
 ---
 title: "Preregistration, design, IRB"
+author: "Suparna Chaudhry and Andrew Heiss"
 date: "Last run: `r format(Sys.time(), '%F')`"
 bibliography: ../manuscript/bibliography.bib
 ---

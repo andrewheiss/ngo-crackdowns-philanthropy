@@ -1,7 +1,7 @@
 ---
 title: "Clean data"
-author: "Andrew Heiss and Suparna Chaudhry"
-date: "Last run: `r format(Sys.time(), '%B %e, %Y')`"
+author: "Suparna Chaudhry and Andrew Heiss"
+date: "Last run: `r format(Sys.time(), '%F')`"
 output: 
   html_document:
     code_folding: show

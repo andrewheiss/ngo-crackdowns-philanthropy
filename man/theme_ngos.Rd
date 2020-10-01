@@ -4,8 +4,7 @@
 \alias{theme_ngos}
 \title{theme_ngos}
 \usage{
-theme_ngos(base_size = 11, base_family = "Roboto Condensed",
-  density = FALSE)
+theme_ngos(base_size = 11, base_family = "Roboto Condensed", density = FALSE)
 }
 \arguments{
 \item{base_size}{base font size}

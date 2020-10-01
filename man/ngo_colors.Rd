@@ -4,7 +4,9 @@
 \name{ngo_colors}
 \alias{ngo_colors}
 \title{Hex codes for colors used in project}
-\format{An object of class \code{character} of length 7.}
+\format{
+An object of class \code{character} of length 7.
+}
 \usage{
 ngo_colors
 }

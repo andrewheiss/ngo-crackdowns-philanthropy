@@ -4,8 +4,7 @@
 \alias{scale_color_ngo}
 \title{Color scale constructor for NGO colors}
 \usage{
-scale_color_ngo(palette = "main", discrete = TRUE, reverse = FALSE,
-  ...)
+scale_color_ngo(palette = "main", discrete = TRUE, reverse = FALSE, ...)
 }
 \arguments{
 \item{palette}{Character name of palette in ngo_palettes}

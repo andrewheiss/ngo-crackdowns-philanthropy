@@ -1,15 +1,15 @@
 Package: crackdownsphilanthropy
-Title: Charity During Crackdown
+Title: Dynamics of International Giving
 Version: 0.9
 Authors@R: c(
-    person("Andrew", "Heiss", email = "andrewheiss@gmail.com", role = c("aut", "cre")),
-    person("Suparna", "Chaudhry", email = "suparna.chaudhry@cnu.edu", role = "aut"))
+    person("Andrew", "Heiss", email = "andrew@andrewheiss.com", role = c("aut", "cre")),
+    person("Suparna", "Chaudhry", email = "schaudhry@lclark.edu", role = "aut"))
 Description: Research on how anti-NGO crackdowns influence donor behavior
 URL: https://github.com/andrewheiss/ngo-crackdowns-philanthropy
 BugReports: https://github.com/andrewheiss/ngo-crackdowns-philanthropy/issues
 License: MIT
 Depends: 
-    R (>= 3.6.0)
+    R (>= 4.0.0)
 Imports: 
     methods,
     Rcpp (>= 0.12.0),
@@ -46,4 +46,4 @@ LinkingTo:
 Encoding: UTF-8
 LazyData: true
 SystemRequirements: GNU make
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.1

@@ -1,29 +1,29 @@
 --------------------------------------------------------------------
-                                                            (1)     
+                                                                (1) 
 -------------------------------------------------------- -----------
- Crackdown                                                 0.086    
+ Crackdown                                                    0.089 
                                                                     
-                                                          (0.090)   
+                                                            (0.091) 
                                                                     
- Cutpoint: Extremely unlikely|Somewhat unlikely            -1.317   
+ Cutpoint: Extremely unlikely|Somewhat unlikely              -1.314 
                                                                     
-                                                          (0.089)   
+                                                            (0.091) 
                                                                     
- Cutpoint: Somewhat unlikely|Neither likely nor unlikely   -0.497   
+ Cutpoint: Somewhat unlikely|Neither likely nor unlikely     -0.496 
                                                                     
-                                                          (0.071)   
+                                                            (0.075) 
                                                                     
- Cutpoint: Neither likely nor unlikely|Somewhat likely     0.179    
+ Cutpoint: Neither likely nor unlikely|Somewhat likely        0.181 
                                                                     
-                                                          (0.069)   
+                                                            (0.072) 
                                                                     
- Cutpoint: Somewhat likely|Extremely likely                1.415    
+ Cutpoint: Somewhat likely|Extremely likely                   1.416 
                                                                     
-                                                          (0.089)   
+                                                            (0.093) 
                                                                     
- Observations                                               531     
+ Observations                                                   531 
                                                                     
- Posterior sample size                                    8000.000  
+ Posterior sample size                                     8000.000 
 --------------------------------------------------------------------
 
 Table: Ordered probit regression with donation likelihood as outcome variable {#tbl:probit-likelihood}

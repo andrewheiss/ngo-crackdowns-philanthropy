@@ -16,7 +16,7 @@ exclude:
 - LICENSE.html
 - README.html
 navbar:
-  title: NGO Crackdowns and Philanthropy
+  title: Dynamics of International Giving
   right:
   - text: Preregistration, design, IRB
     icon: fa-pencil-square

@@ -1,5 +1,6 @@
 ---
 title: "Experiment"
+author: "Suparna Chaudhry and Andrew Heiss"
 date: "Last run: `r format(Sys.time(), '%F')`"
 ---
 

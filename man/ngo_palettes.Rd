@@ -4,7 +4,9 @@
 \name{ngo_palettes}
 \alias{ngo_palettes}
 \title{Palette definitions}
-\format{An object of class \code{list} of length 5.}
+\format{
+An object of class \code{list} of length 5.
+}
 \usage{
 ngo_palettes
 }

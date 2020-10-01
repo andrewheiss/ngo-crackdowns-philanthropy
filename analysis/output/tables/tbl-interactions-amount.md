@@ -1,51 +1,51 @@
 ----------------------------------------------------
-                           (1)      (2)      (3)    
+                              (1)      (2)      (3) 
 ------------------------ -------- -------- ---------
-       (Intercept)        20.374   20.848   22.044  
+             (Intercept)   21.045   20.978   20.698 
                                                     
-                         (1.538)  (2.151)  (3.088)  
+                          (1.490)  (1.707)  (1.977) 
                                                     
-   crackdownCrackdown     4.012    2.887    -2.407  
+      crackdownCrackdown    2.502    2.053    1.801 
                                                     
-                         (2.203)  (3.093)  (4.271)  
+                          (2.061)  (2.019)  (2.251) 
                                                     
-    issueHumanitarian              -0.964   -3.810  
-       assistance                                   
+       issueHumanitarian            -0.241    0.177 
+              assistance                            
                                                     
-                                  (3.038)  (4.320)  
+                                   (1.692)  (1.844) 
                                                     
- crackdownCrackdown:issu           2.349    14.369  
-      eHumanitarian                                 
-       assistance                                   
+ crackdownCrackdown:issu             1.126    2.717 
+           eHumanitarian                            
+              assistance                            
                                                     
-                                  (4.347)  (6.006)  
+                                   (2.209)  (3.231) 
                                                     
-     fundingPrivate                         -2.533  
+          fundingPrivate                      0.377 
                                                     
-                                           (4.330)  
+                                            (1.858) 
                                                     
- crackdownCrackdown:fund                    10.771  
-       ingPrivate                                   
+ crackdownCrackdown:fund                      1.078 
+              ingPrivate                            
                                                     
-                                           (6.145)  
+                                            (2.436) 
                                                     
-    issueHumanitarian                       5.932   
+       issueHumanitarian                     -0.645 
  assistance:fundingPriva                            
-           te                                       
+                      te                            
                                                     
-                                           (6.128)  
+                                            (2.242) 
                                                     
- crackdownCrackdown:issu                   -24.534  
-      eHumanitarian                                 
+ crackdownCrackdown:issu                     -4.638 
+           eHumanitarian                            
  assistance:fundingPriva                            
-           te                                       
+                      te                            
                                                     
-                                           (8.544)  
+                                            (5.222) 
                                                     
-      Observations         531      531      531    
+            Observations      531      531      531 
                                                     
-  Posterior sample size  8000.000 8000.000 8000.000 
+   Posterior sample size 8000.000 8000.000 8000.000 
                                                     
-          Sigma           25.628   25.663   25.517  
+                   Sigma   25.653   25.640   25.589 
 ----------------------------------------------------
 

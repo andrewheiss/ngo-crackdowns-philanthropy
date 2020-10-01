@@ -1,51 +1,51 @@
 ----------------------------------------------------
-                           (1)      (2)      (3)    
+                              (1)      (2)      (3) 
 ------------------------ -------- -------- ---------
-       (Intercept)        -0.298   -0.277   -0.176  
+             (Intercept)   -0.298   -0.275   -0.175 
                                                     
-                         (0.118)  (0.172)  (0.231)  
+                          (0.123)  (0.173)  (0.235) 
                                                     
-   crackdownCrackdown     0.163    0.030    -0.663  
+      crackdownCrackdown    0.161    0.028   -0.666 
                                                     
-                         (0.175)  (0.246)  (0.346)  
+                          (0.169)  (0.247)  (0.346) 
                                                     
-    issueHumanitarian              -0.044   -0.038  
-       assistance                                   
+       issueHumanitarian            -0.044   -0.040 
+              assistance                            
                                                     
-                                  (0.242)  (0.330)  
+                                   (0.242)  (0.319) 
                                                     
- crackdownCrackdown:issu           0.263    0.905   
-      eHumanitarian                                 
-       assistance                                   
+ crackdownCrackdown:issu             0.261    0.910 
+           eHumanitarian                            
+              assistance                            
                                                     
-                                  (0.343)  (0.459)  
+                                   (0.336)  (0.483) 
                                                     
-     fundingPrivate                         -0.239  
+          fundingPrivate                     -0.245 
                                                     
-                                           (0.333)  
+                                            (0.336) 
                                                     
- crackdownCrackdown:fund                    1.384   
-       ingPrivate                                   
+ crackdownCrackdown:fund                      1.389 
+              ingPrivate                            
                                                     
-                                           (0.480)  
+                                            (0.471) 
                                                     
-    issueHumanitarian                       0.030   
+       issueHumanitarian                      0.025 
  assistance:fundingPriva                            
-           te                                       
+                      te                            
                                                     
-                                           (0.472)  
+                                            (0.473) 
                                                     
- crackdownCrackdown:issu                    -1.315  
-      eHumanitarian                                 
+ crackdownCrackdown:issu                     -1.300 
+           eHumanitarian                            
  assistance:fundingPriva                            
-           te                                       
+                      te                            
                                                     
-                                           (0.662)  
+                                            (0.657) 
                                                     
-      Observations         531      531      531    
+            Observations      531      531      531 
                                                     
-  Posterior sample size  8000.000 8000.000 8000.000 
+   Posterior sample size 8000.000 8000.000 8000.000 
                                                     
-          Sigma           1.000    1.000    1.000   
+                   Sigma    1.000    1.000    1.000 
 ----------------------------------------------------
 
