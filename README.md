@@ -20,6 +20,12 @@ DOI](https://img.shields.io/badge/OSF-10.17605%2FOSF.IO%2FFG53W-blue)](https://d
 > Giving: How Heuristics Shape Individual Donor Preferences,” *Nonprofit
 > and Voluntary Sector Quarterly* (forthcoming).
 
+**All this project’s materials are free and open:**
+
+  - [Download the data](#data)
+  - [See the analysis notebook
+    website](https://stats.andrewheiss.com/ngo-crackdowns-philanthropy/)
+
 ![Preregistered](img/preregistered_large_color.png)   ![Open
 data](img/data_large_color.png)   ![Open](img/materials_large_color.png)
 
@@ -49,8 +55,7 @@ is online here:
 
 > Suparna Chaudhry and Andrew Heiss. 2020. “Dynamics of International
 > Giving: How Heuristics Shape Individual Donor Preferences”". Accessed
-> September 29, 2020. Online at
-> <https://dx.doi.org/10.17605/OSF.IO/FG53W>
+> October 1, 2020. Online at <https://dx.doi.org/10.17605/OSF.IO/FG53W>
 
 The paper is published at *Nonprofit and Voluntary Sector Quarterly*:
 
@@ -64,7 +69,7 @@ Please cite this compendium as:
 
 > Suparna Chaudhry and Andrew Heiss. 2020. *Compendium of R code and
 > data for “Dynamics of International Giving: How Heuristics Shape
-> Individual Donor Preferences”*. Accessed September 29, 2020. Online at
+> Individual Donor Preferences”*. Accessed October 1, 2020. Online at
 > <https://dx.doi.org/10.17605/OSF.IO/FG53W>
 
 ## How to download and install

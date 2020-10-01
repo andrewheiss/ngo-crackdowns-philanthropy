@@ -27,6 +27,11 @@ Year <- "2020"
 
 > `r Authors`. `r Year`. "`r Title`," *Nonprofit and Voluntary Sector Quarterly* (forthcoming).
 
+**All this project's materials are free and open:**
+
+- [Download the data](#data)
+- [See the analysis notebook website](https://stats.andrewheiss.com/ngo-crackdowns-philanthropy/)
+
 ![Preregistered](img/preregistered_large_color.png) &emsp; ![Open data](img/data_large_color.png) &emsp; ![Open](img/materials_large_color.png)
 
 ---
