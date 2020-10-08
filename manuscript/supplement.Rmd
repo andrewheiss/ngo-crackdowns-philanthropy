@@ -10,7 +10,7 @@ author:
   affiliation: Georgia State University
   email: aheiss@gsu.edu
   url: https://www.andrewheiss.com/
-date: "`r format(Sys.time(), '%B %e, %Y')`"
+date: "October 7, 2020"
 title-page: false
 published: 
 git-repo: https://github.com/andrewheiss/ngo-crackdowns-philanthropy
@@ -154,5 +154,5 @@ Payment
 
 :   Participants were paid \$0.75 for successfully completing the experiment, commensurate with a \$9/hour wage.
 
-```{r child = "../analysis/text/experiment_blind.md"}
+```{r child = "../analysis/text/experiment.md"}
 ```

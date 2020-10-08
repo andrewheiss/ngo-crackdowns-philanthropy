@@ -55,7 +55,7 @@ ENDFLOAT = FALSE
 
 # Remove identifying information (only happens in mstex and msdocx targets)
 # Use pandoc/bin/replacements.csv to map identifying information to anonymous output
-BLINDED = TRUE
+BLINDED = FALSE
 
 # Add version control information in footer (only happens in tex target)
 VC_ENABLE = FALSE
@@ -191,7 +191,6 @@ bib:	$(BIB)
 	@echo "$(WARN_COLOR)Converting Markdown to HTML...$(NO_COLOR)"
 	python $(PREFIX)/bin/replace_pdfs.py $(PNG_CONVERT) $< | \
 	pandoc -r $(OPTIONS)+ascii_identifiers -s -w html \
-		--filter pandoc-include \
 		$(CROSSREF) \
 		--default-image-extension=png \
 		--mathjax \
@@ -210,7 +209,6 @@ bib:	$(BIB)
 	$(VC_COMMAND)
 	@echo "$(WARN_COLOR)Converting Markdown to TeX using hikma-article template...$(NO_COLOR)"
 	pandoc -r $(OPTIONS)+raw_tex -w latex -s \
-		--filter pandoc-include \
 		--filter pandoc-latex-environment \
 		$(CROSSREF) \
 		--default-image-extension=pdf \
@@ -231,7 +229,6 @@ bib:	$(BIB)
 	@echo "$(WARN_COLOR)Converting Markdown to TeX using generic manuscript template...$(NO_COLOR)"
 	cat $< $(BLINDIFY) | \
 	pandoc -r $(OPTIONS)+raw_tex -w latex -s \
-		--filter pandoc-include \
 		$(CROSSREF) \
 		$(ENDFLOAT_PANDOC) \
 		--default-image-extension=pdf \
@@ -250,7 +247,6 @@ bib:	$(BIB)
 	@echo "$(WARN_COLOR)Converting Markdown to .odt...$(NO_COLOR)"
 	python $(PREFIX)/bin/replace_pdfs.py $(PNG_CONVERT) $< | \
 	pandoc -r $(OPTIONS) -w odt \
-		--filter pandoc-include \
 		$(CROSSREF) \
 		--default-image-extension=png \
 		--template=$(PREFIX)/templates/odt.odt \
@@ -272,7 +268,6 @@ bib:	$(BIB)
 	@echo "$(WARN_COLOR)Converting Markdown to .odt using manuscript template...$(NO_COLOR)"
 	python $(PREFIX)/bin/replace_pdfs.py $(PNG_CONVERT) $< $(BLINDIFY) | \
 	pandoc -r $(OPTIONS) -w odt \
-		--filter pandoc-include \
 		$(CROSSREF) \
 		--default-image-extension=png \
 		--template=$(PREFIX)/templates/odt-manuscript.odt \
